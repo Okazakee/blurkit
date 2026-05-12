@@ -171,3 +171,22 @@ These are intentionally not documented as current support:
 - Broader edge decoding coverage across more image formats and runtimes
 - Framework-specific adapters such as Next.js convenience helpers
 - Additional manifest output formats and tighter build-tool integrations
+
+## Publishing
+
+npm publishing is automated through [`.github/workflows/publish-npm.yml`](/home/okazakee/Desktop/Projects/blurkit/.github/workflows/publish-npm.yml).
+
+Release flow:
+
+1. Bump `packages/blurkit/package.json` to the version you want to publish.
+2. Push a matching git tag like `v0.1.1` or `0.1.1`, or publish a GitHub Release using that tag.
+3. GitHub Actions will install dependencies, build, typecheck, test, and publish `packages/blurkit` to npm.
+
+Repository setup:
+
+- Configure `blurkit` for npm trusted publishing against `Okazakee/blurkit` and the `publish-npm.yml` workflow.
+- You can do that in the npm UI or with `npm trust github blurkit --repo Okazakee/blurkit --file publish-npm.yml`.
+- Trusted publishing requires a current npm CLI with `npm trust` support and account-level 2FA enabled when you create the trust relationship.
+- The workflow will fail fast if the tag does not match `packages/blurkit/package.json`.
+- If that exact version is already on npm, the workflow exits without publishing again.
+- No long-lived `NPM_TOKEN` secret is required for publishing.

@@ -1,0 +1,83 @@
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - 'v*'
+      - '*.*.*'
+  release:
+    types:
+      - published
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-publish-${{ github.event.release.tag_name || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Resolve package version from tag
+        id: meta
+        run: |
+          package_name=$(node -p "require('./packages/blurkit/package.json').name")
+          package_version=$(node -p "require('./packages/blurkit/package.json').version")
+
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            tag_name="${{ github.event.release.tag_name }}"
+          else
+            tag_name="${{ github.ref_name }}"
+          fi
+
+          if [[ "$tag_name" != "$package_version" && "$tag_name" != "v$package_version" ]]; then
+            echo "Tag \"$tag_name\" does not match packages/blurkit/package.json version \"$package_version\"." >&2
+            exit 1
+          fi
+
+          echo "package_name=$package_name" >> "$GITHUB_OUTPUT"
+          echo "package_version=$package_version" >> "$GITHUB_OUTPUT"
+          echo "tag_name=$tag_name" >> "$GITHUB_OUTPUT"
+
+      - name: Check whether this version is already published
+        id: npm
+        run: |
+          if npm view "${{ steps.meta.outputs.package_name }}@${{ steps.meta.outputs.package_version }}" version >/dev/null 2>&1; then
+            echo "already_published=true" >> "$GITHUB_OUTPUT"
+            echo "${{ steps.meta.outputs.package_name }}@${{ steps.meta.outputs.package_version }} is already on npm. Skipping publish."
+          else
+            echo "already_published=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build package
+        if: steps.npm.outputs.already_published != 'true'
+        run: pnpm --filter ./packages/blurkit build
+
+      - name: Typecheck package
+        if: steps.npm.outputs.already_published != 'true'
+        run: pnpm --filter ./packages/blurkit check
+
+      - name: Test package
+        if: steps.npm.outputs.already_published != 'true'
+        run: pnpm --filter ./packages/blurkit test
+
+      - name: Publish package
+        if: steps.npm.outputs.already_published != 'true'
+        working-directory: packages/blurkit
+        run: npm publish

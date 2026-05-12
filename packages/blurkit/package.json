@@ -34,6 +34,17 @@
     "dist"
   ],
   "description": "Universal image placeholder generation for Node, Bun, browser, and edge runtimes.",
+  "homepage": "https://github.com/Okazakee/blurkit#readme",
+  "bugs": {
+    "url": "https://github.com/Okazakee/blurkit/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Okazakee/blurkit.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup",
     "test": "vitest run",
