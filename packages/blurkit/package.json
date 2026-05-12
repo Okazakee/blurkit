@@ -1,9 +1,9 @@
 {
   "name": "blurkit",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "bin": {
-    "blurkit": "./dist/cli.js"
+    "blurkit": "dist/cli.cjs"
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
