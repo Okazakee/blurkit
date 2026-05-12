@@ -1,0 +1,29 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" rx="44" fill="#0B0A16" />
+  <circle cx="1036" cy="102" r="162" fill="#67ECFF" fill-opacity="0.12" />
+  <circle cx="188" cy="526" r="232" fill="#8E6CFF" fill-opacity="0.18" />
+  <rect x="84" y="88" width="180" height="180" rx="48" fill="url(#paint0_linear_1_2)" />
+  <path
+    d="M138 135H176.146C197.341 135 214.524 152.183 214.524 173.378C214.524 194.573 197.341 211.757 176.146 211.757H138V135ZM163.405 156.946V189.811H175.199C184.538 189.811 192.108 182.241 192.108 172.903C192.108 163.564 184.538 155.994 175.199 155.994H163.405V156.946Z"
+    fill="#070711"
+  />
+  <text x="324" y="212" fill="#EEF4FF" font-family="Space Grotesk, sans-serif" font-size="84" font-weight="700">
+    blurkit
+  </text>
+  <text x="324" y="298" fill="#EEF4FF" font-family="Space Grotesk, sans-serif" font-size="56" font-weight="500">
+    Universal placeholder generation
+  </text>
+  <text x="324" y="390" fill="#B9C7E7" font-family="IBM Plex Mono, monospace" font-size="28" font-weight="500">
+    BlurHash and ThumbHash for Node, browser, and edge runtimes.
+  </text>
+  <rect x="324" y="442" width="284" height="58" rx="29" fill="#FFFFFF" fill-opacity="0.08" stroke="#7CF5FF" stroke-opacity="0.22" />
+  <text x="359" y="479" fill="#67ECFF" font-family="IBM Plex Mono, monospace" font-size="24" font-weight="500">
+    dataURL, hash, metadata
+  </text>
+  <defs>
+    <linearGradient id="paint0_linear_1_2" x1="111" y1="108" x2="246" y2="250" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8E6CFF" />
+      <stop offset="1" stop-color="#67ECFF" />
+    </linearGradient>
+  </defs>
+</svg>

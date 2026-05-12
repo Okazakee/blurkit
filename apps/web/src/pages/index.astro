@@ -1,0 +1,181 @@
+---
+import '../styles/site.css'
+import { BlurDemo } from '../components/BlurDemo'
+
+const siteUrl = 'https://blurkit.dev'
+const title = 'blurkit — Universal Placeholder Generation'
+const description =
+  'Generate BlurHash and ThumbHash placeholders from files, blobs, buffers, and remote images with runtime-aware APIs for Node, browser, and edge.'
+const canonicalUrl = `${siteUrl}/`
+const socialImage = `${siteUrl}/social-card.svg`
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'blurkit',
+  url: siteUrl,
+  description,
+  inLanguage: 'en',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: `${siteUrl}/docs/?q={search_term_string}`,
+    'query-input': 'required name=search_term_string',
+  },
+}
+---
+
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#0b0a16" />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700;800&display=swap"
+    />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={socialImage} />
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={description} />
+    <meta property="twitter:image" content={socialImage} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(structuredData)} />
+  </head>
+  <body>
+    <a class="site-skip-link" href="#main-content">Skip to main content</a>
+    <div class="site-shell">
+      <main class="site-main" id="main-content">
+        <header class="site-header">
+          <a class="site-brand" href="/">
+            <span class="site-brand-mark">bk</span>
+            <span class="site-brand-copy">
+              <strong>blurkit</strong>
+              <span>Universal placeholder generation</span>
+            </span>
+          </a>
+
+          <nav class="site-nav" aria-label="Primary">
+            <a class="site-button site-button--ghost" href="/docs/">Documentation</a>
+            <a class="site-button site-button--ghost" href="/docs/quick-start/">Quick start</a>
+          </nav>
+        </header>
+
+        <section class="site-hero">
+          <div class="site-copy">
+            <span class="site-eyebrow">Practical, runtime-aware blur placeholders</span>
+            <h1 class="site-title">
+              Image in.
+              <br />
+              Placeholder data URL out.
+            </h1>
+            <p>
+              Generate BlurHash or ThumbHash placeholders from local files, remote URLs, <span class="site-inline-code">Blob</span>s,
+              and <span class="site-inline-code">ArrayBuffer</span>s. <span class="site-inline-code">blurkit</span> returns a ready-to-use <span class="site-inline-code">dataURL</span>, the raw hash, and
+              source metadata without making you wire the pipeline together yourself.
+            </p>
+
+            <div class="site-actions">
+              <a class="site-button site-button--primary" href="#live-demo">Try the live demo</a>
+              <a class="site-button site-button--ghost" href="/docs/">Open the docs</a>
+            </div>
+          </div>
+
+          <aside class="site-panel site-stack">
+            <div>
+              <h2>Install</h2>
+              <pre class="site-code"><code>pnpm add blurkit
+pnpm add sharp</code></pre>
+            </div>
+
+            <div>
+              <h2>Node quick start</h2>
+              <pre class="site-code"><code>{`import { encode } from 'blurkit/node'
+
+const result = await encode('./public/hero.jpg', {
+  size: 32,
+})
+
+console.log(result.dataURL)`}</code></pre>
+            </div>
+          </aside>
+        </section>
+
+        <section class="site-section">
+          <div class="site-section-header">
+            <h2>What ships today</h2>
+            <p>
+              The public docs are aligned to the code that exists right now: runtime-specific entrypoints,
+              a Node-backed pipeline with `sharp`, browser and edge entrypoints, a CLI, manifest helpers,
+              and a small cache surface for build-time workflows.
+            </p>
+          </div>
+
+          <div class="site-grid">
+            <article class="site-card site-card--stagger-1">
+              <span class="site-card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="M5 8.5 12 3l7 5.5v7L12 21l-7-5.5v-7Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path>
+                  <path d="M8.5 11h7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+                </svg>
+              </span>
+              <h3>Explicit runtime imports</h3>
+              <p>Use `blurkit/node`, `blurkit/browser`, or `blurkit/edge` when bundling behavior matters.</p>
+            </article>
+            <article class="site-card site-card--stagger-2">
+              <span class="site-card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <rect x="4" y="5" width="16" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"></rect>
+                  <path d="M8 12h8M8 15h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+                </svg>
+              </span>
+              <h3>Ready-to-use output</h3>
+              <p>Get a placeholder <span class="site-inline-code">dataURL</span>, raw hash, dimensions, and source metadata in one response.</p>
+            </article>
+            <article class="site-card site-card--stagger-3">
+              <span class="site-card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="M7 4.5h7l4 4v11H7z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path>
+                  <path d="M14 4.5v4h4M9.5 12h5M9.5 15h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+              </span>
+              <h3>Manifest-friendly CLI</h3>
+              <p>Generate single-image JSON or folder manifests for `/public` assets and import pipelines.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="site-section" id="live-demo">
+          <div class="site-section-header">
+            <h2>Live browser demo</h2>
+            <p>
+              This demo uses <span class="site-inline-code">blurkit/browser</span> directly in the client.
+              Files stay local to your browser tab, the original preview appears immediately after upload, and the controls map to the same options exposed by the package API.
+            </p>
+          </div>
+
+          <BlurDemo client:load />
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <div class="site-footer-card">
+          <p>blurkit is an open-source toolkit for runtime-aware placeholder generation.</p>
+          <nav class="site-footer-links" aria-label="Footer">
+            <a href="/docs/">Docs</a>
+            <a href="https://github.com/okazakee/blurkit">GitHub</a>
+            <a href="https://www.npmjs.com/package/blurkit">npm</a>
+          </nav>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

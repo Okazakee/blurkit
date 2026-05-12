@@ -1,0 +1,104 @@
+:root {
+  --sl-color-accent-low: #16192f;
+  --sl-color-accent: #8e6cff;
+  --sl-color-accent-high: #7cf5ff;
+  --sl-color-white: #eef4ff;
+  --sl-color-gray-1: #dbe4ff;
+  --sl-color-gray-2: #b5c0e3;
+  --sl-color-gray-3: #8a96bb;
+  --sl-color-gray-4: #626a95;
+  --sl-color-gray-5: #2d3150;
+  --sl-color-gray-6: #12152b;
+  --sl-color-black: #0b0a16;
+  --sl-font: 'Space Grotesk', 'Avenir Next', sans-serif;
+  --sl-font-mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+}
+
+:root[data-theme='dark'] {
+  --sl-color-bg: #0b0a16;
+  --sl-color-bg-nav: rgba(11, 10, 22, 0.92);
+  --sl-color-bg-sidebar: rgba(13, 12, 26, 0.95);
+  --sl-color-bg-inline-code: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme='light'] {
+  --sl-color-bg: #f5f7ff;
+  --sl-color-bg-nav: rgba(245, 247, 255, 0.94);
+  --sl-color-bg-sidebar: rgba(235, 239, 253, 0.95);
+  --sl-color-bg-inline-code: rgba(14, 20, 42, 0.08);
+  --sl-color-text: #141938;
+}
+
+.main-pane,
+.content-panel,
+.right-sidebar-panel,
+.right-sidebar {
+  background: transparent;
+}
+
+.content-panel {
+  border-inline: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.content-panel :is(code:not(pre code), kbd) {
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.2rem 0.38rem;
+}
+
+.content-panel pre {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+  background: rgba(8, 8, 10, 0.48);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.content-panel h1 + p,
+.content-panel h2 + p {
+  color: rgba(247, 242, 234, 0.8);
+}
+
+.content-panel table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(10, 11, 22, 0.42);
+}
+
+.content-panel th,
+.content-panel td {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.content-panel th {
+  text-align: left;
+  color: var(--sl-color-white);
+}
+
+.content-panel tr:last-child td {
+  border-bottom: 0;
+}
+
+#starlight__sidebar [aria-current='page'] {
+  border-left: 2px solid var(--sl-color-accent-high);
+  background: rgba(142, 108, 255, 0.14);
+}
+
+#starlight__search {
+  --pagefind-ui-primary: var(--sl-color-white);
+  --pagefind-ui-text: var(--sl-color-gray-1);
+  --pagefind-ui-background: rgba(11, 10, 22, 0.96);
+  --pagefind-ui-border: rgba(124, 245, 255, 0.28);
+  --pagefind-ui-tag: rgba(142, 108, 255, 0.22);
+}
+
+@supports not ((-webkit-backdrop-filter: blur(18px)) or (backdrop-filter: blur(18px))) {
+  .content-panel pre,
+  .hero-card,
+  .docs-card {
+    background: rgba(10, 11, 22, 0.95);
+  }
+}
