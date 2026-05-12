@@ -4,7 +4,7 @@ import sitemap from '@astrojs/sitemap'
 import starlight from '@astrojs/starlight'
 
 export default defineConfig({
-  site: 'https://blurkit.dev',
+  site: 'https://blurkit.okazakee.dev',
   base: '/',
   trailingSlash: 'always',
   prefetch: {
