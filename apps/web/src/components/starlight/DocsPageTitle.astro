@@ -1,0 +1,235 @@
+---
+import type { StarlightRouteData } from '@astrojs/starlight/route-data'
+
+const PAGE_TITLE_ID = '_top'
+const route = Astro.locals.starlightRoute
+const isDocsHome = route.id === 'docs'
+const { title, description } = route.entry.data as { title: string; description?: string }
+
+type SidebarEntry = StarlightRouteData['sidebar'][number]
+type SidebarLink = Extract<SidebarEntry, { type: 'link' }>
+type SidebarGroup = Extract<SidebarEntry, { type: 'group' }>
+
+const quickLinks = [
+  { href: '/docs/installation/', label: 'Installation' },
+  { href: '/docs/quick-start/', label: 'Quick start' },
+  { href: '/docs/runtimes/node/', label: 'Node runtime' },
+  { href: '/docs/cli/', label: 'CLI overview' },
+]
+
+function findFirstLink(entries: SidebarEntry[]): SidebarLink | undefined {
+  for (const entry of entries) {
+    if (entry.type === 'link') return entry
+    const nested = findFirstLink(entry.entries)
+    if (nested) return nested
+  }
+
+  return undefined
+}
+
+function collectLinks(entries: SidebarEntry[], limit = 3): SidebarLink[] {
+  const links: SidebarLink[] = []
+
+  for (const entry of entries) {
+    if (links.length >= limit) break
+
+    if (entry.type === 'link') {
+      links.push(entry)
+      continue
+    }
+
+    links.push(...collectLinks(entry.entries, limit - links.length))
+  }
+
+  return links
+}
+
+function containsCurrent(entries: SidebarEntry[]): boolean {
+  return entries.some((entry) => {
+    if (entry.type === 'link') return entry.isCurrent
+    return containsCurrent(entry.entries)
+  })
+}
+
+const activeGroup = route.sidebar.find(
+  (entry): entry is SidebarGroup => entry.type === 'group' && containsCurrent(entry.entries),
+)
+const sectionCards = route.sidebar
+  .filter((entry): entry is SidebarGroup => entry.type === 'group')
+  .map((group) => ({
+    label: group.label,
+    href: findFirstLink(group.entries)?.href ?? '/docs/',
+    links: collectLinks(group.entries),
+  }))
+---
+
+{
+  isDocsHome ? (
+    <div class="docs-home-hero">
+      <div class="docs-home-hero__copy">
+        <span class="site-eyebrow">Documentation</span>
+        <h1 id={PAGE_TITLE_ID}>{title}</h1>
+        {description && <p>{description}</p>}
+
+        <div class="docs-home-hero__actions">
+          {quickLinks.map((link, index) => (
+            <a
+              class:list={[
+                'site-button',
+                index === 0 ? 'site-button--primary' : 'site-button--ghost',
+                'site-button--small',
+              ]}
+              href={link.href}
+            >
+              {link.label}
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <aside class="bk-panel docs-home-hero__summary">
+        <span class="site-eyebrow">What lives here</span>
+        <p>Explicit runtime docs, CLI behavior, type-level API reference, and integration guides built around the current package surface.</p>
+        <div class="docs-home-hero__chips">
+          <span>Node</span>
+          <span>Browser</span>
+          <span>Edge</span>
+          <span>CLI</span>
+          <span>API</span>
+          <span>Guides</span>
+        </div>
+      </aside>
+
+      <div class="docs-home-sections">
+        {sectionCards.map((section) => (
+          <a class="bk-card docs-home-section-card" href={section.href}>
+            <strong>{section.label}</strong>
+            <ul>
+              {section.links.map((link) => (
+                <li>{link.label}</li>
+              ))}
+            </ul>
+          </a>
+        ))}
+      </div>
+    </div>
+  ) : (
+    <div class="docs-page-header">
+      {activeGroup && <p class="docs-page-header__kicker">{activeGroup.label}</p>}
+      <h1 id={PAGE_TITLE_ID}>{title}</h1>
+      {description && <p class="docs-page-header__description">{description}</p>}
+    </div>
+  )
+}
+
+<style>
+  .docs-page-header {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .docs-page-header__kicker {
+    color: var(--sl-color-accent-high);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .docs-page-header h1,
+  .docs-home-hero h1 {
+    color: var(--sl-color-white);
+    font-size: var(--sl-text-h1);
+    line-height: 0.95;
+    letter-spacing: -0.05em;
+  }
+
+  .docs-page-header__description,
+  .docs-home-hero__copy p,
+  .docs-home-hero__summary p {
+    max-width: 58ch;
+    color: var(--bk-muted);
+    font-size: 1.03rem;
+  }
+
+  .docs-home-hero {
+    display: grid;
+    gap: 1.1rem;
+  }
+
+  .docs-home-hero__copy {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .docs-home-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+  }
+
+  .docs-home-hero__summary {
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .docs-home-hero__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .docs-home-hero__chips span {
+    border-radius: 999px;
+    border: 1px solid rgba(166, 184, 255, 0.14);
+    padding: 0.42rem 0.7rem;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--sl-color-gray-1);
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  .docs-home-sections {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+
+  .docs-home-section-card {
+    display: grid;
+    gap: 0.75rem;
+    padding: 1.15rem;
+    text-decoration: none;
+  }
+
+  .docs-home-section-card strong {
+    color: var(--sl-color-white);
+    font-size: 1.02rem;
+  }
+
+  .docs-home-section-card ul {
+    list-style: none;
+    display: grid;
+    gap: 0.45rem;
+    padding: 0;
+    color: var(--bk-muted);
+    font-size: 0.92rem;
+  }
+
+  .docs-home-section-card li::before {
+    content: '→';
+    margin-right: 0.45rem;
+    color: var(--sl-color-accent-high);
+  }
+
+  @media (min-width: 72rem) {
+    .docs-home-hero {
+      grid-template-columns: minmax(0, 1.15fr) minmax(18rem, 0.85fr);
+      align-items: start;
+    }
+
+    .docs-home-sections {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

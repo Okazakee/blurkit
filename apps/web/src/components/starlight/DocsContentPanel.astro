@@ -1,0 +1,40 @@
+---
+const isDocsHome = Astro.locals.starlightRoute.id === 'docs'
+---
+
+<section class:list={['docs-content-panel', { 'docs-route--home': isDocsHome }]}>
+  <div class="docs-content-panel__inner">
+    <slot />
+  </div>
+</section>
+
+<style>
+  .docs-content-panel {
+    width: 100%;
+  }
+
+  .docs-content-panel + .docs-content-panel {
+    margin-top: 1rem;
+  }
+
+  .docs-content-panel__inner {
+    max-width: var(--sl-content-width);
+    margin: 0 auto;
+    padding: 1.35rem clamp(1rem, 2.4vw, 1.5rem);
+    border-radius: 1.45rem;
+    border: 1px solid rgba(166, 184, 255, 0.12);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
+      linear-gradient(180deg, rgba(13, 17, 33, 0.72), rgba(8, 10, 18, 0.72));
+    box-shadow: var(--bk-shadow);
+    backdrop-filter: blur(18px);
+  }
+
+  .docs-content-panel__inner > :global(* + *) {
+    margin-top: 1.4rem;
+  }
+
+  .docs-route--home .docs-content-panel__inner {
+    padding: 1.6rem clamp(1rem, 2.6vw, 1.7rem);
+  }
+</style>

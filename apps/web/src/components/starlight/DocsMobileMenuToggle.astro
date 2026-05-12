@@ -1,0 +1,90 @@
+<starlight-menu-button class="docs-menu-toggle print:hidden" aria-expanded="false">
+  <button
+    type="button"
+    aria-expanded="false"
+    aria-label={Astro.locals.t('menuButton.accessibleLabel')}
+    aria-controls="starlight__sidebar"
+  >
+    <span class="docs-menu-toggle__icon docs-menu-toggle__icon--open">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+      </svg>
+    </span>
+    <span class="docs-menu-toggle__icon docs-menu-toggle__icon--close">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="m7 7 10 10M17 7 7 17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+      </svg>
+    </span>
+  </button>
+</starlight-menu-button>
+
+<script>
+  class StarlightMenuButton extends HTMLElement {
+    btn = this.querySelector('button')
+
+    constructor() {
+      super()
+      this.btn?.addEventListener('click', () => {
+        this.setExpanded(this.getAttribute('aria-expanded') !== 'true')
+      })
+
+      const parentNav = this.closest('nav')
+      parentNav?.addEventListener('keyup', (event) => {
+        if (event.code === 'Escape') {
+          this.setExpanded(false)
+          this.btn?.focus()
+        }
+      })
+    }
+
+    setExpanded(expanded: boolean) {
+      this.setAttribute('aria-expanded', String(expanded))
+      this.btn?.setAttribute('aria-expanded', String(expanded))
+      document.body.toggleAttribute('data-mobile-menu-expanded', expanded)
+    }
+  }
+
+  customElements.define('starlight-menu-button', StarlightMenuButton)
+</script>
+
+<style>
+  .docs-menu-toggle {
+    display: none;
+  }
+
+  .docs-menu-toggle button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 999px;
+    border: 1px solid rgba(166, 184, 255, 0.14);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--sl-color-white);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    cursor: pointer;
+  }
+
+  .docs-menu-toggle__icon {
+    display: inline-flex;
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .docs-menu-toggle__icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .docs-menu-toggle[aria-expanded='true'] .docs-menu-toggle__icon--open,
+  .docs-menu-toggle:not([aria-expanded='true']) .docs-menu-toggle__icon--close {
+    display: none;
+  }
+
+  @media (max-width: 49.99rem) {
+    .docs-menu-toggle {
+      display: inline-flex;
+    }
+  }
+</style>

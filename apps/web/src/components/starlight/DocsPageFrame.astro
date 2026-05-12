@@ -1,0 +1,171 @@
+---
+import MobileMenuToggle from './DocsMobileMenuToggle.astro'
+
+const { hasSidebar } = Astro.locals.starlightRoute
+---
+
+<div class:list={['docs-shell', { 'docs-shell--with-sidebar': hasSidebar }]}>
+  <header class="docs-topbar">
+    <div class="docs-topbar__inner">
+      <slot name="header" />
+      {hasSidebar && <MobileMenuToggle />}
+    </div>
+  </header>
+
+  <div class="docs-body">
+    {
+      hasSidebar && (
+        <nav class="docs-sidebar-nav print:hidden" aria-label={Astro.locals.t('sidebarNav.accessibleLabel')}>
+          <button class="docs-sidebar-scrim" type="button" data-close-sidebar aria-hidden="true" tabindex="-1"></button>
+          <div id="starlight__sidebar" class="docs-sidebar-pane">
+            <div class="docs-sidebar-pane__inner">
+              <slot name="sidebar" />
+            </div>
+          </div>
+        </nav>
+      )
+    }
+
+    <div class="docs-main-frame">
+      <slot />
+    </div>
+  </div>
+</div>
+
+<script>
+  const closeMenu = () => {
+    const toggle = document.querySelector('starlight-menu-button')
+    if (!toggle) return
+    toggle.setAttribute('aria-expanded', 'false')
+    toggle.querySelector('button')?.setAttribute('aria-expanded', 'false')
+    document.body.toggleAttribute('data-mobile-menu-expanded', false)
+  }
+
+  document.querySelectorAll('[data-close-sidebar]').forEach((button) => {
+    button.addEventListener('click', closeMenu)
+  })
+</script>
+
+<style>
+  .docs-shell {
+    min-height: 100vh;
+  }
+
+  .docs-topbar {
+    position: sticky;
+    top: 0;
+    z-index: var(--sl-z-index-navbar);
+    padding:
+      calc(1rem + env(safe-area-inset-top))
+      calc(1rem + env(safe-area-inset-right))
+      1rem
+      calc(1rem + env(safe-area-inset-left));
+    backdrop-filter: blur(18px);
+    background:
+      linear-gradient(180deg, rgba(10, 13, 24, 0.92), rgba(10, 13, 24, 0.76));
+    border-bottom: 1px solid rgba(166, 184, 255, 0.08);
+  }
+
+  .docs-topbar__inner {
+    width: min(1380px, 100%);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .docs-body {
+    width: min(1380px, 100%);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .docs-sidebar-nav {
+    position: relative;
+  }
+
+  .docs-sidebar-pane {
+    width: 100%;
+  }
+
+  .docs-sidebar-pane__inner {
+    padding: 1.15rem var(--sl-sidebar-pad-x) 2rem;
+  }
+
+  .docs-main-frame {
+    min-width: 0;
+  }
+
+  .docs-sidebar-scrim {
+    display: none;
+  }
+
+  @media (min-width: 50rem) {
+    .docs-body {
+      grid-template-columns: var(--sl-sidebar-width) minmax(0, 1fr);
+      align-items: start;
+    }
+
+    .docs-sidebar-pane {
+      position: sticky;
+      top: calc(var(--sl-nav-height) + 0.25rem);
+      max-height: calc(100vh - var(--sl-nav-height) - 1rem);
+      overflow-y: auto;
+      padding-inline-end: 0.25rem;
+    }
+  }
+
+  @media (max-width: 49.99rem) {
+    .docs-topbar__inner {
+      align-items: start;
+    }
+
+    .docs-sidebar-nav {
+      position: fixed;
+      inset: 0;
+      z-index: calc(var(--sl-z-index-navbar) - 1);
+      pointer-events: none;
+    }
+
+    .docs-sidebar-scrim {
+      display: block;
+      position: absolute;
+      inset: 0;
+      background: rgba(4, 6, 12, 0.68);
+      opacity: 0;
+      transition: opacity 180ms ease;
+      pointer-events: none;
+    }
+
+    .docs-sidebar-pane {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: min(88vw, 22rem);
+      height: 100%;
+      padding-top: calc(var(--sl-nav-height) + 0.5rem);
+      background:
+        linear-gradient(180deg, rgba(13, 17, 33, 0.98), rgba(8, 10, 18, 0.98));
+      border-inline-end: 1px solid rgba(166, 184, 255, 0.08);
+      transform: translateX(-104%);
+      transition: transform 180ms ease;
+      overflow-y: auto;
+      pointer-events: auto;
+    }
+
+    :global(body[data-mobile-menu-expanded]) .docs-sidebar-nav {
+      pointer-events: auto;
+    }
+
+    :global(body[data-mobile-menu-expanded]) .docs-sidebar-scrim {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    :global(body[data-mobile-menu-expanded]) .docs-sidebar-pane {
+      transform: translateX(0);
+    }
+  }
+</style>

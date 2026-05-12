@@ -1,0 +1,50 @@
+---
+import EditLink from '@astrojs/starlight/components/EditLink.astro'
+import LastUpdated from '@astrojs/starlight/components/LastUpdated.astro'
+import Pagination from '@astrojs/starlight/components/Pagination.astro'
+
+const { editUrl, lastUpdated } = Astro.locals.starlightRoute
+const showMeta = Boolean(editUrl || lastUpdated)
+---
+
+<footer class="docs-footer">
+  {
+    showMeta && (
+      <div class="bk-panel docs-footer__meta">
+        <EditLink />
+        <LastUpdated />
+      </div>
+    )
+  }
+
+  <div class="docs-footer__pagination">
+    <Pagination />
+  </div>
+</footer>
+
+<style>
+  .docs-footer {
+    display: grid;
+    gap: 1.1rem;
+    margin-top: 3rem;
+  }
+
+  .docs-footer__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 1rem 1.2rem;
+  }
+
+  .docs-footer__meta :global(a),
+  .docs-footer__meta :global(p) {
+    color: var(--sl-color-gray-2);
+    text-decoration: none;
+  }
+
+  .docs-footer__meta :global(a:hover) {
+    color: var(--sl-color-white);
+  }
+</style>

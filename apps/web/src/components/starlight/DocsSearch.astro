@@ -1,0 +1,7 @@
+---
+import Search from '@astrojs/starlight/components/Search.astro'
+
+const className = [Astro.props.class, 'docs-search'].filter(Boolean).join(' ')
+---
+
+<Search class={className} />

@@ -49,6 +49,19 @@ export default defineConfig({
       expressiveCode: {
         themes: ['github-dark', 'github-light'],
       },
+      components: {
+        PageFrame: './src/components/starlight/DocsPageFrame.astro',
+        Header: './src/components/starlight/DocsHeader.astro',
+        Sidebar: './src/components/starlight/DocsSidebar.astro',
+        TwoColumnContent: './src/components/starlight/DocsTwoColumnContent.astro',
+        PageSidebar: './src/components/starlight/DocsPageSidebar.astro',
+        ContentPanel: './src/components/starlight/DocsContentPanel.astro',
+        PageTitle: './src/components/starlight/DocsPageTitle.astro',
+        Footer: './src/components/starlight/DocsFooter.astro',
+        Search: './src/components/starlight/DocsSearch.astro',
+        MobileMenuToggle: './src/components/starlight/DocsMobileMenuToggle.astro',
+        MobileTableOfContents: './src/components/starlight/DocsMobileTableOfContents.astro',
+      },
       favicon: '/favicon.svg',
       disable404Route: true,
       head: [
@@ -125,7 +138,7 @@ export default defineConfig({
           ],
         },
       ],
-      customCss: ['./src/styles/custom.css', './src/styles/site.css'],
+      customCss: ['./src/styles/shared.css', './src/styles/docs.css'],
     }),
   ],
 })
