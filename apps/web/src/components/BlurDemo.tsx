@@ -4,155 +4,128 @@ import {
   useMemo,
   useRef,
   useState,
-  type DragEvent as ReactDragEvent,
+  type ChangeEvent,
+  type DragEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
 } from 'react'
 
+import type { BlurAlgorithm, BlurOutputFormat, BlurResult } from 'blurkit'
 import { encode } from 'blurkit/browser'
 
-type Algorithm = 'blurhash' | 'thumbhash'
-type OutputFormat = 'png' | 'jpeg'
-type EncodeResult = Awaited<ReturnType<typeof encode>>
-type CopyField = 'hash' | 'dataURL' | 'manifest'
-type DemoStage = 'idle' | 'busy' | 'ready'
+type OutputTab = 'dataURL' | 'hash' | 'details'
 
-type DemoSample = {
-  id: string
+type DemoSource = {
+  input: Blob
+  kind: 'preset' | 'upload'
   label: string
-  description: string
-  filename: string
-  svg: string
+  previewURL: string
+  size: number
+  type: string
 }
 
 type SelectOption<T extends string> = {
-  value: T
+  description?: string
   label: string
-  description: string
+  value: T
 }
 
-const DEMO_SAMPLES: DemoSample[] = [
-  {
-    id: 'coastline',
-    label: 'Coastline',
-    description: 'Wide landscape sample',
-    filename: 'sample-coastline.svg',
-    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
-      <defs>
-        <linearGradient id="sky" x1="0" x2="1" y1="0" y2="1">
-          <stop offset="0%" stop-color="#8e6cff" />
-          <stop offset="100%" stop-color="#67ecff" />
-        </linearGradient>
-        <linearGradient id="sea" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stop-color="#11366f" />
-          <stop offset="100%" stop-color="#08172d" />
-        </linearGradient>
-      </defs>
-      <rect width="1600" height="900" fill="url(#sky)" />
-      <circle cx="1220" cy="180" r="110" fill="#fff1b8" opacity="0.95" />
-      <path d="M0 520C220 470 380 460 560 500s270 95 450 74 365-110 590-48v354H0Z" fill="url(#sea)" />
-      <path d="M0 650C205 600 425 578 628 612c172 29 274 102 472 105 183 3 318-80 500-56v239H0Z" fill="#0b0a16" />
-    </svg>`,
-  },
-  {
-    id: 'portrait',
-    label: 'Portrait',
-    description: 'Tall portrait sample',
-    filename: 'sample-portrait.svg',
-    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1200">
-      <defs>
-        <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
-          <stop offset="0%" stop-color="#11162f" />
-          <stop offset="100%" stop-color="#43298d" />
-        </linearGradient>
-      </defs>
-      <rect width="900" height="1200" fill="url(#bg)" />
-      <circle cx="450" cy="390" r="180" fill="#f1c8a8" />
-      <path d="M270 980c16-180 118-284 180-284s164 104 180 284" fill="#67ecff" opacity="0.95" />
-      <path d="M240 322c25-160 151-238 210-238 82 0 183 66 220 214-85-51-154-73-214-73-76 0-148 29-216 97Z" fill="#080914" />
-      <rect x="170" y="960" width="560" height="160" rx="80" fill="#8e6cff" opacity="0.88" />
-    </svg>`,
-  },
-  {
-    id: 'icon-board',
-    label: 'Icon board',
-    description: 'Compact graphic sample',
-    filename: 'sample-icons.svg',
-    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900">
-      <rect width="1200" height="900" rx="80" fill="#0e1021" />
-      <rect x="120" y="120" width="960" height="660" rx="44" fill="#141938" />
-      <rect x="190" y="190" width="220" height="220" rx="48" fill="#67ecff" />
-      <rect x="490" y="190" width="220" height="220" rx="48" fill="#8e6cff" />
-      <rect x="790" y="190" width="220" height="220" rx="48" fill="#f7a9ff" />
-      <circle cx="300" cy="600" r="112" fill="#ffe08c" />
-      <path d="M600 500h150c68 0 124 56 124 124s-56 124-124 124H600Z" fill="#67ecff" opacity="0.85" />
-      <path d="M468 726 612 474l144 252Z" fill="#8e6cff" opacity="0.92" />
-    </svg>`,
-  },
+const TEST_IMAGE_PATH = '/test.webp'
+const TEST_IMAGE_LABEL = 'test.webp'
+const SIZE_MIN = 8
+const SIZE_MAX = 96
+const COMPONENT_MIN = 1
+const COMPONENT_MAX = 9
+
+const algorithmOptions: SelectOption<BlurAlgorithm>[] = [
+  { value: 'blurhash', label: 'BlurHash', description: 'More tunable' },
+  { value: 'thumbhash', label: 'ThumbHash', description: 'Compact default' },
 ]
 
-const ALGORITHM_OPTIONS: SelectOption<Algorithm>[] = [
-  {
-    value: 'blurhash',
-    label: 'BlurHash',
-    description: 'Configurable blur grid for richer gradients.',
-  },
-  {
-    value: 'thumbhash',
-    label: 'ThumbHash',
-    description: 'Compact placeholder with built-in aspect data.',
-  },
+const outputFormatOptions: SelectOption<BlurOutputFormat>[] = [
+  { value: 'png', label: 'PNG', description: 'Lossless' },
+  { value: 'jpeg', label: 'JPEG', description: 'Smaller output' },
 ]
 
-const OUTPUT_OPTIONS: SelectOption<OutputFormat>[] = [
-  {
-    value: 'png',
-    label: 'PNG',
-    description: 'Sharper edges and transparent-safe output.',
-  },
-  {
-    value: 'jpeg',
-    label: 'JPEG',
-    description: 'Smaller output with opaque compression.',
-  },
-]
+function sanitizePositiveIntegerInput(value: string): string {
+  const digits = value.replace(/[^\d]/g, '')
+  if (!digits) {
+    return ''
+  }
 
-function createSampleFile(sample: DemoSample): File {
-  return new File([sample.svg], sample.filename, { type: 'image/svg+xml' })
+  const normalized = String(Number.parseInt(digits, 10))
+  return normalized === '0' ? '' : normalized
 }
 
-function isSupportedImage(file: File): boolean {
-  return file.type.startsWith('image/') || /\.(avif|bmp|gif|heic|heif|ico|jpe?g|png|svg|webp)$/i.test(file.name)
+function parseOptionalPositiveInteger(value: string): number | undefined {
+  if (!value) {
+    return undefined
+  }
+
+  const parsed = Number.parseInt(value, 10)
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined
 }
 
-function CustomSelect<T extends string>({
-  label,
-  value,
-  options,
+function createSource(blob: Blob, label: string, kind: DemoSource['kind']): DemoSource {
+  return {
+    input: blob,
+    kind,
+    label,
+    previewURL: URL.createObjectURL(blob),
+    size: blob.size,
+    type: blob.type || 'image/png',
+  }
+}
+
+function formatDimensions(width?: number, height?: number): string {
+  if (!width || !height) {
+    return 'Pending'
+  }
+
+  return `${width} × ${height}`
+}
+
+function buildDetails(result: BlurResult | null): string {
+  if (!result) {
+    return '// Generate a placeholder to inspect the result payload.'
+  }
+
+  return JSON.stringify(
+    {
+      algorithm: result.algorithm,
+      width: result.width,
+      height: result.height,
+      meta: result.meta ?? null,
+    },
+    null,
+    2,
+  )
+}
+
+function DemoSelect<T extends string>({
+  labelledBy,
   onChange,
+  options,
+  value,
 }: {
-  label: string
-  value: T
+  labelledBy: string
+  onChange(value: T): void
   options: SelectOption<T>[]
-  onChange: (value: T) => void
+  value: T
 }) {
-  const [isOpen, setIsOpen] = useState(false)
-  const rootRef = useRef<HTMLDivElement | null>(null)
-  const listboxId = useId()
-  const selectedOption = options.find((option) => option.value === value) ?? options[0]!
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const selected = options.find((option) => option.value === value) ?? options[0]
 
   useEffect(() => {
-    if (!isOpen) {
-      return
-    }
-
     function handlePointerDown(event: MouseEvent) {
-      if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setOpen(false)
       }
     }
 
     function handleEscape(event: KeyboardEvent) {
       if (event.key === 'Escape') {
-        setIsOpen(false)
+        setOpen(false)
       }
     }
 
@@ -163,68 +136,43 @@ function CustomSelect<T extends string>({
       document.removeEventListener('mousedown', handlePointerDown)
       document.removeEventListener('keydown', handleEscape)
     }
-  }, [isOpen])
+  }, [])
 
   return (
-    <div className={`bk-select ${isOpen ? 'bk-select--open' : ''}`} ref={rootRef}>
-      <span className="bk-demo-label">{label}</span>
+    <div className={`live-demo-select ${open ? 'live-demo-select--open' : ''}`.trim()} ref={rootRef}>
       <button
-        className="bk-select-trigger"
-        type="button"
+        aria-expanded={open}
         aria-haspopup="listbox"
-        aria-expanded={isOpen}
-        aria-controls={listboxId}
-        onClick={() => setIsOpen((current) => !current)}
+        aria-labelledby={labelledBy}
+        className="live-demo-select-trigger"
+        type="button"
+        onClick={() => setOpen((current) => !current)}
       >
-        <span className="bk-select-trigger-copy">
-          <strong>{selectedOption.label}</strong>
-          <span>{selectedOption.description}</span>
-        </span>
-        <span className="bk-select-arrow" aria-hidden="true">
-          <svg viewBox="0 0 16 16" focusable="false">
-            <path
-              d="M4 6.5 8 10.5l4-4"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1.8"
-            />
-          </svg>
+        <span className="live-demo-select-copy">
+          <strong>{selected?.label}</strong>
+          {selected?.description ? <span>{selected.description}</span> : null}
         </span>
       </button>
-      {isOpen ? (
-        <div className="bk-select-menu" id={listboxId} role="listbox" aria-label={label}>
+
+      {open ? (
+        <div className="live-demo-select-menu" role="listbox" aria-labelledby={labelledBy}>
           {options.map((option) => (
             <button
               key={option.value}
-              className={`bk-select-option ${option.value === value ? 'bk-select-option--active' : ''}`}
-              type="button"
-              role="option"
               aria-selected={option.value === value}
+              className={`live-demo-select-option ${option.value === value ? 'live-demo-select-option--active' : ''}`.trim()}
+              role="option"
+              type="button"
               onClick={() => {
                 onChange(option.value)
-                setIsOpen(false)
+                setOpen(false)
               }}
             >
-              <span className="bk-select-option-copy">
+              <span className="live-demo-select-copy">
                 <strong>{option.label}</strong>
-                <span>{option.description}</span>
+                {option.description ? <span>{option.description}</span> : null}
               </span>
-              <span className="bk-select-check" aria-hidden="true">
-                {option.value === value ? (
-                  <svg viewBox="0 0 16 16" focusable="false">
-                    <path
-                      d="M3.5 8.5 6.5 11.5 12.5 4.5"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="1.8"
-                    />
-                  </svg>
-                ) : null}
-              </span>
+              {option.value === value ? <span className="live-demo-select-check" aria-hidden="true" /> : null}
             </button>
           ))}
         </div>
@@ -234,471 +182,442 @@ function CustomSelect<T extends string>({
 }
 
 export function BlurDemo() {
-  const [file, setFile] = useState<File | null>(null)
-  const [previewURL, setPreviewURL] = useState<string | null>(null)
-  const [algorithm, setAlgorithm] = useState<Algorithm>('blurhash')
-  const [size, setSize] = useState(32)
-  const [componentX, setComponentX] = useState(4)
-  const [componentY, setComponentY] = useState(3)
-  const [outputFormat, setOutputFormat] = useState<OutputFormat>('png')
-  const [result, setResult] = useState<EncodeResult | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const uploadErrorId = useId()
+  const dimensionsHintId = useId()
+  const algorithmLabelId = useId()
+  const formatLabelId = useId()
+
+  const [source, setSource] = useState<DemoSource | null>(null)
+  const [result, setResult] = useState<BlurResult | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [uploadError, setUploadError] = useState<string | null>(null)
+  const [isBootstrapping, setIsBootstrapping] = useState(true)
   const [isEncoding, setIsEncoding] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
-  const [retryNonce, setRetryNonce] = useState(0)
-  const [copyField, setCopyField] = useState<CopyField | null>(null)
-  const [activeSampleId, setActiveSampleId] = useState<string | null>(null)
-  const [fileInputKey, setFileInputKey] = useState(0)
-  const fileInputRef = useRef<HTMLInputElement | null>(null)
-  const uploadDescribedBy = ['bk-demo-upload-hint', uploadError ? 'bk-demo-upload-error' : null].filter(Boolean).join(' ')
-  const stage: DemoStage = isEncoding ? 'busy' : result ? 'ready' : 'idle'
+  const [activeTab, setActiveTab] = useState<OutputTab>('dataURL')
 
-  const manifestPreview = useMemo(() => {
-    if (!result) {
-      return null
-    }
+  const [algorithm, setAlgorithm] = useState<BlurAlgorithm>('blurhash')
+  const [size, setSize] = useState(32)
+  const [widthInput, setWidthInput] = useState('')
+  const [heightInput, setHeightInput] = useState('')
+  const [componentX, setComponentX] = useState(4)
+  const [componentY, setComponentY] = useState(3)
+  const [outputFormat, setOutputFormat] = useState<BlurOutputFormat>('png')
 
-    return JSON.stringify(
-      {
-        version: 1,
-        generatedAt: new Date().toISOString(),
-        images: {
-          [file?.name ?? 'upload']: result,
-        },
-      },
-      null,
-      2,
-    )
-  }, [file?.name, result])
+  const width = useMemo(() => parseOptionalPositiveInteger(widthInput), [widthInput])
+  const height = useMemo(() => parseOptionalPositiveInteger(heightInput), [heightInput])
+  const hasDimensionOverride = width !== undefined || height !== undefined
+  const usesBlurhash = algorithm === 'blurhash'
+  const detailsOutput = useMemo(() => buildDetails(result), [result])
+
+  const options = useMemo(
+    () => ({
+      algorithm,
+      size,
+      width,
+      height,
+      componentX,
+      componentY,
+      outputFormat,
+    }),
+    [algorithm, size, width, height, componentX, componentY, outputFormat],
+  )
 
   useEffect(() => {
-    if (!file) {
-      setPreviewURL(null)
+    let disposed = false
+
+    async function loadPreset() {
+      try {
+        const response = await fetch(TEST_IMAGE_PATH)
+        if (!response.ok) {
+          throw new Error(`Failed to load ${TEST_IMAGE_PATH}. Add apps/web/public/test.webp to enable the preset demo.`)
+        }
+
+        const blob = await response.blob()
+        const file =
+          typeof File === 'function'
+            ? new File([blob], TEST_IMAGE_LABEL, { type: blob.type || 'image/webp' })
+            : blob
+
+        const nextSource = createSource(file, TEST_IMAGE_LABEL, 'preset')
+        if (disposed) {
+          URL.revokeObjectURL(nextSource.previewURL)
+          return
+        }
+
+        setSource((current) => {
+          if (current) {
+            URL.revokeObjectURL(nextSource.previewURL)
+            return current
+          }
+
+          return nextSource
+        })
+        setError(null)
+      } catch (caught) {
+        if (!disposed) {
+          setError(caught instanceof Error ? caught.message : 'Unable to load the preset image.')
+        }
+      } finally {
+        if (!disposed) {
+          setIsBootstrapping(false)
+        }
+      }
+    }
+
+    void loadPreset()
+
+    return () => {
+      disposed = true
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!source) {
       return
     }
 
-    const objectURL = URL.createObjectURL(file)
-    setPreviewURL(objectURL)
-    return () => URL.revokeObjectURL(objectURL)
-  }, [file])
+    return () => {
+      URL.revokeObjectURL(source.previewURL)
+    }
+  }, [source])
 
   useEffect(() => {
+    if (!source) {
+      return
+    }
+
+    const currentSource = source
     let cancelled = false
+    setIsEncoding(true)
 
-    async function run() {
-      if (!file) {
-        setResult(null)
-        setError(null)
-        setIsEncoding(false)
-        return
-      }
-
-      setIsEncoding(true)
-      setError(null)
-
+    async function generatePlaceholder() {
       try {
-        const next = await encode(file, {
-          algorithm,
-          size,
-          componentX,
-          componentY,
-          outputFormat,
-        })
-
-        if (!cancelled) {
-          setResult(next)
-          setError(null)
-          setIsEncoding(false)
+        const nextResult = await encode(currentSource.input, options)
+        if (cancelled) {
+          return
         }
-      } catch (nextError) {
+
+        setResult(nextResult)
+        setError(null)
+      } catch (caught) {
         if (!cancelled) {
-          setError(nextError instanceof Error ? nextError.message : String(nextError))
           setResult(null)
+          setError(caught instanceof Error ? caught.message : 'Unable to generate a placeholder for this image.')
+        }
+      } finally {
+        if (!cancelled) {
           setIsEncoding(false)
         }
       }
     }
 
-    run()
+    void generatePlaceholder()
 
     return () => {
       cancelled = true
     }
-  }, [algorithm, componentX, componentY, file, outputFormat, retryNonce, size])
+  }, [source, options])
 
-  async function copyValue(field: CopyField, value: string) {
-    try {
-      await navigator.clipboard.writeText(value)
-      setCopyField(field)
-      window.setTimeout(() => {
-        setCopyField((current) => (current === field ? null : current))
-      }, 1400)
-    } catch {
-      setError('Copy failed. Your browser did not grant clipboard access.')
-    }
-  }
-
-  function resetDemo() {
-    setFile(null)
-    setPreviewURL(null)
-    setResult(null)
-    setError(null)
-    setUploadError(null)
-    setIsDragging(false)
-    setActiveSampleId(null)
-    setCopyField(null)
-    setRetryNonce(0)
-    setFileInputKey((current) => current + 1)
-  }
-
-  function handleIncomingFile(nextFile: File | null, source: 'upload' | 'sample') {
-    if (!nextFile) {
+  function applyBlob(blob: Blob, label: string, kind: DemoSource['kind']) {
+    if (!blob.type.startsWith('image/')) {
+      setError('Only image files are supported in the browser demo.')
       return
     }
 
-    if (!isSupportedImage(nextFile)) {
-      setUploadError('Only image files are supported in the browser demo.')
-      return
-    }
+    setSource((current) => {
+      if (current) {
+        URL.revokeObjectURL(current.previewURL)
+      }
 
-    setUploadError(null)
+      return createSource(blob, label, kind)
+    })
     setError(null)
-    setResult(null)
-    setFile(nextFile)
-    setActiveSampleId(source === 'sample' ? nextFile.name : null)
-    setFileInputKey((current) => current + 1)
   }
 
-  function handleDrop(event: ReactDragEvent<HTMLDivElement>) {
+  function handleFileSelection(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (file) {
+      applyBlob(file, file.name, 'upload')
+    }
+
+    event.target.value = ''
+  }
+
+  function handleDrop(event: DragEvent<HTMLDivElement>) {
     event.preventDefault()
     setIsDragging(false)
-    handleIncomingFile(event.dataTransfer.files?.[0] ?? null, 'upload')
+
+    const file = event.dataTransfer.files?.[0]
+    if (file) {
+      applyBlob(file, file.name, 'upload')
+    }
   }
 
-  function downloadPlaceholder() {
-    if (!result) {
+  function handleDragLeave(event: DragEvent<HTMLDivElement>) {
+    if (event.currentTarget.contains(event.relatedTarget as Node | null)) {
       return
     }
 
-    const anchor = document.createElement('a')
-    anchor.href = result.dataURL
-    anchor.download = `${file?.name?.replace(/\.[^.]+$/, '') ?? 'placeholder'}.${outputFormat}`
-    anchor.click()
+    setIsDragging(false)
+  }
+
+  function handleDropzoneKeyDown(event: ReactKeyboardEvent<HTMLDivElement>) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      inputRef.current?.click()
+    }
   }
 
   return (
-    <div className="bk-demo">
-      <div className="bk-demo-intro">
-        <p className="site-muted">
-          Upload an image, switch algorithms, and inspect the exact <span className="site-inline-code">hash</span>,{' '}
-          <span className="site-inline-code">dataURL</span>, and manifest entry shape returned by the browser runtime.
-        </p>
+    <div className="live-demo">
+      <div className="live-demo-intro">
+        <span className="live-demo-kicker">Live demo</span>
+        <h2>Test blurkit in the browser.</h2>
+        <p>Drop an image, adjust the settings, and inspect the generated output.</p>
       </div>
 
-      <div className="bk-demo-workbench">
-        <section className="bk-demo-column bk-demo-column--controls">
-          <div className="bk-demo-panel-copy">
-            <span className="bk-demo-panel-kicker">1. Input controls</span>
-            <h3>Choose a source and tune the encoding pass.</h3>
-          </div>
-
-          <div className="bk-demo-statusbar" aria-live="polite">
-            <div className={`bk-demo-status ${stage === 'busy' ? 'bk-demo-status--busy' : stage === 'ready' ? 'bk-demo-status--ready' : ''}`}>
-              {stage === 'busy' ? 'Generating placeholder…' : stage === 'ready' ? 'Placeholder ready' : 'Waiting for upload'}
-            </div>
-            {error ? (
-              <div className="bk-demo-error-row">
-                <p className="bk-demo-error">{error}</p>
-                {file ? (
-                  <button className="site-button site-button--ghost site-button--small" type="button" onClick={() => setRetryNonce((current) => current + 1)}>
-                    Retry
-                  </button>
-                ) : null}
-              </div>
-            ) : null}
-          </div>
-
-          <div
-            className={`bk-demo-card bk-demo-card--hero bk-demo-dropzone ${isDragging ? 'bk-demo-dropzone--dragging' : ''}`}
+      <div className="live-demo-shell">
+        <aside className="live-demo-rail">
+          <section
+            className={`live-demo-card live-demo-input-card ${isDragging ? 'live-demo-input-card--dragging' : ''}`.trim()}
+            role="button"
+            tabIndex={0}
             onDragOver={(event) => {
               event.preventDefault()
               setIsDragging(true)
             }}
-            onDragLeave={() => setIsDragging(false)}
+            onDragEnter={(event) => {
+              event.preventDefault()
+              setIsDragging(true)
+            }}
+            onDragLeave={handleDragLeave}
             onDrop={handleDrop}
+            onKeyDown={handleDropzoneKeyDown}
+            onClick={() => inputRef.current?.click()}
           >
-            <div className="bk-demo-dropzone-copy">
-              <span className="bk-demo-label">Upload an image</span>
-              <p id="bk-demo-upload-hint">Drop a file here or use the picker. PNG, JPEG, WebP, SVG, and other image formats are accepted.</p>
+            <span className="live-demo-dropzone-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M12 16V7m0 0-3 3m3-3 3 3M5 17.5v.5A2 2 0 0 0 7 20h10a2 2 0 0 0 2-2v-.5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.8"
+                ></path>
+              </svg>
+            </span>
+
+            <div className="live-demo-dropzone-copy">
+              <span className="live-demo-card-kicker">Image input</span>
+              <h3>Drop or browse</h3>
+              <p>Use any local image. Processing stays in the browser.</p>
             </div>
+
             <input
-              key={fileInputKey}
-              ref={fileInputRef}
-              className="bk-demo-file-input"
+              ref={inputRef}
+              className="live-demo-file-input"
               type="file"
               accept="image/*"
-              aria-describedby={uploadDescribedBy}
-              onChange={(event) => handleIncomingFile(event.target.files?.[0] ?? null, 'upload')}
+              aria-describedby={error ? uploadErrorId : undefined}
+              aria-invalid={Boolean(error)}
+              onChange={handleFileSelection}
             />
-            <div className="bk-demo-toolbar">
-              <button className="site-button site-button--primary" type="button" onClick={() => fileInputRef.current?.click()}>
-                Choose image
-              </button>
-              <button className="site-button site-button--ghost" type="button" onClick={resetDemo}>
-                Reset
-              </button>
-            </div>
-            <div className="bk-demo-meta">
-              <span>Processing stays in the browser.</span>
-              <span>{file ? file.name : 'No file selected'}</span>
-            </div>
-            {uploadError ? (
-              <p className="bk-demo-error bk-demo-error--inline" id="bk-demo-upload-error">
-                {uploadError}
-              </p>
-            ) : null}
-            <div className="bk-demo-samples" aria-label="Sample images">
-              {DEMO_SAMPLES.map((sample) => (
-                <button
-                  key={sample.id}
-                  className={`bk-demo-sample ${activeSampleId === sample.filename ? 'bk-demo-sample--active' : ''}`}
-                  type="button"
-                  onClick={() => handleIncomingFile(createSampleFile(sample), 'sample')}
-                >
-                  <strong>{sample.label}</strong>
-                  <span>{sample.description}</span>
-                </button>
-              ))}
-            </div>
-          </div>
 
-          <div className="bk-demo-card bk-demo-controls-card">
-            <div className="bk-demo-control-grid">
-              <CustomSelect label="Algorithm" value={algorithm} options={ALGORITHM_OPTIONS} onChange={setAlgorithm} />
-              <CustomSelect label="Output format" value={outputFormat} options={OUTPUT_OPTIONS} onChange={setOutputFormat} />
+            {error ? <p className="live-demo-error" id={uploadErrorId}>{error}</p> : null}
+          </section>
 
-              <label className="bk-demo-control">
-                <span className="bk-demo-label">Size</span>
-                <input
-                  type="range"
-                  min="12"
-                  max="64"
-                  value={size}
-                  onChange={(event) => setSize(Number(event.target.value))}
-                />
-                <div className="bk-demo-meta">
-                  <span>Longest side</span>
-                  <strong>{size}px</strong>
+          <section className="live-demo-card live-demo-controls">
+            <h3>Controls</h3>
+
+            <div className="live-demo-control-groups">
+              <div className="live-demo-control-group">
+                <label className="live-demo-field">
+                  <span id={algorithmLabelId}>Algorithm</span>
+                  <DemoSelect
+                    labelledBy={algorithmLabelId}
+                    options={algorithmOptions}
+                    value={algorithm}
+                    onChange={(value) => setAlgorithm(value)}
+                  />
+                </label>
+
+                <label className="live-demo-field">
+                  <span id={formatLabelId}>Output format</span>
+                  <DemoSelect
+                    labelledBy={formatLabelId}
+                    options={outputFormatOptions}
+                    value={outputFormat}
+                    onChange={(value) => setOutputFormat(value)}
+                  />
+                </label>
+              </div>
+
+              <div className="live-demo-control-group">
+                <label className="live-demo-field" aria-describedby={dimensionsHintId}>
+                  <span>Size</span>
+                  <div className="live-demo-range-row">
+                    <input
+                      type="range"
+                      min={SIZE_MIN}
+                      max={SIZE_MAX}
+                      step={1}
+                      value={size}
+                      disabled={hasDimensionOverride}
+                      onChange={(event) => setSize(Number.parseInt(event.target.value, 10))}
+                    />
+                    <strong>{size}px</strong>
+                  </div>
+                </label>
+
+                <p className="live-demo-hint" id={dimensionsHintId}>
+                  {hasDimensionOverride ? 'Size is ignored while width or height is set.' : 'Size scales the longest side.'}
+                </p>
+
+                <div className="live-demo-inline-fields">
+                  <label className="live-demo-field">
+                    <span>Width</span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="auto"
+                      value={widthInput}
+                      onChange={(event) => setWidthInput(sanitizePositiveIntegerInput(event.target.value))}
+                    />
+                  </label>
+
+                  <label className="live-demo-field">
+                    <span>Height</span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="auto"
+                      value={heightInput}
+                      onChange={(event) => setHeightInput(sanitizePositiveIntegerInput(event.target.value))}
+                    />
+                  </label>
                 </div>
-              </label>
+              </div>
 
-              <label className="bk-demo-control" aria-disabled={algorithm !== 'blurhash'} data-disabled={algorithm !== 'blurhash' || undefined}>
-                <span className="bk-demo-label" title="Controls horizontal detail for the BlurHash grid. Higher values retain more structure.">
-                  BlurHash X components
-                </span>
-                <input
-                  type="range"
-                  min="2"
-                  max="8"
-                  value={componentX}
-                  disabled={algorithm !== 'blurhash'}
-                  onChange={(event) => setComponentX(Number(event.target.value))}
-                />
-                <div className="bk-demo-meta">
-                  <span>Horizontal detail</span>
-                  <strong>{componentX}</strong>
-                </div>
-              </label>
-
-              <label className="bk-demo-control" aria-disabled={algorithm !== 'blurhash'} data-disabled={algorithm !== 'blurhash' || undefined}>
-                <span className="bk-demo-label" title="Controls vertical detail for the BlurHash grid. Higher values retain more structure.">
-                  BlurHash Y components
-                </span>
-                <input
-                  type="range"
-                  min="2"
-                  max="8"
-                  value={componentY}
-                  disabled={algorithm !== 'blurhash'}
-                  onChange={(event) => setComponentY(Number(event.target.value))}
-                />
-                <div className="bk-demo-meta">
-                  <span>Vertical detail</span>
-                  <strong>{componentY}</strong>
-                </div>
-              </label>
-            </div>
-          </div>
-        </section>
-
-        <section className="bk-demo-column bk-demo-column--preview">
-          <div className="bk-demo-panel-copy">
-            <span className="bk-demo-panel-kicker">2. Main preview</span>
-            <h3>Compare source pixels against the generated placeholder.</h3>
-          </div>
-
-          <div className="bk-demo-card bk-demo-stage-card">
-            <div className="bk-demo-preview bk-demo-preview--featured">
-              <figure className="bk-demo-media">
-                <figcaption>Original upload</figcaption>
-                {previewURL ? (
-                  <>
-                    <div className="bk-demo-media-frame">
-                      <img
-                        src={previewURL}
-                        alt="Original upload"
-                        loading="lazy"
-                        decoding="async"
-                        width={result?.meta?.originalWidth}
-                        height={result?.meta?.originalHeight}
+              <div className="live-demo-control-group">
+                <div className="live-demo-control-row">
+                  <label className="live-demo-field" data-disabled={!usesBlurhash}>
+                    <span>componentX</span>
+                    <div className="live-demo-range-row">
+                      <input
+                        type="range"
+                        min={COMPONENT_MIN}
+                        max={COMPONENT_MAX}
+                        step={1}
+                        value={componentX}
+                        disabled={!usesBlurhash}
+                        onChange={(event) => setComponentX(Number.parseInt(event.target.value, 10))}
                       />
-                      {isEncoding ? (
-                        <div className="bk-demo-media-overlay">
-                          <span className="bk-demo-spinner" aria-hidden="true" />
-                          <span>Processing source</span>
-                        </div>
-                      ) : null}
+                      <strong>{componentX}</strong>
                     </div>
-                    {result?.meta ? (
-                      <div className="bk-demo-dimensions">
-                        <span>
-                          Original: {result.meta.originalWidth} × {result.meta.originalHeight}
-                        </span>
-                      </div>
-                    ) : null}
-                  </>
+                  </label>
+
+                  <label className="live-demo-field" data-disabled={!usesBlurhash}>
+                    <span>componentY</span>
+                    <div className="live-demo-range-row">
+                      <input
+                        type="range"
+                        min={COMPONENT_MIN}
+                        max={COMPONENT_MAX}
+                        step={1}
+                        value={componentY}
+                        disabled={!usesBlurhash}
+                        onChange={(event) => setComponentY(Number.parseInt(event.target.value, 10))}
+                      />
+                      <strong>{componentY}</strong>
+                    </div>
+                  </label>
+                </div>
+
+                <p className="live-demo-hint">
+                  {usesBlurhash ? 'Higher values preserve more structure.' : 'These controls only apply to BlurHash.'}
+                </p>
+              </div>
+            </div>
+          </section>
+        </aside>
+
+        <div className="live-demo-stage">
+          <section className="live-demo-card live-demo-preview-card">
+            <div className="live-demo-preview-grid">
+              <figure className="live-demo-frame">
+                <figcaption>
+                  <strong>Source</strong>
+                  <span>{source?.kind === 'preset' ? 'Preset' : 'Upload'}</span>
+                </figcaption>
+                {source ? (
+                  <img alt="Selected source preview" src={source.previewURL} />
                 ) : (
-                  <div className="bk-demo-empty">
-                    <strong>No image selected</strong>
-                    <span>Choose a PNG, JPEG, or WebP file to preview the original image here.</span>
+                  <div className="live-demo-empty">
+                    <strong>Loading preset image</strong>
+                    <span>The demo boots from the local sample.</span>
                   </div>
                 )}
               </figure>
 
-              <figure className="bk-demo-media">
-                <figcaption>Rendered placeholder</figcaption>
+              <figure className="live-demo-frame">
+                <figcaption>
+                  <strong>Placeholder</strong>
+                  <span>{outputFormat.toUpperCase()}</span>
+                </figcaption>
                 {result ? (
-                  <>
-                    <div className="bk-demo-media-frame">
-                      <img
-                        src={result.dataURL}
-                        alt="Generated placeholder"
-                        loading="lazy"
-                        decoding="async"
-                        width={result.width}
-                        height={result.height}
-                      />
-                      {isEncoding ? (
-                        <div className="bk-demo-media-overlay">
-                          <span className="bk-demo-spinner" aria-hidden="true" />
-                          <span>Refreshing preview</span>
-                        </div>
-                      ) : null}
-                    </div>
-                    <div className="bk-demo-dimensions">
-                      <span>
-                        Placeholder: {result.width} × {result.height}
-                      </span>
-                      {result.meta ? (
-                        <span>
-                          Source: {result.meta.originalWidth} × {result.meta.originalHeight}
-                        </span>
-                      ) : null}
-                    </div>
-                  </>
-                ) : isEncoding ? (
-                  <div className="bk-demo-empty bk-demo-empty--loading">
-                    <span className="bk-demo-spinner" aria-hidden="true" />
-                    <strong>Generating placeholder…</strong>
-                    <span>The browser runtime is decoding, hashing, and rendering a preview.</span>
-                  </div>
-                ) : error ? (
-                  <div className="bk-demo-empty">
-                    <strong>Placeholder failed</strong>
-                    <span>Adjust the input or settings and try again. The original preview remains available.</span>
-                  </div>
+                  <img alt="Generated placeholder preview" src={result.dataURL} />
                 ) : (
-                  <div className="bk-demo-empty">
-                    <strong>No placeholder yet</strong>
-                    <span>Upload an image to render the generated preview here.</span>
+                  <div className={`live-demo-empty ${isEncoding || isBootstrapping ? 'live-demo-empty--loading' : ''}`.trim()}>
+                    {isEncoding || isBootstrapping ? <span className="live-demo-spinner" aria-hidden="true" /> : null}
+                    <strong>{isEncoding || isBootstrapping ? 'Generating placeholder' : 'Placeholder preview'}</strong>
+                    <span>{isEncoding || isBootstrapping ? 'Processing in the browser runtime.' : 'Choose an image to see the output.'}</span>
                   </div>
                 )}
               </figure>
             </div>
-          </div>
-        </section>
 
-        <section className="bk-demo-column bk-demo-column--outputs">
-          <div className="bk-demo-panel-copy">
-            <span className="bk-demo-panel-kicker">3. Metadata output</span>
-            <h3>Copy the exact values you would ship in production.</h3>
-          </div>
+            <dl className="live-demo-facts">
+              <div>
+                <dt>Original</dt>
+                <dd>{formatDimensions(result?.meta?.originalWidth, result?.meta?.originalHeight)}</dd>
+              </div>
+              <div>
+                <dt>Output</dt>
+                <dd>{formatDimensions(result?.width, result?.height)}</dd>
+              </div>
+              <div>
+                <dt>Format</dt>
+                <dd>{result?.meta?.format ?? source?.type.replace('image/', '') ?? 'Pending'}</dd>
+              </div>
+            </dl>
+          </section>
 
-          <div className="bk-demo-results">
-            <div className="bk-demo-card">
-              <div className="bk-demo-output-header">
-                <h3>Hash</h3>
-                {result ? (
-                  <button className="site-button site-button--ghost site-button--small" type="button" onClick={() => copyValue('hash', result.hash)}>
-                    {copyField === 'hash' ? 'Copied' : 'Copy'}
+          <section className="live-demo-card live-demo-output-card">
+            <div className="live-demo-output-header">
+              <h3>Outputs</h3>
+              <div className="live-demo-tab-list" role="tablist" aria-label="Placeholder outputs">
+                {(['dataURL', 'hash', 'details'] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    className={`live-demo-tab ${activeTab === tab ? 'live-demo-tab--active' : ''}`.trim()}
+                    role="tab"
+                    type="button"
+                    aria-selected={activeTab === tab}
+                    onClick={() => setActiveTab(tab)}
+                  >
+                    {tab === 'dataURL' ? 'dataURL' : tab === 'hash' ? 'hash' : 'details'}
                   </button>
-                ) : null}
+                ))}
               </div>
-              {result ? (
-                <pre>{result.hash}</pre>
-              ) : (
-                <div className="bk-demo-empty bk-demo-empty--compact">
-                  <strong>No hash yet</strong>
-                  <span>The selected algorithm output will appear here after encoding.</span>
-                </div>
-              )}
             </div>
 
-            <div className="bk-demo-card">
-              <div className="bk-demo-output-header">
-                <h3>Data URL</h3>
-                {result ? (
-                  <div className="bk-demo-output-actions">
-                    <button className="site-button site-button--ghost site-button--small" type="button" onClick={() => copyValue('dataURL', result.dataURL)}>
-                      {copyField === 'dataURL' ? 'Copied' : 'Copy'}
-                    </button>
-                    <button className="site-button site-button--ghost site-button--small" type="button" onClick={downloadPlaceholder}>
-                      Download
-                    </button>
-                  </div>
-                ) : null}
-              </div>
-              {result ? (
-                <pre>{result.dataURL}</pre>
-              ) : (
-                <div className="bk-demo-empty bk-demo-empty--compact">
-                  <strong>No data URL yet</strong>
-                  <span>The rendered placeholder data URL will appear here once generation finishes.</span>
-                </div>
-              )}
-            </div>
-
-            <div className="bk-demo-card">
-              <div className="bk-demo-output-header">
-                <h3>Manifest preview</h3>
-                {manifestPreview ? (
-                  <button className="site-button site-button--ghost site-button--small" type="button" onClick={() => copyValue('manifest', manifestPreview)}>
-                    {copyField === 'manifest' ? 'Copied' : 'Copy'}
-                  </button>
-                ) : null}
-              </div>
-              {manifestPreview ? (
-                <pre>{manifestPreview}</pre>
-              ) : (
-                <div className="bk-demo-empty bk-demo-empty--compact">
-                  <strong>No manifest yet</strong>
-                  <span>The JSON manifest entry for this image will appear here after a successful encode.</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
+            {activeTab === 'dataURL' ? <pre>{result?.dataURL ?? '// Waiting for a generated data URL.'}</pre> : null}
+            {activeTab === 'hash' ? <pre>{result?.hash ?? '// Waiting for a generated hash.'}</pre> : null}
+            {activeTab === 'details' ? <pre>{detailsOutput}</pre> : null}
+          </section>
+        </div>
       </div>
     </div>
   )
