@@ -1,0 +1,83 @@
+---
+import path from 'node:path'
+import { encode } from 'blurkit/node'
+
+const imagePath = path.join(process.cwd(), 'public', 'hero.svg')
+const placeholder = await encode(imagePath, {
+  algorithm: 'thumbhash',
+  size: 36,
+  outputFormat: 'png',
+})
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>blurkit Astro example</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        background: #f7f8fa;
+        color: #101828;
+      }
+
+      main {
+        max-width: 920px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+
+      .grid {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      }
+
+      figure {
+        margin: 0;
+      }
+
+      figcaption {
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+      }
+
+      img {
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid #d0d5dd;
+        background: #fff;
+      }
+
+      pre {
+        margin-top: 1rem;
+        padding: 0.85rem;
+        border-radius: 12px;
+        background: #101828;
+        color: #d0d5dd;
+        overflow-x: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>blurkit + Astro</h1>
+      <p>This page generates a placeholder during server rendering with <code>blurkit/node</code>.</p>
+
+      <section class="grid">
+        <figure>
+          <figcaption>Generated placeholder</figcaption>
+          <img src={placeholder.dataURL} alt="Generated placeholder" />
+        </figure>
+        <figure>
+          <figcaption>Source image</figcaption>
+          <img src="/hero.svg" alt="Source image" />
+        </figure>
+      </section>
+
+      <pre>{JSON.stringify({ hash: placeholder.hash, width: placeholder.width, height: placeholder.height, algorithm: placeholder.algorithm }, null, 2)}</pre>
+    </main>
+  </body>
+</html>

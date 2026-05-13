@@ -1,0 +1,64 @@
+name: Bug report
+description: Report a reproducible problem in blurkit.
+title: "bug: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting this. Please include enough detail to reproduce the issue quickly.
+  - type: input
+    id: version
+    attributes:
+      label: blurkit version
+      description: The exact version you are using (for example 0.1.3).
+      placeholder: 0.1.3
+    validations:
+      required: true
+  - type: dropdown
+    id: runtime
+    attributes:
+      label: Runtime entrypoint
+      description: Which runtime path are you using?
+      options:
+        - blurkit/node
+        - blurkit/browser
+        - blurkit/edge
+        - blurkit/cloudflare
+        - blurkit (root import)
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Describe the actual behavior and what you expected.
+      placeholder: When I call encode(...), I expected ... but got ...
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Share minimal steps or a small repo/snippet that reproduces the issue.
+      placeholder: |
+        1. Install ...
+        2. Run ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Node/Bun version, package manager, framework, and any relevant hosting runtime.
+      placeholder: Node 22.22.0, pnpm 11, Next.js 16, Ubuntu 24.04
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error output
+      description: Paste stack traces, logs, or screenshots if relevant.
+      render: shell

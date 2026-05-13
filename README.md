@@ -1,5 +1,10 @@
 # blurkit
 
+[![npm version](https://img.shields.io/npm/v/blurkit.svg)](https://www.npmjs.com/package/blurkit)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/Okazakee/blurkit/blob/main/LICENSE)
+[![Release blurkit](https://github.com/Okazakee/blurkit/actions/workflows/release.yml/badge.svg)](https://github.com/Okazakee/blurkit/actions/workflows/release.yml)
+[![Deploy website](https://github.com/Okazakee/blurkit/actions/workflows/website-deploy.yml/badge.svg)](https://github.com/Okazakee/blurkit/actions/workflows/website-deploy.yml)
+
 Universal image placeholder generation for Node, Bun, browser, and edge runtimes.
 
 `blurkit` takes an image input and returns a ready-to-use placeholder `dataURL` plus the underlying hash, dimensions, and source metadata. The goal is to hide the decode, resize, hash, and render pipeline behind one practical API.
@@ -39,6 +44,13 @@ console.log(result.dataURL)
 console.log(result.hash)
 console.log(result.meta?.originalWidth, result.meta?.originalHeight)
 ```
+
+## Examples
+
+Copy these minimal integrations as starting points:
+
+- Next.js: [`apps/example-nextjs`](https://github.com/Okazakee/blurkit/tree/main/apps/example-nextjs)
+- Astro: [`apps/example-astro`](https://github.com/Okazakee/blurkit/tree/main/apps/example-astro)
 
 ## Runtime Imports
 

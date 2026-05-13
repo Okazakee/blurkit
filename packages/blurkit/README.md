@@ -1,5 +1,10 @@
 # blurkit
 
+[![npm version](https://img.shields.io/npm/v/blurkit.svg)](https://www.npmjs.com/package/blurkit)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/Okazakee/blurkit/blob/main/LICENSE)
+[![Release blurkit](https://github.com/Okazakee/blurkit/actions/workflows/release.yml/badge.svg)](https://github.com/Okazakee/blurkit/actions/workflows/release.yml)
+[![Deploy website](https://github.com/Okazakee/blurkit/actions/workflows/website-deploy.yml/badge.svg)](https://github.com/Okazakee/blurkit/actions/workflows/website-deploy.yml)
+
 Universal image placeholder generation for Node, Bun, browsers, edge runtimes, and Cloudflare Workers.
 
 `blurkit` takes an image input and returns a placeholder `dataURL` plus hash text, placeholder dimensions, and source metadata.
@@ -38,6 +43,13 @@ const result = await encode('./public/hero.jpg', { size: 32 })
 console.log(result.dataURL)
 console.log(result.hash)
 ```
+
+## Examples
+
+Copy these minimal integrations as starting points:
+
+- Next.js: [`apps/example-nextjs`](https://github.com/Okazakee/blurkit/tree/main/apps/example-nextjs)
+- Astro: [`apps/example-astro`](https://github.com/Okazakee/blurkit/tree/main/apps/example-astro)
 
 ## Choose an Entrypoint
 
