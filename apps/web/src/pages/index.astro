@@ -3,12 +3,15 @@ import '../styles/site.css'
 import { BlurDemo } from '../components/BlurDemo'
 import { BLURKIT_NPM_VERSION_URL, BLURKIT_VERSION } from '../utils/blurkit-version'
 
-const siteUrl = 'https://blurkit.dev'
+const fallbackSiteUrl = new URL('https://blurkit.okazakee.dev/')
+const siteBase = Astro.site ?? fallbackSiteUrl
+const siteUrl = siteBase.origin
 const title = 'blurkit - Universal Placeholder Generation'
 const description =
   'Generate BlurHash and ThumbHash placeholders across Node, browser, edge, and Cloudflare.'
-const canonicalUrl = `${siteUrl}/`
-const socialImage = `${siteUrl}/social-card.svg`
+const canonicalUrl = new URL('/', siteBase).toString()
+const socialImage = new URL('/social-card.webp', siteBase).toString()
+const socialImageAlt = 'blurkit social card with product title and runtime coverage'
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
@@ -32,7 +35,7 @@ const structuredData = {
     <meta name="description" content={description} />
     <meta name="theme-color" content="#0b0a16" />
     <link rel="canonical" href={canonicalUrl} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -44,11 +47,17 @@ const structuredData = {
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content="blurkit" />
     <meta property="og:image" content={socialImage} />
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:title" content={title} />
-    <meta property="twitter:description" content={description} />
-    <meta property="twitter:image" content={socialImage} />
+    <meta property="og:image:alt" content={socialImageAlt} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/webp" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImage} />
+    <meta name="twitter:image:alt" content={socialImageAlt} />
     <script type="application/ld+json" is:inline set:html={JSON.stringify(structuredData)} />
   </head>
   <body>

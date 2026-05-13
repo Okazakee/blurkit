@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://blurkit.dev/sitemap-index.xml
+Sitemap: https://blurkit.okazakee.dev/sitemap-index.xml

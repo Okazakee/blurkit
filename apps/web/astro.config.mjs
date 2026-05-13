@@ -3,8 +3,11 @@ import react from '@astrojs/react'
 import sitemap from '@astrojs/sitemap'
 import starlight from '@astrojs/starlight'
 
+const SITE_URL = 'https://blurkit.okazakee.dev'
+const SOCIAL_IMAGE_URL = `${SITE_URL}/social-card.webp`
+
 export default defineConfig({
-  site: 'https://blurkit.okazakee.dev',
+  site: SITE_URL,
   base: '/',
   trailingSlash: 'always',
   prefetch: {
@@ -76,10 +79,18 @@ export default defineConfig({
         MobileMenuToggle: './src/components/starlight/DocsMobileMenuToggle.astro',
         MobileTableOfContents: './src/components/starlight/DocsMobileTableOfContents.astro',
       },
-      favicon: '/favicon.svg',
+      favicon: '/apple-touch-icon.png',
       disable404Route: true,
       head: [
         { tag: 'meta', attrs: { name: 'theme-color', content: '#0b0a16' } },
+        { tag: 'meta', attrs: { property: 'og:image', content: SOCIAL_IMAGE_URL } },
+        { tag: 'meta', attrs: { property: 'og:image:alt', content: 'blurkit social card with product title and runtime coverage' } },
+        { tag: 'meta', attrs: { property: 'og:image:width', content: '1200' } },
+        { tag: 'meta', attrs: { property: 'og:image:height', content: '630' } },
+        { tag: 'meta', attrs: { property: 'og:image:type', content: 'image/webp' } },
+        { tag: 'meta', attrs: { name: 'twitter:card', content: 'summary_large_image' } },
+        { tag: 'meta', attrs: { name: 'twitter:image', content: SOCIAL_IMAGE_URL } },
+        { tag: 'meta', attrs: { name: 'twitter:image:alt', content: 'blurkit social card with product title and runtime coverage' } },
         { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.googleapis.com' } },
         {
           tag: 'link',
