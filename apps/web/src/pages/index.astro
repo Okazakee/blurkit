@@ -5,7 +5,7 @@ import { BlurDemo } from '../components/BlurDemo'
 const siteUrl = 'https://blurkit.dev'
 const title = 'blurkit - Universal Placeholder Generation'
 const description =
-  'Generate BlurHash and ThumbHash placeholders across Node, browser, and edge.'
+  'Generate BlurHash and ThumbHash placeholders across Node, browser, edge, and Cloudflare.'
 const canonicalUrl = `${siteUrl}/`
 const socialImage = `${siteUrl}/social-card.svg`
 const structuredData = {
@@ -110,7 +110,7 @@ console.log(result.dataURL)`}</code></pre>
           <div class="site-section-header">
             <h2>Core features</h2>
             <p>
-              blurkit covers the practical placeholder workflow: runtime-specific entrypoints, two algorithms, batch APIs, CLI tooling, manifest helpers, and a Node cache helper.
+              blurkit covers the practical placeholder workflow: runtime-specific entrypoints, two algorithms, batch APIs, CLI tooling, manifest helpers, and cache helpers.
             </p>
           </div>
 
@@ -123,7 +123,7 @@ console.log(result.dataURL)`}</code></pre>
                 </svg>
               </span>
               <h3>Runtime entrypoints</h3>
-              <p>Import <span class="site-inline-code">blurkit/node</span>, <span class="site-inline-code">blurkit/browser</span>, or <span class="site-inline-code">blurkit/edge</span> explicitly when runtime behavior matters.</p>
+              <p>Import <span class="site-inline-code">blurkit/node</span>, <span class="site-inline-code">blurkit/browser</span>, <span class="site-inline-code">blurkit/edge</span>, or <span class="site-inline-code">blurkit/cloudflare</span> explicitly when runtime behavior matters.</p>
             </article>
             <article class="site-card site-card--stagger-2">
               <span class="site-card-icon" aria-hidden="true">
@@ -172,8 +172,8 @@ console.log(result.dataURL)`}</code></pre>
                   <path d="M9 11.5h6M9 14.5h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
                 </svg>
               </span>
-              <h3>Node cache helper</h3>
-              <p>Reuse work in Node pipelines with the built-in in-memory cache exposed from <span class="site-inline-code">blurkit/node</span>.</p>
+              <h3>Cache helpers</h3>
+              <p>Reuse work with built-in memory/filesystem helpers in <span class="site-inline-code">blurkit/node</span> and Worker cache support in <span class="site-inline-code">blurkit/cloudflare</span>.</p>
             </article>
           </div>
         </section>

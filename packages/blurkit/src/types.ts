@@ -1,10 +1,31 @@
 export type BlurAlgorithm = 'blurhash' | 'thumbhash'
 export type BlurOutputFormat = 'png' | 'jpeg'
 
+export type BlurKitRemoteURLString = `http://${string}` | `https://${string}`
+
 export type BlurKitInput =
   | string
   | URL
   | File
+  | Blob
+  | ArrayBuffer
+
+export type BlurKitNodeInput =
+  | string
+  | URL
+  | Blob
+  | ArrayBuffer
+
+export type BlurKitBrowserInput =
+  | BlurKitRemoteURLString
+  | URL
+  | File
+  | Blob
+  | ArrayBuffer
+
+export type BlurKitEdgeInput =
+  | BlurKitRemoteURLString
+  | URL
   | Blob
   | ArrayBuffer
 
@@ -45,6 +66,22 @@ export interface BlurManifest {
   images: Record<string, BlurResult>
 }
 
+export interface BlurEncodeManySettledFulfilled {
+  status: 'fulfilled'
+  input: BlurKitInput
+  value: BlurResult
+}
+
+export interface BlurEncodeManySettledRejected {
+  status: 'rejected'
+  input: BlurKitInput
+  reason: unknown
+}
+
+export type BlurEncodeManySettledResult =
+  | BlurEncodeManySettledFulfilled
+  | BlurEncodeManySettledRejected
+
 export interface NormalizedBlurKitOptions {
   algorithm: BlurAlgorithm
   size: number
@@ -68,4 +105,3 @@ export interface ResolvedInput {
   bytes: Uint8Array
   mimeType?: string
 }
-

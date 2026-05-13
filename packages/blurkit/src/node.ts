@@ -1,15 +1,59 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import sharp from 'sharp'
-
-import { createMemoryCache } from './cache'
+import { createFilesystemCache, createMemoryCache } from './cache'
 import { resolveTargetDimensions } from './internal/dimensions'
 import { bytesToDataURL } from './internal/base64'
 import { normalizeOptions } from './internal/normalize-options'
-import { createManifest, writeManifest } from './manifest'
-import { encodeManyWithRuntime, encodeWithRuntime } from './shared'
-import type { BlurKitInput, BlurKitOptions, BlurResult, DecodedImage, ResolvedInput } from './types'
+import { createManifest } from './manifest-core'
+import { writeManifest } from './manifest-node'
+import { encodeManySettledWithRuntime, encodeManyWithRuntime, encodeWithRuntime } from './shared'
+import type {
+  BlurEncodeManySettledResult,
+  BlurKitInput,
+  BlurKitOptions,
+  BlurResult,
+  DecodedImage,
+  ResolvedInput,
+} from './types'
+
+export const BLURKIT_MISSING_SHARP = 'BLURKIT_MISSING_SHARP'
+
+type SharpFactory = (input: unknown, options?: unknown) => any
+
+let sharpFactoryPromise: Promise<SharpFactory> | undefined
+
+function createMissingSharpError(cause?: unknown): Error & { code: string } {
+  const error = new Error(
+    'BLURKIT_MISSING_SHARP: The Node runtime requires "sharp". Install it with `npm install sharp` (or avoid `--omit=optional`).',
+  ) as Error & { code: string; cause?: unknown }
+  error.code = BLURKIT_MISSING_SHARP
+  if (cause !== undefined) {
+    error.cause = cause
+  }
+  return error
+}
+
+async function getSharpFactory(): Promise<SharpFactory> {
+  if (!sharpFactoryPromise) {
+    sharpFactoryPromise = import('sharp')
+      .then((module) => {
+        const maybeDefault = (module as { default?: unknown }).default
+        const sharpFactory = (maybeDefault ?? module) as unknown
+
+        if (typeof sharpFactory !== 'function') {
+          throw createMissingSharpError()
+        }
+
+        return sharpFactory as SharpFactory
+      })
+      .catch((error: unknown) => {
+        throw createMissingSharpError(error)
+      })
+  }
+
+  return sharpFactoryPromise
+}
 
 function isRemote(value: string): boolean {
   return /^https?:\/\//i.test(value)
@@ -64,6 +108,7 @@ async function decodeNodeImage(
   resolved: ResolvedInput,
   options: ReturnType<typeof normalizeOptions>,
 ): Promise<DecodedImage> {
+  const sharp = await getSharpFactory()
   const basePipeline = sharp(resolved.bytes, { animated: false }).rotate()
   const metadata = await basePipeline.metadata()
   const originalWidth = metadata.width
@@ -74,14 +119,9 @@ async function decodeNodeImage(
   }
 
   const target = resolveTargetDimensions(originalWidth, originalHeight, options)
-  const resizeOptions =
-    options.width && options.height
-      ? { width: target.width, height: target.height, fit: 'fill' as const }
-      : { width: target.width, height: target.height, fit: 'fill' as const }
-
   const resized = await sharp(resolved.bytes, { animated: false })
     .rotate()
-    .resize(resizeOptions)
+    .resize({ width: target.width, height: target.height, fit: 'fill' })
     .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true })
@@ -105,6 +145,7 @@ async function renderNodeDataURL(
   height: number,
   format: 'png' | 'jpeg',
 ): Promise<string> {
+  const sharp = await getSharpFactory()
   const buffer = Buffer.from(pixels.buffer, pixels.byteOffset, pixels.byteLength)
   const output = sharp(buffer, { raw: { width, height, channels: 4 } })
   const rendered =
@@ -132,7 +173,15 @@ export async function encodeMany(
   return encodeManyWithRuntime(inputs, normalizeOptions(options), runtime)
 }
 
+export async function encodeManySettled(
+  inputs: BlurKitInput[],
+  options?: BlurKitOptions,
+): Promise<BlurEncodeManySettledResult[]> {
+  return encodeManySettledWithRuntime(inputs, normalizeOptions(options), runtime)
+}
+
 export {
+  createFilesystemCache,
   createMemoryCache,
   createManifest,
   writeManifest,

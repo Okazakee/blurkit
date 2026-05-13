@@ -1,7 +1,13 @@
 import sharp from 'sharp'
 import { describe, expect, it } from 'vitest'
 
-import { createMemoryCache, encode, encodeMany } from '../src/node'
+import {
+  createFilesystemCache,
+  createMemoryCache,
+  encode,
+  encodeMany,
+  encodeManySettled,
+} from '../src/node'
 
 function toOwnedArrayBuffer(buffer: Buffer): ArrayBuffer {
   const bytes = new Uint8Array(buffer)
@@ -71,4 +77,71 @@ describe('blurkit node runtime', () => {
     expect(results[0]!.algorithm).toBe('thumbhash')
     expect(results[0]!.hash.length).toBeGreaterThan(0)
   })
+
+  it('supports partial success with encodeManySettled', async () => {
+    const valid = await sharp({
+      create: {
+        width: 24,
+        height: 24,
+        channels: 4,
+        background: { r: 20, g: 160, b: 240, alpha: 1 },
+      },
+    })
+      .png()
+      .toBuffer()
+
+    const results = await encodeManySettled(
+      [
+        toOwnedArrayBuffer(valid),
+        new ArrayBuffer(8),
+      ],
+      {
+        size: 16,
+      },
+    )
+
+    expect(results).toHaveLength(2)
+    expect(results[0]!.status).toBe('fulfilled')
+    expect(results[1]!.status).toBe('rejected')
+    expect(results[0]!.input).toBeInstanceOf(ArrayBuffer)
+    expect(results[1]!.input).toBeInstanceOf(ArrayBuffer)
+  })
+
+  it('can persist cache entries in filesystem cache', async () => {
+    const cacheDir = path.join(tmpdir(), `blurkit-cache-test-${Date.now()}`)
+    const fileCache = createFilesystemCache({
+      dir: cacheDir,
+    })
+
+    const image = await sharp({
+      create: {
+        width: 12,
+        height: 12,
+        channels: 4,
+        background: { r: 180, g: 180, b: 180, alpha: 1 },
+      },
+    })
+      .png()
+      .toBuffer()
+
+    try {
+      const first = await encode(toOwnedArrayBuffer(image), {
+        size: 10,
+        cache: fileCache,
+      })
+
+      const second = await encode(toOwnedArrayBuffer(image), {
+        size: 10,
+        cache: fileCache,
+      })
+
+      expect(first.hash).toBe(second.hash)
+      expect(first.dataURL).toBe(second.dataURL)
+    } finally {
+      await rm(cacheDir, { recursive: true, force: true })
+    }
+  })
 })
+import { rm } from 'node:fs/promises'
+import path from 'node:path'
+import { tmpdir } from 'node:os'

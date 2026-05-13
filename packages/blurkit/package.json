@@ -1,18 +1,32 @@
 {
   "name": "blurkit",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "type": "module",
   "bin": {
     "blurkit": "dist/cli.cjs"
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/root-node.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "types": "./dist/root-node.d.ts",
+      "browser": {
+        "import": "./dist/root-browser.js",
+        "require": "./dist/root-browser.cjs"
+      },
+      "worker": {
+        "import": "./dist/root-edge.js",
+        "require": "./dist/root-edge.cjs"
+      },
+      "node": {
+        "import": "./dist/root-node.js",
+        "require": "./dist/root-node.cjs"
+      },
+      "default": {
+        "import": "./dist/root-edge.js",
+        "require": "./dist/root-edge.cjs"
+      }
     },
     "./node": {
       "types": "./dist/node.d.ts",
@@ -28,13 +42,18 @@
       "types": "./dist/edge.d.ts",
       "import": "./dist/edge.js",
       "require": "./dist/edge.cjs"
+    },
+    "./cloudflare": {
+      "types": "./dist/cloudflare.d.ts",
+      "import": "./dist/cloudflare.js",
+      "require": "./dist/cloudflare.cjs"
     }
   },
   "files": [
     "dist"
   ],
   "description": "Universal image placeholder generation for Node, Bun, browser, and edge runtimes.",
-  "homepage": "https://github.com/Okazakee/blurkit#readme",
+  "homepage": "https://blurkit.okazakee.dev",
   "bugs": {
     "url": "https://github.com/Okazakee/blurkit/issues"
   },
@@ -56,6 +75,9 @@
     "commander": "^14.0.3",
     "fast-glob": "^3.3.3",
     "thumbhash": "^0.1.1"
+  },
+  "optionalDependencies": {
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "sharp": "^0.34.5"

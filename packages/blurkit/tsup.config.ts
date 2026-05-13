@@ -3,9 +3,13 @@ import { defineConfig } from 'tsup'
 export default defineConfig({
   entry: {
     index: 'src/index.ts',
+    'root-node': 'src/root-node.ts',
+    'root-browser': 'src/root-browser.ts',
+    'root-edge': 'src/root-edge.ts',
     node: 'src/node.ts',
     browser: 'src/browser.ts',
     edge: 'src/edge.ts',
+    cloudflare: 'src/cloudflare.ts',
     cli: 'src/cli.ts',
   },
   format: ['esm', 'cjs'],
@@ -15,4 +19,3 @@ export default defineConfig({
   clean: true,
   shims: false,
 })
-

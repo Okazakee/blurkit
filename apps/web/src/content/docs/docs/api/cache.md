@@ -1,18 +1,21 @@
 ---
 title: Cache
-description: Reference for BlurKitCache and the Node memory cache helper.
+description: Reference for BlurKitCache and built-in cache helpers.
 ---
 
 ## When to use
 
-Use cache integration when your job may encode the same source multiple times in one process.
+Use cache integration when your job may encode the same source multiple times.
 
 ## Example
 
 ```ts
-import { createMemoryCache, encode } from 'blurkit/node'
+import { createFilesystemCache, encode } from 'blurkit/node'
 
-const cache = createMemoryCache({ max: 500 })
+const cache = createFilesystemCache({
+  dir: './.cache/blurkit',
+  ttlMs: 120_000,
+})
 
 const result = await encode('./public/hero.jpg', { cache })
 ```
@@ -26,17 +29,20 @@ interface BlurKitCache {
 }
 ```
 
-- Cache is optional.
-- When a cache is provided, blurkit reads before encode and writes after encode.
-- Both sync and async cache adapters are supported.
+Built-in helpers:
+
+- `createMemoryCache({ max? })` from `blurkit/node`
+- `createFilesystemCache({ dir, ttlMs? })` from `blurkit/node`
+- `createCloudflareCache({ name?, ttlSeconds? })` from `blurkit/cloudflare`
 
 ## Limits / Caveats
 
-- Built-in cache helper is memory-only.
-- Persistent adapters are caller-owned.
+- Memory cache is process-local and reset on restart.
+- Filesystem cache is local-disk scoped.
+- Cloudflare cache depends on Worker Cache API availability and scope.
 
 ## Next read
 
 - [Node Runtime](/docs/runtimes/node/)
+- [Cloudflare Runtime](/docs/runtimes/cloudflare/)
 - [API: Options](/docs/api/options/)
-- [Decision: Cache Interface](/docs/decisions/cache-interface/)

@@ -4,7 +4,7 @@ import MobileMenuToggle from './DocsMobileMenuToggle.astro'
 const { hasSidebar } = Astro.locals.starlightRoute
 ---
 
-<div class:list={['docs-shell', { 'docs-shell--with-sidebar': hasSidebar }]}>
+<div class="docs-shell">
   <header class="docs-topbar">
     <div class="docs-topbar__inner">
       <slot name="header" />

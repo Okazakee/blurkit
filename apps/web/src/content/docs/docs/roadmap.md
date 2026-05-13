@@ -7,20 +7,19 @@ description: Planned direction for features intentionally not shipped today.
 
 Use this page when evaluating future capabilities or deciding whether to build custom adapters now.
 
-## Example
-
-```text
-Need persistent cache now? Implement your own adapter against BlurKitCache.
-```
-
 ## Inputs / Options / Behavior
 
 Planned, not shipped:
 
-- persistent cache adapters beyond in-memory helper
-- broader edge decode coverage
+- broader edge decode coverage beyond current runtime API availability
 - framework-specific convenience adapters
 - additional manifest output targets
+
+Already shipped:
+
+- persistent cache helpers (`createFilesystemCache`, `createCloudflareCache`)
+- partial-success batch API (`encodeManySettled`)
+- explicit Cloudflare runtime entrypoint (`blurkit/cloudflare`)
 
 Rule of interpretation:
 

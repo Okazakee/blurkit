@@ -27,11 +27,12 @@ console.log(result.hash)
 - Use explicit entrypoints for predictable runtime behavior:
   - `blurkit/node` for build and server pipelines
   - `blurkit/browser` for `File`/`Blob` input in client code
-  - `blurkit/edge` for worker-style environments
+  - `blurkit/edge` for worker-style runtimes with `ImageDecoder` + `OffscreenCanvas`
+  - `blurkit/cloudflare` for Cloudflare Workers
 
 ## Limits / Caveats
 
-- The Node example requires `sharp` installed.
+- Node runtime requires `sharp` at execution time.
 - Browser runtime does not support local path strings such as `./public/hero.jpg`.
 
 ## Next read

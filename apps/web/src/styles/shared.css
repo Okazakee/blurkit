@@ -151,8 +151,7 @@ p {
 
 .site-nav,
 .site-actions,
-.site-footer-links,
-.site-subnav {
+.site-footer-links {
   display: flex;
   gap: var(--bk-space-3);
   flex-wrap: wrap;

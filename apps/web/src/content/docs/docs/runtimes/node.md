@@ -10,9 +10,12 @@ Use `blurkit/node` for build steps, CMS import jobs, server-side processing, and
 ## Example
 
 ```ts
-import { encode, createMemoryCache } from 'blurkit/node'
+import { createFilesystemCache, encode } from 'blurkit/node'
 
-const cache = createMemoryCache({ max: 500 })
+const cache = createFilesystemCache({
+  dir: './.cache/blurkit',
+  ttlMs: 300_000,
+})
 
 const result = await encode('./public/hero.jpg', {
   size: 32,
@@ -30,15 +33,16 @@ const result = await encode('./public/hero.jpg', {
   - `ArrayBuffer`
 - Additional Node exports:
   - `encodeMany()`
+  - `encodeManySettled()`
   - `createMemoryCache()`
+  - `createFilesystemCache()`
   - `createManifest()`
   - `writeManifest()`
-- Remote URL input is fetched before decode.
 
 ## Limits / Caveats
 
 - Requires `sharp`.
-- Root import can work in Node/Bun but explicit `blurkit/node` is safer for clear runtime intent.
+- Missing `sharp` throws `BLURKIT_MISSING_SHARP` with install guidance.
 - `encodeMany()` is fail-fast.
 
 ## Next read
