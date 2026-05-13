@@ -130,6 +130,8 @@ function main() {
     const breakingChange = (parsed?.breaking ?? false) || hasBreakingBody(commit.body)
     const shortHash = commit.hash.slice(0, 7)
     const link = repoUrl ? `[${shortHash}](${repoUrl}/commit/${commit.hash})` : shortHash
+    const scope = parsed?.scope?.toLowerCase() ?? ''
+    const isNonLibScope = scope === 'website' || scope === 'web' || scope === 'docs'
 
     if (breakingChange) {
       const description = parsed?.description ?? commit.subject
@@ -138,6 +140,10 @@ function main() {
     }
 
     if (!parsed) {
+      continue
+    }
+
+    if (isNonLibScope) {
       continue
     }
 
