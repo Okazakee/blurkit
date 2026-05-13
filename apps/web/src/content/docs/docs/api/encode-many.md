@@ -1,17 +1,11 @@
 ---
 title: encodeMany()
-description: Batch placeholder generation with fail-fast behavior.
+description: Batch encode many inputs with fail-fast Promise.all semantics.
 ---
 
-# API: encodeMany()
+## When to use
 
-```ts
-encodeMany(inputs: BlurKitInput[], options?: BlurKitOptions): Promise<BlurResult[]>
-```
-
-`encodeMany()` is intentionally fail-fast and mirrors `Promise.all()`.
-
-If any single image fails, the whole call rejects. Use it when batch failure should stop a build or import pipeline.
+Use `encodeMany()` when one job must process multiple images and fail the job if any input fails.
 
 ## Example
 
@@ -19,18 +13,28 @@ If any single image fails, the whole call rejects. Use it when batch failure sho
 import { encodeMany } from 'blurkit/node'
 
 const results = await encodeMany(
-  [
-    './public/hero.jpg',
-    './public/poster.jpg',
-  ],
-  {
-    size: 32,
-  },
+  ['./public/hero.jpg', './public/poster.jpg'],
+  { size: 32 },
 )
 ```
 
-## Good fit
+## Inputs / Options / Behavior
 
-- build-time placeholder generation
-- content import scripts
-- batch processing where one bad image should fail the job
+```ts
+encodeMany(inputs: BlurKitInput[], options?: BlurKitOptions): Promise<BlurResult[]>
+```
+
+- Uses `Promise.all` semantics.
+- Preserves input order in output array.
+- Applies the same `BlurKitOptions` to each input.
+
+## Limits / Caveats
+
+- Fail-fast: one rejection rejects the whole batch.
+- No partial-success envelope is returned.
+
+## Next read
+
+- [API: encode()](/docs/api/encode/)
+- [API: Options](/docs/api/options/)
+- [CLI: Manifest Generation](/docs/cli/manifest-generation/)

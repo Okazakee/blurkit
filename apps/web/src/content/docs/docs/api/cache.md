@@ -1,13 +1,23 @@
 ---
 title: Cache
-description: Reference for the BlurKitCache interface and the shipped Node memory cache helper.
+description: Reference for BlurKitCache and the Node memory cache helper.
 ---
 
-# API: Cache
+## When to use
 
-The shared options type accepts a `cache` object so callers can avoid recomputing placeholders during build-time or import workflows.
+Use cache integration when your job may encode the same source multiple times in one process.
 
-## Interface
+## Example
+
+```ts
+import { createMemoryCache, encode } from 'blurkit/node'
+
+const cache = createMemoryCache({ max: 500 })
+
+const result = await encode('./public/hero.jpg', { cache })
+```
+
+## Inputs / Options / Behavior
 
 ```ts
 interface BlurKitCache {
@@ -16,20 +26,17 @@ interface BlurKitCache {
 }
 ```
 
-## Shipped helper
+- Cache is optional.
+- When a cache is provided, blurkit reads before encode and writes after encode.
+- Both sync and async cache adapters are supported.
 
-```ts
-import { createMemoryCache } from 'blurkit/node'
+## Limits / Caveats
 
-const cache = createMemoryCache({ max: 500 })
-```
+- Built-in cache helper is memory-only.
+- Persistent adapters are caller-owned.
 
-The package currently ships one concrete helper: an in-memory LRU-style cache exposed from `blurkit/node`.
+## Next read
 
-## What it is for
-
-- repeated local build runs
-- manifest generation in one process
-- import pipelines that may see the same image more than once
-
-Persistent cache adapters are intentionally deferred and are not part of the current package surface.
+- [Node Runtime](/docs/runtimes/node/)
+- [API: Options](/docs/api/options/)
+- [Decision: Cache Interface](/docs/decisions/cache-interface/)

@@ -1,11 +1,11 @@
 ---
 title: Browser Runtime
-description: Use the browser runtime for client-side uploads, private local previews, and CORS-permitted remote images.
+description: Encode placeholders from File, Blob, ArrayBuffer, or CORS-enabled remote URLs in client code.
 ---
 
-# Browser Runtime
+## When to use
 
-`blurkit/browser` is for client-side image processing. It is the runtime used by the live demo on the website.
+Use `blurkit/browser` when the user provides an image in the client and you need a local preview placeholder.
 
 ## Example
 
@@ -18,22 +18,23 @@ const result = await encode(file, {
 })
 ```
 
-## Supported inputs
+## Inputs / Options / Behavior
 
-- `File`
-- `Blob`
-- `ArrayBuffer`
-- Remote URLs when the target server permits CORS
+- Supported inputs:
+  - `File`
+  - `Blob`
+  - `ArrayBuffer`
+  - remote URL string or `URL` when CORS allows fetch and decode
+- Decode uses browser image loading + Canvas 2D.
+- Output shape is the same `BlurResult` contract used in other runtimes.
 
-## What it does not support
+## Limits / Caveats
 
-- local filesystem path strings such as `./public/hero.jpg`
-- filesystem access of any kind
+- Local filesystem paths are not supported.
+- Remote URL flow fails when CORS blocks image decode.
 
-## Decode path
+## Next read
 
-The current browser implementation uses browser-native image loading plus a Canvas 2D pipeline to extract pixels and render the final placeholder image.
-
-## Caveat
-
-Remote URLs depend on CORS. `File` and `Blob` input are the safest path for private images and interactive browser demos.
+- [API: encode()](/docs/api/encode/)
+- [Guide: Browser Uploader Flow](/docs/guides/browser-uploader-flow/)
+- [Limits and Caveats](/docs/limits/)

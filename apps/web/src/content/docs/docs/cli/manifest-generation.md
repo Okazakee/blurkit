@@ -1,13 +1,13 @@
 ---
 title: Manifest Generation
-description: Generate a BlurManifest for a folder of images with the CLI.
+description: Generate one BlurManifest JSON file from a local directory.
 ---
 
-# CLI: Manifest Generation
+## When to use
 
-Use manifest generation when you want one JSON file that can be committed, loaded at runtime, or imported into another system.
+Use this flow when your build or app needs a precomputed placeholder map.
 
-## Basic command
+## Example
 
 ```bash
 npx blurkit encode ./public \
@@ -16,22 +16,22 @@ npx blurkit encode ./public \
   --pretty
 ```
 
-## Path behavior
+## Inputs / Options / Behavior
 
-- Files inside `/public` become public URL-style keys such as `/images/hero.jpg`.
-- Other folders default to normalized relative keys.
-- `--base-path` lets you rewrite manifest keys for downstream consumers.
+- `--glob` selects files inside the input directory.
+- `--concurrency` controls parallel file encoding.
+- Key mapping behavior:
+  - files under `/public` map to URL-style keys such as `/images/hero.jpg`
+  - other folders map to normalized relative keys
+  - `--base-path` prepends a custom key prefix
 
-## Useful flags
+## Limits / Caveats
 
-```bash
-npx blurkit encode ./assets \
-  --glob "**/*.png" \
-  --base-path /static \
-  --concurrency 4 \
-  --out blur-manifest.json
-```
+- `--glob` cannot be used with remote URL input.
+- Manifest key conventions must match your app lookup strategy.
 
-## Caveat
+## Next read
 
-`--glob` is only valid for local directory input. Remote URLs always behave like single-image input.
+- [API: Manifest Helpers](/docs/api/manifest/)
+- [Guide: Build-time Manifest Generation](/docs/guides/build-time-manifest-generation/)
+- [Limits and Caveats](/docs/limits/)

@@ -1,11 +1,11 @@
 ---
 title: Edge Runtime
-description: Use the edge runtime when you need browser-like platform APIs without depending on sharp.
+description: Encode placeholders in worker-style runtimes that provide ImageDecoder and OffscreenCanvas.
 ---
 
-# Edge Runtime
+## When to use
 
-`blurkit/edge` is the lightweight runtime for platforms that expose browser-like APIs but cannot rely on native Node dependencies such as `sharp`.
+Use `blurkit/edge` when you run image processing in worker-like platforms without `sharp`.
 
 ## Example
 
@@ -15,22 +15,24 @@ import { encode } from 'blurkit/edge'
 const result = await encode('https://example.com/image.jpg')
 ```
 
-## Current limits
+## Inputs / Options / Behavior
 
-- The current implementation relies on `ImageDecoder`.
-- It also requires `OffscreenCanvas` for rendering the placeholder image.
-- It is best suited to worker-style runtimes that provide those APIs.
-- It does not support local filesystem paths.
+- Supported inputs:
+  - remote `http`/`https` URL string
+  - `URL`
+  - `Blob`
+  - `ArrayBuffer`
+- Decode path depends on `ImageDecoder`.
+- Rendering path depends on `OffscreenCanvas`.
 
-## Supported inputs
+## Limits / Caveats
 
-- remote URL strings
-- `URL`
-- `Blob`
-- `ArrayBuffer`
+- Non-remote string input is rejected.
+- Runtime fails when `ImageDecoder` or `OffscreenCanvas` is unavailable.
+- `encodeMany()` is fail-fast.
 
-## Use this when
+## Next read
 
-- you are in an edge or worker-style environment
-- you need remote image processing without `sharp`
-- your platform provides the APIs listed above
+- [API: encode()](/docs/api/encode/)
+- [Limits and Caveats](/docs/limits/)
+- [Roadmap](/docs/roadmap/)

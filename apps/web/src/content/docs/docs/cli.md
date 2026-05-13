@@ -1,29 +1,27 @@
 ---
 title: CLI Overview
-description: Use the blurkit CLI for single-image JSON output or folder-wide manifest generation.
+description: Generate one result or one manifest from the shell using the Node runtime.
 ---
 
-# CLI Overview
+## When to use
 
-The CLI wraps the Node runtime and is designed for scripts, build steps, and ad hoc placeholder generation from the shell.
+Use the CLI when you want JSON output without writing a custom script.
 
-## Install
-
-The CLI depends on the Node runtime, so install `sharp` alongside `blurkit` in Node or Bun environments.
+## Example
 
 ```bash
-pnpm add blurkit sharp
+blurkit encode ./public/hero.jpg --pretty
 ```
 
-## Commands
+## Inputs / Options / Behavior
 
-The current CLI surface is:
+Command surface:
 
 ```bash
 blurkit encode <input>
 ```
 
-## Common flags
+Common flags:
 
 - `--algorithm blurhash|thumbhash`
 - `--size <number>`
@@ -36,8 +34,19 @@ blurkit encode <input>
 - `--concurrency <number>`
 - `--pretty`
 
-## What to read next
+Behavior:
 
-- [Single Image](/docs/cli/single-image/) for one-off JSON output
-- [Manifest Generation](/docs/cli/manifest-generation/) for batch workflows
-- [Node Runtime](/docs/runtimes/node/) for the underlying runtime behavior
+- local file input returns one `BlurResult` JSON object
+- local directory input + `--glob` returns one `BlurManifest` JSON object
+- remote URL input behaves as single-image mode
+
+## Limits / Caveats
+
+- CLI uses Node runtime and requires `sharp`.
+- `--glob` is valid only for local directory input.
+
+## Next read
+
+- [CLI: Single Image](/docs/cli/single-image/)
+- [CLI: Manifest Generation](/docs/cli/manifest-generation/)
+- [Node Runtime](/docs/runtimes/node/)

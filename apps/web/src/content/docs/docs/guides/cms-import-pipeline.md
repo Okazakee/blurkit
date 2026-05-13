@@ -1,11 +1,11 @@
 ---
 title: CMS Import Pipeline
-description: Generate placeholders during Node-based import jobs before writing records to a CMS or database.
+description: Generate placeholders during Node import jobs before writing CMS records.
 ---
 
-# CMS import pipeline
+## When to use
 
-Use the Node runtime when you are importing assets into a CMS, content store, or relational database and want to persist blur metadata at the same time.
+Use this pattern when your importer already fetches images and writes structured records.
 
 ## Example
 
@@ -28,10 +28,19 @@ async function processImage(url: string) {
 }
 ```
 
-## Why this shape works
+## Inputs / Options / Behavior
 
-You keep the image processing in the import job, then persist all placeholder and dimension data next to the original asset record.
+- Remote input is fetched in Node runtime.
+- Placeholder and source metadata are emitted in one result.
+- The same pattern works for DB, CMS, or search index writes.
 
-## Caveat
+## Limits / Caveats
 
-Remote inputs still need to be reachable from the process running the import script, and failed images will reject the encode call unless you catch and handle them yourself.
+- Import job must handle network and decode failures.
+- Batch jobs should decide between fail-fast and per-item error handling.
+
+## Next read
+
+- [Node Runtime](/docs/runtimes/node/)
+- [API: Result](/docs/api/result/)
+- [API: Cache](/docs/api/cache/)

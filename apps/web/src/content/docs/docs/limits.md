@@ -1,29 +1,41 @@
 ---
 title: Limits and Caveats
-description: Current runtime boundaries and important behavior to understand before using blurkit in production.
+description: Runtime boundaries and behavior constraints to account for in production.
 ---
 
-# Limits and caveats
+## When to use
 
-This page documents current implementation limits so the rest of the docs can stay concise.
+Use this page before production rollout or when debugging behavior differences between runtimes.
 
-## Runtime boundaries
+## Example
+
+```text
+If you deploy to an edge worker without ImageDecoder, blurkit/edge cannot decode images.
+```
+
+## Runtime and API boundaries
+
+Runtime boundaries:
 
 - `blurkit/node` requires `sharp`.
-- `blurkit/browser` does not support local filesystem path strings.
-- `blurkit/browser` remote URL usage depends on CORS.
+- `blurkit/browser` rejects local filesystem path strings.
+- `blurkit/browser` remote URL flow depends on CORS.
 - `blurkit/edge` requires `ImageDecoder` and `OffscreenCanvas`.
-- `blurkit/edge` does not support local filesystem paths.
+- `blurkit/edge` rejects non-remote string paths.
 
-## API behavior
+Cross-cutting behavior:
 
 - `encodeMany()` is fail-fast.
-- The root import is convenience-only and should not be treated as the best choice for bundler-sensitive production code.
-- The shipped cache helper is memory-only and only exported from `blurkit/node`.
+- Root import is convenience-first and not bundler-first.
+- Shipped cache helper is memory-only.
 
-## Deferred, not current support
+## Not shipped by design
 
-- persistent cache adapters
-- broader edge decoder coverage
-- framework-specific convenience adapters
-- additional manifest output targets
+- Persistent cache adapters are not shipped.
+- Framework-specific adapters are not shipped.
+
+## Next read
+
+- [Roadmap](/docs/roadmap/)
+- [Node Runtime](/docs/runtimes/node/)
+- [Decision: Cache Interface](/docs/decisions/cache-interface/)

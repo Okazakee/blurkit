@@ -1,17 +1,13 @@
 ---
 title: Build-time Manifest Generation
-description: Generate a blur manifest during a build so the app can load placeholders without recomputing them at runtime.
+description: Precompute placeholder JSON during builds to avoid runtime encoding.
 ---
 
-# Build-time manifest generation
+## When to use
 
-Use this pattern when your images live in a known folder and you want to precompute placeholder data during your build or content pipeline.
+Use this pattern when your image set is known at build time and runtime latency must stay low.
 
-## Why this shape works
-
-You pay the image decode and encode cost once during the build, then load the resulting JSON in your app without recomputing placeholders on the client or server.
-
-## CLI flow
+## Example
 
 ```bash
 npx blurkit encode ./public \
@@ -20,16 +16,14 @@ npx blurkit encode ./public \
   --pretty
 ```
 
-## Programmatic flow
+## Inputs / Options / Behavior
+
+Programmatic equivalent:
 
 ```ts
 import { encodeMany, createManifest, writeManifest } from 'blurkit/node'
 
-const inputs = [
-  './public/images/hero.jpg',
-  './public/images/poster.jpg',
-]
-
+const inputs = ['./public/images/hero.jpg', './public/images/poster.jpg']
 const results = await encodeMany(inputs, { size: 32 })
 
 const manifest = createManifest({
@@ -40,6 +34,16 @@ const manifest = createManifest({
 await writeManifest('./blur-manifest.json', manifest, { pretty: true })
 ```
 
-## Caveat
+- Use deterministic manifest keys that match runtime image paths.
+- Build once, read many at runtime.
 
-If your source files are not inside `/public`, make sure your manifest keys match the paths your app will actually use.
+## Limits / Caveats
+
+- `encodeMany()` is fail-fast.
+- Key mismatches between manifest and app URLs break placeholder lookup.
+
+## Next read
+
+- [API: Manifest Helpers](/docs/api/manifest/)
+- [CLI: Manifest Generation](/docs/cli/manifest-generation/)
+- [API: encodeMany()](/docs/api/encode-many/)

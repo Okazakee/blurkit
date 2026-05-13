@@ -1,37 +1,32 @@
 ---
 title: Cache Interface
-description: Why the cache contract exists in the public options shape even though only one helper ships today.
+description: Why cache is part of options and why persistent adapters are caller-owned today.
 ---
 
-`BlurKitOptions.cache` exists because placeholder generation often runs inside repeatable pipelines: static builds, CMS imports, asset manifests, and server-side warmup jobs. Those flows want stable results, but they also want a straightforward way to skip duplicate work when the same input is encountered more than once.
+## When to use
 
-## Why it is part of the options shape
+Use this page when designing build or import pipelines that need deterministic reuse and you are deciding where cache policy should live.
 
-Putting the cache contract on `BlurKitOptions` keeps caching close to the work being performed. Callers do not need to wrap `encode()` in a second abstraction just to add memoization later, and libraries consuming `blurkit` can pass a cache through without changing their higher-level APIs.
+## Example
 
-That decision keeps the current surface small while still leaving room for:
+```ts
+const result = await encode(input, { cache })
+```
 
-- Build tools that want a short-lived in-memory cache.
-- Import jobs that may want to memoize during a single run.
-- Future adapters that map the same contract onto disk, KV, or other persistent stores.
+## Inputs / Options / Behavior
 
-:::note
-The shipped helper today is `createMemoryCache()` from `blurkit/node`. It is intentionally scoped to one process and one run.
-:::
+- Cache is part of `BlurKitOptions` so callers can enable reuse without wrapping `encode()` in another API.
+- The contract is intentionally low-level (`get` and `set`) to support sync and async adapters.
+- The package ships one helper: `createMemoryCache()` from `blurkit/node`.
 
-## Why persistent adapters were deferred
+## Limits / Caveats
 
-Persistent cache helpers sound simple, but they force decisions the package does not yet want to lock in:
+- Persistent storage policy is not defined by blurkit.
+- Invalidating persistent entries across path, bytes, and options is caller-owned.
+- Cache interface presence does not imply durable helper availability.
 
-- Cache keys for local files vs remote URLs.
-- Invalidation rules when image bytes change but the path does not.
-- Serialization details for `BlurResult`.
-- Cross-runtime guarantees for Node, browser, and edge environments.
+## Next read
 
-Shipping an opinionated adapter before those trade-offs are settled would imply support that the package cannot defend yet.
-
-:::caution
-The current cache interface is a low-level contract, not a promise that `blurkit` already includes durable storage helpers.
-:::
-
-Read [API: Cache](/docs/api/cache/) for the concrete interface and helper usage.
+- [API: Cache](/docs/api/cache/)
+- [Node Runtime](/docs/runtimes/node/)
+- [Roadmap](/docs/roadmap/)

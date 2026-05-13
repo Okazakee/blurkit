@@ -1,19 +1,38 @@
 ---
 title: Roadmap
-description: Features intentionally deferred from the current implementation.
+description: Planned direction for features intentionally not shipped today.
 ---
 
-# Roadmap
+## When to use
 
-This page keeps the docs honest. These items are part of the direction for the project, but they are not described elsewhere as current support.
+Use this page when evaluating future capabilities or deciding whether to build custom adapters now.
 
-## Deferred today
+## Example
 
-- Persistent cache adapters beyond the in-memory Node helper
-- Broader edge decoder coverage across more formats and runtimes
-- Framework-specific convenience adapters
-- Additional manifest output targets and build-tool integrations
+```text
+Need persistent cache now? Implement your own adapter against BlurKitCache.
+```
 
-## Current rule
+## Inputs / Options / Behavior
 
-If a feature is not represented by the current package entrypoints, exports, CLI behavior, or docs examples, treat it as planned rather than available.
+Planned, not shipped:
+
+- persistent cache adapters beyond in-memory helper
+- broader edge decode coverage
+- framework-specific convenience adapters
+- additional manifest output targets
+
+Rule of interpretation:
+
+- if it is not in exports, runtime entrypoints, CLI behavior, or examples, treat it as not shipped
+
+## Limits / Caveats
+
+- Roadmap items have no stability guarantees until shipped.
+- Production decisions should use documented current behavior only.
+
+## Next read
+
+- [Limits and Caveats](/docs/limits/)
+- [Decision: Cache Interface](/docs/decisions/cache-interface/)
+- [API: Cache](/docs/api/cache/)

@@ -3,7 +3,21 @@ title: Result
 description: Reference for the BlurResult returned by encode() and encodeMany().
 ---
 
-# API: Result
+## When to use
+
+Use this page when integrating blurkit output into UI components, manifests, or database records.
+
+## Example
+
+```ts
+const result = await encode('./public/hero.jpg')
+
+console.log(result.dataURL)
+console.log(result.hash)
+console.log(result.meta?.originalWidth)
+```
+
+## Inputs / Options / Behavior
 
 ```ts
 interface BlurResult {
@@ -21,12 +35,18 @@ interface BlurResult {
 }
 ```
 
-`dataURL` is the main product value for UI integration, while `hash` preserves the underlying algorithm-specific placeholder string.
+- `dataURL` is the direct placeholder value for UI props.
+- `hash` preserves algorithm output for storage or post-processing.
+- `width`/`height` reflect placeholder dimensions.
+- `meta` describes source image properties when available.
 
-## What each field is for
+## Limits / Caveats
 
-- `dataURL`: pass directly into UI placeholder props or persist in JSON
-- `hash`: store the algorithm output separately when you want to keep the raw placeholder value
-- `algorithm`: lets downstream code know how the hash was produced
-- `width` and `height`: describe the placeholder dimensions used during encoding
-- `meta`: gives source image information that is often needed in content pipelines
+- `meta` is optional.
+- Stored `dataURL` size depends on chosen `outputFormat` and dimensions.
+
+## Next read
+
+- [API: encode()](/docs/api/encode/)
+- [API: Manifest Helpers](/docs/api/manifest/)
+- [Guide: Next.js](/docs/guides/nextjs/)

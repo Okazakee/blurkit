@@ -1,28 +1,11 @@
 ---
 title: encode()
-description: The main API for turning one image input into a BlurResult.
+description: Encode one image input into a BlurResult placeholder object.
 ---
 
-# API: encode()
+## When to use
 
-```ts
-encode(input: BlurKitInput, options?: BlurKitOptions): Promise<BlurResult>
-```
-
-Use `encode()` when one image input should become a ready-to-use placeholder `dataURL`.
-
-## Input shape
-
-```ts
-type BlurKitInput =
-  | string
-  | URL
-  | File
-  | Blob
-  | ArrayBuffer
-```
-
-The exact supported inputs still depend on the runtime entrypoint you import.
+Use `encode()` when one image should produce one placeholder result.
 
 ## Example
 
@@ -36,18 +19,24 @@ const result = await encode('./public/hero.jpg', {
 })
 ```
 
-## Returns
+## Inputs / Options / Behavior
 
-`encode()` resolves to a `BlurResult` containing:
+```ts
+encode(input: BlurKitInput, options?: BlurKitOptions): Promise<BlurResult>
 
-- `dataURL`
-- `hash`
-- `algorithm`
-- `width`
-- `height`
-- optional `meta`
+type BlurKitInput = string | URL | File | Blob | ArrayBuffer
+```
 
-## Related pages
+- Runtime entrypoint determines which input forms are valid at runtime.
+- `options` controls algorithm, target dimensions, output format, and optional cache.
+- Returns a `BlurResult` with `dataURL`, `hash`, dimensions, algorithm, and optional `meta`.
+
+## Limits / Caveats
+
+- Input support is runtime-specific.
+- Remote URL input can fail from network or CORS constraints.
+
+## Next read
 
 - [API: Options](/docs/api/options/)
 - [API: Result](/docs/api/result/)

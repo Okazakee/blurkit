@@ -1,34 +1,36 @@
 ---
 title: Single Image
-description: Use the CLI to generate one BlurResult from a local path or remote URL.
+description: Generate one BlurResult JSON object from a local path or remote URL.
 ---
 
-# CLI: Single Image
+## When to use
 
-Use the CLI when you want a single JSON result without wiring up your own script.
+Use this flow when one asset must be encoded and consumed immediately.
 
-## Local file
+## Example
 
 ```bash
 npx blurkit encode ./public/hero.jpg --pretty
 ```
 
-## Remote URL
+## Inputs / Options / Behavior
+
+Alternative remote input example:
 
 ```bash
-npx blurkit encode https://example.com/image.jpg \
-  --algorithm thumbhash \
-  --format jpeg \
-  --pretty
+npx blurkit encode https://example.com/image.jpg --algorithm thumbhash --format jpeg --pretty
 ```
 
-## Output behavior
+- Without `--out`, JSON is written to stdout.
+- With `--out`, JSON is written to the given file path.
 
-- Without `--out`, the CLI prints a `BlurResult` to stdout.
-- With `--out`, the CLI writes that raw `BlurResult` JSON to disk.
+## Limits / Caveats
 
-## Good fit
+- Remote URL mode can fail on network errors.
+- Single-image mode does not create a manifest envelope.
 
-- one-off asset inspection
-- shell scripts
-- content pipelines where you only need one image result at a time
+## Next read
+
+- [CLI Overview](/docs/cli/)
+- [CLI: Manifest Generation](/docs/cli/manifest-generation/)
+- [API: Result](/docs/api/result/)

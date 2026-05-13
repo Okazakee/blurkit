@@ -48,11 +48,25 @@ export default defineConfig({
       },
       expressiveCode: {
         themes: ['github-dark', 'github-light'],
+        styleOverrides: {
+          borderRadius: '1.1rem',
+          borderWidth: '1px',
+          borderColor: 'rgba(103, 236, 255, 0.12)',
+          codeFontFamily: "var(--sl-font-mono)",
+          codeFontSize: '0.86rem',
+          codeLineHeight: '1.55',
+          codePaddingBlock: '0.95rem',
+          codePaddingInline: '1rem',
+          frames: {
+            shadowColor: 'transparent',
+          },
+        },
       },
       components: {
         PageFrame: './src/components/starlight/DocsPageFrame.astro',
         Header: './src/components/starlight/DocsHeader.astro',
         Sidebar: './src/components/starlight/DocsSidebar.astro',
+        MobileMenuFooter: './src/components/starlight/DocsMobileMenuFooter.astro',
         TwoColumnContent: './src/components/starlight/DocsTwoColumnContent.astro',
         PageSidebar: './src/components/starlight/DocsPageSidebar.astro',
         ContentPanel: './src/components/starlight/DocsContentPanel.astro',

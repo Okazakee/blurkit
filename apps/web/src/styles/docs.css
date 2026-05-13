@@ -35,7 +35,7 @@
   --sl-color-red-low: rgba(255, 123, 187, 0.16);
   --sl-color-red: #ff7bbb;
   --sl-color-red-high: #ffe1f1;
-  --sl-font: 'Space Grotesk', 'Avenir Next', sans-serif;
+  --sl-font: 'Space Grotesk', 'Avenir Next', 'Segoe UI', sans-serif;
   --sl-font-mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
   --sl-nav-height: 5.25rem;
   --sl-sidebar-width: clamp(17rem, 18vw, 19.5rem);
@@ -56,10 +56,17 @@ html[data-theme='light'] {
 
 body {
   color: var(--sl-color-gray-2);
+  scrollbar-color: rgba(103, 236, 255, 0.35) rgba(255, 255, 255, 0.06);
+  scrollbar-width: thin;
 }
 
 body[data-mobile-menu-expanded] {
   overflow: hidden;
+}
+
+.docs-shell :is(.bk-panel, .bk-card) {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 .sl-markdown-content {
@@ -86,6 +93,19 @@ body[data-mobile-menu-expanded] {
 
 .sl-markdown-content h3 {
   margin-top: 2.4rem;
+}
+
+.sl-markdown-content .sl-heading-wrapper {
+  --sl-anchor-icon-gap: 0.35em;
+}
+
+.sl-markdown-content .sl-anchor-link {
+  color: var(--sl-color-gray-3);
+}
+
+.sl-markdown-content .sl-anchor-link:focus,
+.sl-markdown-content .sl-heading-wrapper:hover .sl-anchor-link {
+  color: var(--sl-color-accent-high);
 }
 
 .sl-markdown-content :is(p, li) > code:not(:where(.not-content *)),
@@ -158,14 +178,7 @@ body[data-mobile-menu-expanded] {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
-.docs-route--home .sl-markdown-content > h1:first-child {
-  display: none;
-}
-
-.docs-route--home .sl-markdown-content > :nth-child(2) {
-  margin-top: 0;
-}
-
+/* Relies on Starlight Search button data attributes and modal hooks. */
 .docs-search button[data-open-modal] {
   width: 100%;
   min-height: 3.1rem;
@@ -241,7 +254,7 @@ body[data-mobile-menu-expanded] {
 .docs-mobile-toc-shell mobile-starlight-toc nav {
   border-top: 1px solid rgba(166, 184, 255, 0.08);
   background: rgba(9, 11, 20, 0.82);
-  backdrop-filter: blur(18px);
+  backdrop-filter: blur(10px);
 }
 
 .docs-mobile-toc-shell summary {
@@ -289,6 +302,64 @@ body[data-mobile-menu-expanded] {
   color: var(--sl-color-white);
 }
 
+.docs-footer__pagination .pagination-links {
+  gap: 0.9rem;
+}
+
+.docs-footer__pagination .pagination-links a {
+  border-radius: 1rem;
+  border: 1px solid rgba(166, 184, 255, 0.16);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
+    linear-gradient(180deg, rgba(13, 17, 33, 0.72), rgba(8, 10, 18, 0.72));
+  box-shadow: var(--bk-shadow);
+  transition:
+    border-color 140ms ease,
+    color 140ms ease,
+    transform 140ms ease;
+}
+
+.docs-footer__pagination .pagination-links a:hover {
+  border-color: rgba(103, 236, 255, 0.28);
+  transform: translateY(-1px);
+}
+
+.docs-footer__pagination .pagination-links .link-title {
+  font-size: clamp(1.1rem, 2.2vw, 1.35rem);
+}
+
+.docs-footer__pagination .pagination-links a:focus-visible {
+  outline-offset: 3px;
+}
+
+.docs-sidebar-pane,
+.docs-main-frame,
+.docs-search dialog,
+.sl-markdown-content pre:not(:where(.not-content *)),
+.sl-markdown-content .expressive-code {
+  scrollbar-color: rgba(103, 236, 255, 0.35) rgba(255, 255, 255, 0.06);
+  scrollbar-width: thin;
+}
+
+:where(body, .docs-sidebar-pane, .docs-main-frame, .docs-search dialog, .sl-markdown-content pre, .sl-markdown-content .expressive-code)::-webkit-scrollbar {
+  width: 0.72rem;
+  height: 0.72rem;
+}
+
+:where(body, .docs-sidebar-pane, .docs-main-frame, .docs-search dialog, .sl-markdown-content pre, .sl-markdown-content .expressive-code)::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+:where(body, .docs-sidebar-pane, .docs-main-frame, .docs-search dialog, .sl-markdown-content pre, .sl-markdown-content .expressive-code)::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.03);
+  background: rgba(103, 236, 255, 0.35);
+}
+
+:where(body, .docs-sidebar-pane, .docs-main-frame, .docs-search dialog, .sl-markdown-content pre, .sl-markdown-content .expressive-code)::-webkit-scrollbar-thumb:hover {
+  background: rgba(103, 236, 255, 0.5);
+}
+
 @media (max-width: 71.99rem) {
   .docs-search dialog {
     margin-top: 5rem;
@@ -300,9 +371,18 @@ body[data-mobile-menu-expanded] {
   .docs-search button[data-open-modal] {
     min-height: 2.9rem;
     padding-inline: 0.9rem;
+    justify-content: center;
   }
 
-  .docs-search button[data-open-modal] > span[aria-hidden='true'] {
+  /*
+    This intentionally keeps only the first child (search icon) visible.
+    If Starlight search button markup changes, revisit this selector.
+  */
+  .docs-search button[data-open-modal] > :not(:first-child) {
     display: none;
+  }
+
+  .docs-mobile-toc-shell mobile-starlight-toc nav {
+    backdrop-filter: none;
   }
 }

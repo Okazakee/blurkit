@@ -11,10 +11,9 @@ type SidebarLink = Extract<SidebarEntry, { type: 'link' }>
 type SidebarGroup = Extract<SidebarEntry, { type: 'group' }>
 
 const quickLinks = [
-  { href: '/docs/installation/', label: 'Installation' },
-  { href: '/docs/quick-start/', label: 'Quick start' },
-  { href: '/docs/runtimes/node/', label: 'Node runtime' },
-  { href: '/docs/cli/', label: 'CLI overview' },
+  { href: '/docs/installation/', label: 'Install blurkit' },
+  { href: '/docs/quick-start/', label: 'Generate first placeholder' },
+  { href: '/docs/runtimes/node/', label: 'Choose a runtime' },
 ]
 
 function findFirstLink(entries: SidebarEntry[]): SidebarLink | undefined {
@@ -67,7 +66,7 @@ const sectionCards = route.sidebar
   isDocsHome ? (
     <div class="docs-home-hero">
       <div class="docs-home-hero__copy">
-        <span class="site-eyebrow">Documentation</span>
+        <span class="site-eyebrow">Docs overview</span>
         <h1 id={PAGE_TITLE_ID}>{title}</h1>
         {description && <p>{description}</p>}
 
@@ -86,19 +85,6 @@ const sectionCards = route.sidebar
           ))}
         </div>
       </div>
-
-      <aside class="bk-panel docs-home-hero__summary">
-        <span class="site-eyebrow">What lives here</span>
-        <p>Explicit runtime docs, CLI behavior, type-level API reference, and integration guides built around the current package surface.</p>
-        <div class="docs-home-hero__chips">
-          <span>Node</span>
-          <span>Browser</span>
-          <span>Edge</span>
-          <span>CLI</span>
-          <span>API</span>
-          <span>Guides</span>
-        </div>
-      </aside>
 
       <div class="docs-home-sections">
         {sectionCards.map((section) => (
@@ -145,8 +131,7 @@ const sectionCards = route.sidebar
   }
 
   .docs-page-header__description,
-  .docs-home-hero__copy p,
-  .docs-home-hero__summary p {
+  .docs-home-hero__copy p {
     max-width: 58ch;
     color: var(--bk-muted);
     font-size: 1.03rem;
@@ -166,27 +151,6 @@ const sectionCards = route.sidebar
     display: flex;
     flex-wrap: wrap;
     gap: 0.7rem;
-  }
-
-  .docs-home-hero__summary {
-    display: grid;
-    gap: 0.9rem;
-  }
-
-  .docs-home-hero__chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-  }
-
-  .docs-home-hero__chips span {
-    border-radius: 999px;
-    border: 1px solid rgba(166, 184, 255, 0.14);
-    padding: 0.42rem 0.7rem;
-    background: rgba(255, 255, 255, 0.04);
-    color: var(--sl-color-gray-1);
-    font-size: 0.82rem;
-    font-weight: 700;
   }
 
   .docs-home-sections {
@@ -220,16 +184,5 @@ const sectionCards = route.sidebar
     content: '→';
     margin-right: 0.45rem;
     color: var(--sl-color-accent-high);
-  }
-
-  @media (min-width: 72rem) {
-    .docs-home-hero {
-      grid-template-columns: minmax(0, 1.15fr) minmax(18rem, 0.85fr);
-      align-items: start;
-    }
-
-    .docs-home-sections {
-      grid-column: 1 / -1;
-    }
   }
 </style>

@@ -1,11 +1,13 @@
 ---
 title: Documentation
-description: A complete reference for blurkit's current runtime entrypoints, CLI, helpers, and production use cases.
+description: Technical reference for blurkit runtimes, API behavior, CLI usage, and production patterns.
 ---
 
-# blurkit docs
+## When to use
 
-These docs describe the package as it exists today: explicit runtime entrypoints, a browser-safe encode path, the current CLI surface, manifest helpers, and the result shapes returned by the library.
+Use this page when you are new to blurkit or when you need a fast map of the docs before jumping into a specific runtime, API, or CLI flow.
+
+## Example
 
 ```ts title="scripts/encode-hero.ts"
 import { encode } from 'blurkit/node'
@@ -14,60 +16,26 @@ const result = await encode('./public/hero.jpg', {
   algorithm: 'blurhash',
   size: 32,
 })
+
+console.log(result.dataURL)
 ```
 
-:::note
-Use runtime-specific imports in production code. `blurkit/node`, `blurkit/browser`, and `blurkit/edge` make the supported environment explicit and keep bundlers honest.
-:::
+## Inputs / Options / Behavior
 
-## Start here
+- blurkit ships three explicit runtime entrypoints: `blurkit/node`, `blurkit/browser`, and `blurkit/edge`.
+- Root import `blurkit` dispatches at runtime and is convenience-first, not bundler-first.
+- Successful `encode()` returns `dataURL`, `hash`, `algorithm`, `width`, `height`, and optional `meta`.
+- `encodeMany()` is fail-fast and rejects the whole call when one input fails.
 
-- Read [Installation](/docs/installation/) for package-manager commands across `pnpm`, `npm`, `yarn`, and `bun`.
-- Read [Quick Start](/docs/quick-start/) if you want the shortest path to a real `blurDataURL`.
-- Read [Node Runtime](/docs/runtimes/node/) if you are working in build scripts, CMS imports, or server-side image processing.
-- Read [CLI Overview](/docs/cli/) if you want JSON output or manifest generation without writing code.
+## Limits / Caveats
 
-## What the package covers
+- Node runtime requires `sharp`.
+- Browser runtime cannot read local filesystem paths.
+- Edge runtime requires `ImageDecoder` and `OffscreenCanvas`.
+- Remote URL input depends on network reachability and, in browsers, CORS.
 
-- Runtime-specific imports:
-  - `blurkit/node`
-  - `blurkit/browser`
-  - `blurkit/edge`
-- A root convenience import:
-  - `blurkit`
-- Batch encoding through `encodeMany()`
-- A Node memory cache helper through `blurkit/node`
-- Manifest helpers through the root package and Node entrypoint
-- A CLI for single-image output and folder manifests
+## Next read
 
-## What `encode()` returns
-
-Every successful encode call resolves to a `BlurResult` containing:
-
-- A ready-to-use `dataURL`
-- The raw placeholder `hash`
-- The `algorithm` used to generate it
-- The placeholder `width` and `height`
-- Optional source `meta` with original image dimensions and format
-
-## Runtime input coverage
-
-```text title="runtime-coverage.txt"
-Node    : local path, remote URL, Blob, File, ArrayBuffer
-Browser : remote URL, Blob, File, ArrayBuffer
-Edge    : remote URL, Blob, File, ArrayBuffer
-
-Typical fit:
-Node    -> builds, manifests, CLI, import jobs
-Browser -> client-side uploads and private local previews
-Edge    -> platform fetch pipelines without sharp
-```
-
-## Suggested reading order
-
-- [Quick Start](/docs/quick-start/) for the shortest working flow
-- [Runtime Guides](/docs/runtimes/node/) for environment-specific behavior
-- [CLI Overview](/docs/cli/) for shell usage and manifests
-- [API: encode()](/docs/api/encode/) for signatures and inputs
-- [Use Cases](/docs/guides/build-time-manifest-generation/) for production patterns
-- [Limits and Caveats](/docs/limits/) for runtime boundaries
+- [Installation](/docs/installation/)
+- [Quick Start](/docs/quick-start/)
+- [Node Runtime](/docs/runtimes/node/)

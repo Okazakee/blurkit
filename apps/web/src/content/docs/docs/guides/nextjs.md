@@ -1,11 +1,11 @@
 ---
 title: Next.js
-description: Use blurkit output with Next.js Image placeholders in build-time or server-side code.
+description: Use blurkit output as blurDataURL in Next.js Image workflows.
 ---
 
-# Next.js image placeholders
+## When to use
 
-Use `blurkit/node` when you are processing images during a build, in route handlers, or in server-side code before rendering a Next.js page.
+Use this pattern when image URLs are known in build-time or server-side code.
 
 ## Example
 
@@ -23,14 +23,19 @@ const result = await encode('./public/hero.jpg')
 />
 ```
 
-## Why this shape works
+## Inputs / Options / Behavior
 
-Next.js already accepts a `blurDataURL`, so `blurkit` can do the image work ahead of rendering and hand the result directly to `<Image />`.
+- Placeholder work runs before render.
+- `blurDataURL` receives `result.dataURL` directly.
+- Runtime entrypoint should be `blurkit/node` for this flow.
 
-:::note
-If the image is purely decorative, an empty `alt=""` is still valid. The example uses meaningful alt text because most product and editorial images are content, not decoration.
-:::
+## Limits / Caveats
 
-## Caveat
+- Requires `sharp` in Node environment.
+- Do not use browser runtime for server-only placeholder generation.
 
-Use the browser runtime only when the user is selecting or transforming images directly in the client. For app or build infrastructure, stay with `blurkit/node`.
+## Next read
+
+- [Node Runtime](/docs/runtimes/node/)
+- [API: Result](/docs/api/result/)
+- [Guide: Build-time Manifest Generation](/docs/guides/build-time-manifest-generation/)

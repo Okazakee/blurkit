@@ -4,6 +4,7 @@ import SocialIcons from '@astrojs/starlight/components/SocialIcons.astro'
 
 const { siteTitleHref, id } = Astro.locals.starlightRoute
 const isDocsHome = id === 'docs'
+const isQuickStart = id === 'docs/quick-start'
 ---
 
 <div class="docs-header">
@@ -20,7 +21,7 @@ const isDocsHome = id === 'docs'
 
   <nav class="docs-header__links" aria-label="Primary">
     <a class:list={['docs-header__link', { 'is-current': isDocsHome }]} href="/docs/">Overview</a>
-    <a class="docs-header__link" href="/docs/quick-start/">Quick start</a>
+    <a class:list={['docs-header__link', { 'is-current': isQuickStart }]} href="/docs/quick-start/">Quick start</a>
     <a class="docs-header__link" href="/#live-demo">Live demo</a>
   </nav>
 

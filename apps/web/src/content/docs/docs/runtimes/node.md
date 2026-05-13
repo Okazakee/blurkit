@@ -1,29 +1,11 @@
 ---
 title: Node Runtime
-description: Use the sharp-backed Node runtime for local files, remote URLs, batch work, caching, and manifests.
+description: Use sharp-backed encoding for local paths, remote URLs, batching, cache, and manifests.
 ---
 
-# Node Runtime
+## When to use
 
-`blurkit/node` is the main fully featured runtime today. It is the right choice for build scripts, CMS imports, static manifests, and server-side image processing in Node or Bun.
-
-## Install requirement
-
-```bash
-pnpm add blurkit sharp
-```
-
-`blurkit/node` depends on `sharp` for decoding source images and rendering the final placeholder image.
-
-## Supported inputs
-
-The current implementation supports:
-
-- local path strings such as `./public/hero.jpg`
-- remote `http` and `https` strings
-- `URL`
-- `Blob`
-- `ArrayBuffer`
+Use `blurkit/node` for build steps, CMS import jobs, server-side processing, and manifest generation.
 
 ## Example
 
@@ -38,22 +20,29 @@ const result = await encode('./public/hero.jpg', {
 })
 ```
 
-## Also available from `blurkit/node`
+## Inputs / Options / Behavior
 
-- `encodeMany()`
-- `createMemoryCache()`
-- `createManifest()`
-- `writeManifest()`
+- Supported inputs:
+  - local path string
+  - remote `http`/`https` URL string
+  - `URL`
+  - `Blob`
+  - `ArrayBuffer`
+- Additional Node exports:
+  - `encodeMany()`
+  - `createMemoryCache()`
+  - `createManifest()`
+  - `writeManifest()`
+- Remote URL input is fetched before decode.
 
-## Good fit
+## Limits / Caveats
 
-- Static site and CMS import scripts
-- Node-based image ingestion pipelines
-- Manifest generation during builds
-- Bun projects that can use the Node entrypoint
+- Requires `sharp`.
+- Root import can work in Node/Bun but explicit `blurkit/node` is safer for clear runtime intent.
+- `encodeMany()` is fail-fast.
 
-## Caveats
+## Next read
 
-- The Node runtime requires `sharp`.
-- Local path strings are only supported in Node and Bun, not in the browser or edge entrypoints.
-- The root import may work in Node, but explicit `blurkit/node` imports are safer when you want predictable bundling.
+- [API: encodeMany()](/docs/api/encode-many/)
+- [API: Cache](/docs/api/cache/)
+- [CLI Overview](/docs/cli/)

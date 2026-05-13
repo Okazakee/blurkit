@@ -1,37 +1,37 @@
 ---
 title: Installation
-description: Install blurkit with pnpm, npm, yarn, or bun, and add sharp when you need the Node runtime or CLI.
+description: Install blurkit for your runtime and add sharp when using Node runtime or CLI.
 ---
 
-# Installation
+## When to use
 
-Use the same package across runtimes, then add `sharp` when you plan to use the Node entrypoint or the CLI in a Node or Bun environment.
+Use this page before running `blurkit/node` code or any CLI command.
 
-## Install matrix
+## Example
 
-| Package manager | Core package | Node or Bun with `sharp` |
+```bash
+pnpm add blurkit sharp
+```
+
+## Inputs / Options / Behavior
+
+- Install only `blurkit` when you use browser or edge entrypoints.
+- Install `blurkit` and `sharp` when you use Node runtime or CLI.
+
+| Package manager | Browser/edge install | Node/CLI install |
 | --- | --- | --- |
 | `pnpm` | `pnpm add blurkit` | `pnpm add blurkit sharp` |
 | `npm` | `npm install blurkit` | `npm install blurkit sharp` |
 | `yarn` | `yarn add blurkit` | `yarn add blurkit sharp` |
 | `bun` | `bun add blurkit` | `bun add blurkit sharp` |
 
-## When `sharp` is required
+## Limits / Caveats
 
-Install `sharp` when you are using:
+- Node runtime fails without `sharp`.
+- Root import can resolve to Node runtime in Node/Bun and therefore also needs `sharp` in those environments.
 
-- `blurkit/node`
-- the CLI
-- Node or Bun build-time image pipelines
+## Next read
 
-You do **not** need `sharp` for:
-
-- `blurkit/browser`
-- `blurkit/edge`
-- the root package when it resolves to browser or edge code
-
-## What to read next
-
-- [Quick Start](/docs/quick-start/) for your first placeholder
-- [Node Runtime](/docs/runtimes/node/) for server and build-time usage
-- [CLI Overview](/docs/cli/) for shell workflows
+- [Quick Start](/docs/quick-start/)
+- [Node Runtime](/docs/runtimes/node/)
+- [CLI Overview](/docs/cli/)

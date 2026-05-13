@@ -1,0 +1,65 @@
+---
+import SocialIcons from '@astrojs/starlight/components/SocialIcons.astro'
+---
+
+<div class="docs-mobile-menu-footer">
+  <nav class="docs-mobile-menu-footer__links" aria-label="Docs quick links">
+    <a href="/docs/">Overview</a>
+    <a href="/docs/quick-start/">Quick start</a>
+    <a href="/#live-demo">Live demo</a>
+  </nav>
+
+  <div class="docs-mobile-menu-footer__social" aria-label="External links">
+    <SocialIcons />
+  </div>
+</div>
+
+<style>
+  .docs-mobile-menu-footer {
+    display: none;
+  }
+
+  @media (max-width: 49.99rem) {
+    .docs-mobile-menu-footer {
+      display: grid;
+      gap: 0.9rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(166, 184, 255, 0.14);
+    }
+
+    .docs-mobile-menu-footer__links {
+      display: grid;
+      gap: 0.45rem;
+    }
+
+    .docs-mobile-menu-footer__links a {
+      border-radius: 0.8rem;
+      color: var(--sl-color-gray-2);
+      padding: 0.55rem 0.7rem;
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .docs-mobile-menu-footer__links a:hover,
+    .docs-mobile-menu-footer__links a:focus-visible {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--sl-color-white);
+    }
+
+    .docs-mobile-menu-footer__social {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.9rem;
+      padding: 0 0.7rem;
+    }
+
+    .docs-mobile-menu-footer__social :global(a) {
+      color: var(--sl-color-gray-2);
+    }
+
+    .docs-mobile-menu-footer__social :global(a:hover) {
+      color: var(--sl-color-white);
+    }
+  }
+</style>

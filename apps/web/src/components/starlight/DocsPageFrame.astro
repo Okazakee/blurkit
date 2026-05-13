@@ -16,7 +16,14 @@ const { hasSidebar } = Astro.locals.starlightRoute
     {
       hasSidebar && (
         <nav class="docs-sidebar-nav print:hidden" aria-label={Astro.locals.t('sidebarNav.accessibleLabel')}>
-          <button class="docs-sidebar-scrim" type="button" data-close-sidebar aria-hidden="true" tabindex="-1"></button>
+          <button
+            class="docs-sidebar-scrim"
+            type="button"
+            data-close-sidebar
+            aria-label="Close navigation menu"
+            aria-hidden="true"
+            tabindex="-1"
+          ></button>
           <div id="starlight__sidebar" class="docs-sidebar-pane">
             <div class="docs-sidebar-pane__inner">
               <slot name="sidebar" />
@@ -33,13 +40,122 @@ const { hasSidebar } = Astro.locals.starlightRoute
 </div>
 
 <script>
-  const closeMenu = () => {
-    const toggle = document.querySelector('starlight-menu-button')
-    if (!toggle) return
-    toggle.setAttribute('aria-expanded', 'false')
-    toggle.querySelector('button')?.setAttribute('aria-expanded', 'false')
-    document.body.toggleAttribute('data-mobile-menu-expanded', false)
+  const MOBILE_QUERY = '(max-width: 49.99rem)'
+  const FOCUSABLE_SELECTOR = [
+    'a[href]',
+    'button:not([disabled])',
+    'input:not([disabled])',
+    'select:not([disabled])',
+    'textarea:not([disabled])',
+    '[tabindex]:not([tabindex="-1"])',
+  ].join(',')
+
+  const mediaQuery = window.matchMedia(MOBILE_QUERY)
+  const body = document.body
+  const topbarInner = document.querySelector('.docs-topbar__inner')
+  const mainFrame = document.querySelector('.docs-main-frame')
+  const sidebarNav = document.querySelector('.docs-sidebar-nav')
+  const sidebarPane = sidebarNav?.querySelector('.docs-sidebar-pane')
+  const scrim = sidebarNav?.querySelector('.docs-sidebar-scrim')
+
+  let lastFocusedElement: HTMLElement | null = null
+
+  const getToggle = () => document.querySelector('starlight-menu-button')
+  const getToggleButton = () => getToggle()?.querySelector('button')
+  const isMenuExpanded = () => body.hasAttribute('data-mobile-menu-expanded')
+
+  const getFocusableElements = (container: ParentNode | null | undefined): HTMLElement[] => {
+    if (!container) return []
+    const focusables: HTMLElement[] = []
+    Array.from(container.querySelectorAll(FOCUSABLE_SELECTOR)).forEach((el) => {
+      if (!(el instanceof HTMLElement)) return
+      if (el.getAttribute('aria-hidden') === 'true') return
+      if (el.getAttribute('inert') !== null) return
+      const style = window.getComputedStyle(el)
+      if (style.display === 'none' || style.visibility === 'hidden') return
+      focusables.push(el)
+    })
+    return focusables
   }
+
+  const closeMenu = () => {
+    const toggle = getToggle()
+    toggle?.setAttribute('aria-expanded', 'false')
+    getToggleButton()?.setAttribute('aria-expanded', 'false')
+    body.toggleAttribute('data-mobile-menu-expanded', false)
+  }
+
+  const trapMenuFocus = (event: KeyboardEvent) => {
+    if (!mediaQuery.matches || !isMenuExpanded() || event.key !== 'Tab') return
+    const focusables = getFocusableElements(sidebarNav)
+    if (!focusables.length) return
+    const first = focusables[0]!
+    const last = focusables[focusables.length - 1]!
+    const active = document.activeElement
+
+    if (event.shiftKey && active === first) {
+      event.preventDefault()
+      last.focus()
+      return
+    }
+
+    if (!event.shiftKey && active === last) {
+      event.preventDefault()
+      first.focus()
+    }
+  }
+
+  const updateInertBackground = (expanded: boolean) => {
+    if (!(mainFrame instanceof HTMLElement)) return
+    mainFrame.inert = expanded
+
+    if (!(topbarInner instanceof HTMLElement)) return
+    const menuButtonHost = getToggle()
+    Array.from(topbarInner.children).forEach((child) => {
+      if (!(child instanceof HTMLElement) || child === menuButtonHost) return
+      child.inert = expanded
+    })
+  }
+
+  const syncMenuState = () => {
+    const expanded = mediaQuery.matches && isMenuExpanded()
+    if (scrim instanceof HTMLButtonElement) {
+      scrim.tabIndex = expanded ? 0 : -1
+      scrim.setAttribute('aria-hidden', String(!expanded))
+    }
+
+    updateInertBackground(expanded)
+
+    if (!expanded) return
+    const focusables = getFocusableElements(sidebarPane)
+    focusables[0]?.focus()
+  }
+
+  if (sidebarNav) {
+    sidebarNav.addEventListener('keydown', (event) => trapMenuFocus(event as KeyboardEvent))
+  }
+
+  mediaQuery.addEventListener('change', () => {
+    if (!mediaQuery.matches) closeMenu()
+    syncMenuState()
+  })
+
+  const observer = new MutationObserver(() => {
+    if (isMenuExpanded()) {
+      lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    } else if (lastFocusedElement) {
+      lastFocusedElement.focus()
+      lastFocusedElement = null
+    }
+    syncMenuState()
+  })
+
+  observer.observe(body, {
+    attributes: true,
+    attributeFilter: ['data-mobile-menu-expanded'],
+  })
+
+  syncMenuState()
 
   document.querySelectorAll('[data-close-sidebar]').forEach((button) => {
     button.addEventListener('click', closeMenu)

@@ -1,9 +1,26 @@
 ---
 title: Options
-description: Reference for the shared BlurKitOptions object used by encode() and encodeMany().
+description: Reference for BlurKitOptions used by encode() and encodeMany().
 ---
 
-# API: Options
+## When to use
+
+Use this page when you need predictable placeholder dimensions, algorithm selection, or output format control.
+
+## Example
+
+```ts
+import { encode } from 'blurkit/node'
+
+await encode('./public/hero.jpg', {
+  algorithm: 'thumbhash',
+  width: 40,
+  height: 24,
+  outputFormat: 'jpeg',
+})
+```
+
+## Inputs / Options / Behavior
 
 ```ts
 interface BlurKitOptions {
@@ -18,7 +35,7 @@ interface BlurKitOptions {
 }
 ```
 
-## Defaults
+Defaults:
 
 - `algorithm`: `blurhash`
 - `size`: `32`
@@ -26,16 +43,20 @@ interface BlurKitOptions {
 - `componentY`: `3`
 - `outputFormat`: `png`
 
-## Notes
+Dimension behavior:
 
-- `size` scales the longest side while preserving aspect ratio.
-- `width` and `height` can be used as explicit overrides.
+- `size` scales longest side while preserving aspect ratio.
+- `width` only derives `height` from source ratio.
+- `height` only derives `width` from source ratio.
+- `width` + `height` uses exact dimensions.
+
+## Limits / Caveats
+
 - `componentX` and `componentY` only affect `blurhash`.
-- `cache` is accepted everywhere, but the package only ships a memory cache helper through `blurkit/node`.
+- Built-in cache helper is provided via `blurkit/node` only.
 
-## Option interactions
+## Next read
 
-- If you provide `size`, the runtime preserves aspect ratio.
-- If you provide only `width`, height is derived from the source aspect ratio.
-- If you provide only `height`, width is derived from the source aspect ratio.
-- If you provide both `width` and `height`, those exact placeholder dimensions are used.
+- [API: encode()](/docs/api/encode/)
+- [API: Cache](/docs/api/cache/)
+- [API: Result](/docs/api/result/)

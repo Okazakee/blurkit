@@ -1,31 +1,11 @@
 ---
 title: Manifest Helpers
-description: Reference for createManifest(), writeManifest(), and the BlurManifest shape.
+description: Use createManifest() and writeManifest() to persist many BlurResult entries.
 ---
 
-# API: Manifest Helpers
+## When to use
 
-Use the manifest helpers when you want to persist or assemble many `BlurResult` objects into a stable JSON structure.
-
-## Helpers
-
-```ts
-createManifest(images: Record<string, BlurResult>): BlurManifest
-writeManifest(filePath: string, manifest: BlurManifest, options?: { pretty?: boolean }): Promise<void>
-```
-
-## BlurManifest shape
-
-```ts
-interface BlurManifest {
-  version: 1
-  algorithm?: 'blurhash' | 'thumbhash' | 'mixed'
-  generatedAt: string
-  images: Record<string, BlurResult>
-}
-```
-
-The CLI uses this shape for directory encoding. Files under `/public` default to public URL-style keys such as `/images/hero.jpg`. Other folders use normalized relative paths unless you pass `--base-path`.
+Use manifest helpers when you precompute placeholders and need one stable JSON file for runtime lookup.
 
 ## Example
 
@@ -39,4 +19,30 @@ const manifest = createManifest({
 await writeManifest('./blur-manifest.json', manifest, { pretty: true })
 ```
 
-`createManifest()` automatically sets the manifest version and infers `algorithm` as one value or `mixed`.
+## Inputs / Options / Behavior
+
+```ts
+createManifest(images: Record<string, BlurResult>): BlurManifest
+writeManifest(filePath: string, manifest: BlurManifest, options?: { pretty?: boolean }): Promise<void>
+
+interface BlurManifest {
+  version: 1
+  algorithm?: 'blurhash' | 'thumbhash' | 'mixed'
+  generatedAt: string
+  images: Record<string, BlurResult>
+}
+```
+
+- `createManifest()` infers `algorithm` as single value or `mixed`.
+- `writeManifest()` creates parent directories and writes UTF-8 JSON.
+
+## Limits / Caveats
+
+- Path key strategy is chosen by caller when creating `images` map.
+- Manifest helpers do not validate downstream URL conventions.
+
+## Next read
+
+- [CLI: Manifest Generation](/docs/cli/manifest-generation/)
+- [API: Result](/docs/api/result/)
+- [Guide: Build-time Manifest Generation](/docs/guides/build-time-manifest-generation/)

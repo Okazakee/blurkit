@@ -1,11 +1,11 @@
 ---
 title: Browser Uploader Flow
-description: Generate local placeholders in the browser when users upload images directly in the client.
+description: Generate placeholders in the browser when users upload images in client UI.
 ---
 
-# Browser uploader flow
+## When to use
 
-Use `blurkit/browser` when a user selects an image in the browser and you want to create a lightweight preview or upload-side metadata without sending the image elsewhere first.
+Use this pattern when images are selected by users and should not be uploaded just to generate a placeholder.
 
 ## Example
 
@@ -27,10 +27,19 @@ async function handleFile(file: File) {
 }
 ```
 
-## Why this shape works
+## Inputs / Options / Behavior
 
-The browser runtime lets you create placeholders from local user files while keeping the processing inside the browser tab.
+- Use `File` or `Blob` input for local user images.
+- `meta` fields can be stored with upload payloads.
+- `thumbhash` can reduce payload size for very small placeholders.
 
-## Caveat
+## Limits / Caveats
 
-Remote browser URLs still depend on CORS. For private or user-selected images, `File` input is the most reliable path.
+- Remote URL input requires CORS.
+- Browser runtime cannot read local path strings.
+
+## Next read
+
+- [Browser Runtime](/docs/runtimes/browser/)
+- [API: Options](/docs/api/options/)
+- [Limits and Caveats](/docs/limits/)
