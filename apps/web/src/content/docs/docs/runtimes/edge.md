@@ -1,11 +1,11 @@
 ---
 title: Edge Runtime
-description: Encode placeholders in worker-style runtimes that provide ImageDecoder and OffscreenCanvas.
+description: Encode placeholders in runtimes that provide ImageDecoder and OffscreenCanvas.
 ---
 
 ## When to use
 
-Use `blurkit/edge` when you run image processing in worker-like platforms without `sharp`.
+Use `blurkit/edge` when your worker runtime exposes `ImageDecoder` and `OffscreenCanvas`.
 
 ## Example
 
@@ -22,17 +22,16 @@ const result = await encode('https://example.com/image.jpg')
   - `URL`
   - `Blob`
   - `ArrayBuffer`
-- Decode path depends on `ImageDecoder`.
-- Rendering path depends on `OffscreenCanvas`.
+- Includes `encodeMany()` and `encodeManySettled()`.
 
 ## Limits / Caveats
 
 - Non-remote string input is rejected.
 - Runtime fails when `ImageDecoder` or `OffscreenCanvas` is unavailable.
-- `encodeMany()` is fail-fast.
+- For Cloudflare Workers, prefer `blurkit/cloudflare`.
 
 ## Next read
 
+- [Cloudflare Runtime](/docs/runtimes/cloudflare/)
 - [API: encode()](/docs/api/encode/)
 - [Limits and Caveats](/docs/limits/)
-- [Roadmap](/docs/roadmap/)

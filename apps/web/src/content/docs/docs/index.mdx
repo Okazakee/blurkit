@@ -22,16 +22,18 @@ console.log(result.dataURL)
 
 ## Inputs / Options / Behavior
 
-- blurkit ships three explicit runtime entrypoints: `blurkit/node`, `blurkit/browser`, and `blurkit/edge`.
-- Root import `blurkit` dispatches at runtime and is convenience-first, not bundler-first.
+- blurkit ships explicit runtime entrypoints: `blurkit/node`, `blurkit/browser`, `blurkit/edge`, and `blurkit/cloudflare`.
+- Root import `blurkit` resolves by export conditions (`node`, `browser`, `worker`) without runtime dynamic dispatch.
 - Successful `encode()` returns `dataURL`, `hash`, `algorithm`, `width`, `height`, and optional `meta`.
-- `encodeMany()` is fail-fast and rejects the whole call when one input fails.
+- `encodeMany()` is fail-fast.
+- `encodeManySettled()` returns per-item success/failure results.
 
 ## Limits / Caveats
 
 - Node runtime requires `sharp`.
 - Browser runtime cannot read local filesystem paths.
 - Edge runtime requires `ImageDecoder` and `OffscreenCanvas`.
+- Cloudflare runtime accepts remote URL input only.
 - Remote URL input depends on network reachability and, in browsers, CORS.
 
 ## Next read

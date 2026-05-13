@@ -1,0 +1,198 @@
+name: Release blurkit
+
+on:
+  push:
+    tags:
+      - 'v*'
+      - '*.*.*'
+
+concurrency:
+  group: blurkit-release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      tag_name: ${{ steps.meta.outputs.tag_name }}
+      package_name: ${{ steps.meta.outputs.package_name }}
+      package_version: ${{ steps.meta.outputs.package_version }}
+      previous_tag: ${{ steps.meta.outputs.previous_tag }}
+      already_published: ${{ steps.meta.outputs.already_published }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Validate tag and resolve release metadata
+        id: meta
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          tag_name="$TAG_NAME"
+          normalized_tag="${tag_name#v}"
+
+          if [[ ! "$normalized_tag" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Only stable semver tags are allowed (vX.Y.Z or X.Y.Z). Received: $tag_name" >&2
+            exit 1
+          fi
+
+          package_name=$(node -p "require('./packages/blurkit/package.json').name")
+          package_version=$(node -p "require('./packages/blurkit/package.json').version")
+
+          if [[ "$package_version" != "$normalized_tag" ]]; then
+            echo "Tag \"$tag_name\" does not match packages/blurkit/package.json version \"$package_version\"." >&2
+            exit 1
+          fi
+
+          previous_tag=$(CURRENT_VERSION="$normalized_tag" node - <<'NODE'
+            const { execSync } = require('node:child_process')
+
+            const current = process.env.CURRENT_VERSION
+            const tags = execSync('git tag --list', { encoding: 'utf8' })
+              .split('\n')
+              .map((tag) => tag.trim())
+              .filter(Boolean)
+
+            const parse = (tag) => {
+              const normalized = tag.startsWith('v') ? tag.slice(1) : tag
+              if (!/^\d+\.\d+\.\d+$/.test(normalized)) return null
+              const [major, minor, patch] = normalized.split('.').map((value) => Number.parseInt(value, 10))
+              return { tag, normalized, major, minor, patch }
+            }
+
+            const compareDesc = (left, right) => {
+              if (left.major !== right.major) return right.major - left.major
+              if (left.minor !== right.minor) return right.minor - left.minor
+              return right.patch - left.patch
+            }
+
+            const compareAsc = (left, right) => {
+              if (left.major !== right.major) return left.major - right.major
+              if (left.minor !== right.minor) return left.minor - right.minor
+              return left.patch - right.patch
+            }
+
+            const currentParsed = parse(current)
+            if (!currentParsed) {
+              process.stdout.write('')
+              process.exit(0)
+            }
+
+            const previous = tags
+              .map(parse)
+              .filter((entry) => entry && compareAsc(entry, currentParsed) < 0)
+              .sort(compareDesc)[0]
+
+            process.stdout.write(previous ? previous.tag : '')
+          NODE
+          )
+
+          if npm view "$package_name@$package_version" version >/dev/null 2>&1; then
+            already_published=true
+          else
+            already_published=false
+          fi
+
+          echo "tag_name=$tag_name" >> "$GITHUB_OUTPUT"
+          echo "package_name=$package_name" >> "$GITHUB_OUTPUT"
+          echo "package_version=$package_version" >> "$GITHUB_OUTPUT"
+          echo "previous_tag=$previous_tag" >> "$GITHUB_OUTPUT"
+          echo "already_published=$already_published" >> "$GITHUB_OUTPUT"
+  quality_and_publish:
+    needs: prepare
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      published: ${{ steps.publish_state.outputs.published }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Install dependencies
+        if: needs.prepare.outputs.already_published != 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Build package
+        if: needs.prepare.outputs.already_published != 'true'
+        run: pnpm --filter ./packages/blurkit build
+
+      - name: Typecheck package
+        if: needs.prepare.outputs.already_published != 'true'
+        run: pnpm --filter ./packages/blurkit check
+
+      - name: Test package
+        if: needs.prepare.outputs.already_published != 'true'
+        run: pnpm --filter ./packages/blurkit test
+
+      - name: Publish package
+        if: needs.prepare.outputs.already_published != 'true'
+        working-directory: packages/blurkit
+        run: npm publish
+
+      - name: Mark publish output state
+        id: publish_state
+        run: |
+          if [[ "${{ needs.prepare.outputs.already_published }}" == 'true' ]]; then
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  release:
+    needs:
+      - prepare
+      - quality_and_publish
+    if: needs.quality_and_publish.outputs.published == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Generate blurkit release notes
+        run: node .github/scripts/generate-blurkit-release-notes.mjs release-notes.md
+        env:
+          CURRENT_TAG: ${{ needs.prepare.outputs.tag_name }}
+          PREVIOUS_TAG: ${{ needs.prepare.outputs.previous_tag }}
+          PACKAGE_VERSION: ${{ needs.prepare.outputs.package_version }}
+          COMMIT_PATH: packages/blurkit
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+
+      - name: Create or update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.prepare.outputs.tag_name }}
+          name: blurkit v${{ needs.prepare.outputs.package_version }}
+          body_path: release-notes.md
+          draft: false
+          prerelease: false
+          generate_release_notes: false

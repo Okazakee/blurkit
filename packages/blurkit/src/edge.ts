@@ -1,8 +1,16 @@
 import { bytesToDataURL } from './internal/base64'
 import { resolveTargetDimensions } from './internal/dimensions'
 import { normalizeOptions } from './internal/normalize-options'
-import { encodeManyWithRuntime, encodeWithRuntime } from './shared'
-import type { BlurKitInput, BlurKitOptions, BlurResult, DecodedImage, ResolvedInput } from './types'
+import { encodeManySettledWithRuntime, encodeManyWithRuntime, encodeWithRuntime } from './shared'
+import type {
+  BlurEncodeManySettledResult,
+  BlurKitEdgeInput,
+  BlurKitInput,
+  BlurKitOptions,
+  BlurResult,
+  DecodedImage,
+  ResolvedInput,
+} from './types'
 
 function detectMimeType(bytes: Uint8Array): string | undefined {
   if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) {
@@ -20,11 +28,27 @@ function detectMimeType(bytes: Uint8Array): string | undefined {
   return undefined
 }
 
+function assertEdgeDecodeCapabilities(): void {
+  if (typeof ImageDecoder === 'undefined' || typeof OffscreenCanvas === 'undefined') {
+    throw new Error(
+      'The current edge runtime is missing ImageDecoder and/or OffscreenCanvas. Use blurkit/cloudflare on Cloudflare Workers, or run blurkit/edge in a runtime that provides both APIs.',
+    )
+  }
+}
+
+function assertEdgeRenderCapabilities(): void {
+  if (typeof OffscreenCanvas === 'undefined') {
+    throw new Error(
+      'The current edge runtime is missing OffscreenCanvas. Use blurkit/cloudflare on Cloudflare Workers, or run blurkit/edge in a runtime that provides OffscreenCanvas.',
+    )
+  }
+}
+
 async function resolveEdgeInput(input: BlurKitInput): Promise<ResolvedInput> {
   if (typeof input === 'string' || input instanceof URL) {
     const url = input instanceof URL ? input.toString() : input
     if (!/^https?:\/\//i.test(url)) {
-      throw new Error('The edge runtime supports remote URLs and ArrayBuffer input only.')
+      throw new Error('The edge runtime supports remote URLs, Blob, and ArrayBuffer input only.')
     }
 
     const response = await fetch(url)
@@ -61,9 +85,7 @@ async function decodeEdgeImage(
   resolved: ResolvedInput,
   options: ReturnType<typeof normalizeOptions>,
 ): Promise<DecodedImage> {
-  if (typeof ImageDecoder === 'undefined' || typeof OffscreenCanvas === 'undefined') {
-    throw new Error('The current edge runtime does not provide ImageDecoder and OffscreenCanvas.')
-  }
+  assertEdgeDecodeCapabilities()
 
   const mimeType = resolved.mimeType ?? detectMimeType(resolved.bytes)
   if (!mimeType) {
@@ -120,9 +142,7 @@ async function renderEdgeDataURL(
   height: number,
   format: 'png' | 'jpeg',
 ): Promise<string> {
-  if (typeof OffscreenCanvas === 'undefined') {
-    throw new Error('The current edge runtime does not provide OffscreenCanvas.')
-  }
+  assertEdgeRenderCapabilities()
 
   const canvas = new OffscreenCanvas(width, height)
   const context = canvas.getContext('2d')
@@ -145,13 +165,29 @@ const runtime = {
   renderDataURL: renderEdgeDataURL,
 }
 
+export async function encode(input: BlurKitEdgeInput, options?: BlurKitOptions): Promise<BlurResult>
 export async function encode(input: BlurKitInput, options?: BlurKitOptions): Promise<BlurResult> {
   return encodeWithRuntime(input, normalizeOptions(options), runtime)
 }
 
 export async function encodeMany(
+  inputs: BlurKitEdgeInput[],
+  options?: BlurKitOptions,
+): Promise<BlurResult[]>
+export async function encodeMany(
   inputs: BlurKitInput[],
   options?: BlurKitOptions,
 ): Promise<BlurResult[]> {
   return encodeManyWithRuntime(inputs, normalizeOptions(options), runtime)
+}
+
+export async function encodeManySettled(
+  inputs: BlurKitEdgeInput[],
+  options?: BlurKitOptions,
+): Promise<BlurEncodeManySettledResult[]>
+export async function encodeManySettled(
+  inputs: BlurKitInput[],
+  options?: BlurKitOptions,
+): Promise<BlurEncodeManySettledResult[]> {
+  return encodeManySettledWithRuntime(inputs, normalizeOptions(options), runtime)
 }

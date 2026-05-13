@@ -12,10 +12,17 @@ Use `blurkit/browser` when the user provides an image in the client and you need
 ```ts
 import { encode } from 'blurkit/browser'
 
-const result = await encode(file, {
-  algorithm: 'thumbhash',
-  outputFormat: 'png',
-})
+const input = document.querySelector<HTMLInputElement>('#image')
+const file = input?.files?.[0]
+
+if (file) {
+  const result = await encode(file, {
+    algorithm: 'thumbhash',
+    outputFormat: 'png',
+  })
+
+  console.log(result.dataURL)
+}
 ```
 
 ## Inputs / Options / Behavior
@@ -25,8 +32,7 @@ const result = await encode(file, {
   - `Blob`
   - `ArrayBuffer`
   - remote URL string or `URL` when CORS allows fetch and decode
-- Decode uses browser image loading + Canvas 2D.
-- Output shape is the same `BlurResult` contract used in other runtimes.
+- Includes `encodeMany()` and `encodeManySettled()`.
 
 ## Limits / Caveats
 

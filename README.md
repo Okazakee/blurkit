@@ -174,19 +174,26 @@ These are intentionally not documented as current support:
 
 ## Publishing
 
-npm publishing is automated through [`.github/workflows/publish-npm.yml`](/home/okazakee/Desktop/Projects/blurkit/.github/workflows/publish-npm.yml).
+Library releases and website deployments are handled by separate workflows.
 
-Release flow:
+### Library Release (`.github/workflows/release.yml`)
 
 1. Bump `packages/blurkit/package.json` to the version you want to publish.
-2. Push a matching git tag like `v0.1.1` or `0.1.1`, or publish a GitHub Release using that tag.
-3. GitHub Actions will install dependencies, build, typecheck, test, and publish `packages/blurkit` to npm.
+2. Push a matching stable tag like `v0.1.3` or `0.1.3`.
+3. The workflow validates tag/version match, publishes `blurkit`, generates lib-scoped release notes, and creates/updates the GitHub Release.
 
 Repository setup:
 
-- Configure `blurkit` for npm trusted publishing against `Okazakee/blurkit` and the `publish-npm.yml` workflow.
-- You can do that in the npm UI or with `npm trust github blurkit --repo Okazakee/blurkit --file publish-npm.yml`.
+- Configure `blurkit` for npm trusted publishing against `Okazakee/blurkit` and the `release.yml` workflow.
+- You can do that in the npm UI or with `npm trust github blurkit --repo Okazakee/blurkit --file release.yml`.
 - Trusted publishing requires a current npm CLI with `npm trust` support and account-level 2FA enabled when you create the trust relationship.
-- The workflow will fail fast if the tag does not match `packages/blurkit/package.json`.
-- If that exact version is already on npm, the workflow exits without publishing again.
+- The workflow accepts only stable semver tags (`vX.Y.Z` or `X.Y.Z`) and fails if the tag does not match `packages/blurkit/package.json`.
+- If that exact version is already on npm, publish/release steps are skipped.
+- GitHub Release notes are generated from commits scoped to `packages/blurkit` and include only product-impacting conventional commit types (`feat`, `fix`, `perf`, `refactor`, plus breaking changes).
 - No long-lived `NPM_TOKEN` secret is required for publishing.
+
+### Website Deploy (`.github/workflows/website-deploy.yml`)
+
+- Automatic deploy trigger: push to `main` with website path changes (`apps/web/**`) and a commit subject matching `^(feat|fix|docs|refactor|perf)\(website\):`.
+- Non-matching commit subjects intentionally skip deployment, even when website files changed.
+- Manual `workflow_dispatch` is available and bypasses the commit-subject gate for testing or recovery deploys.

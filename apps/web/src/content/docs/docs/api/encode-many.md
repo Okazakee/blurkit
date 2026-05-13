@@ -1,37 +1,44 @@
 ---
 title: encodeMany()
-description: Batch encode many inputs with fail-fast Promise.all semantics.
+description: Batch encode many inputs with fail-fast or settled semantics.
 ---
 
 ## When to use
 
-Use `encodeMany()` when one job must process multiple images and fail the job if any input fails.
+Use `encodeMany()` when one failure should fail the whole job. Use `encodeManySettled()` when you need partial success details.
 
 ## Example
 
 ```ts
-import { encodeMany } from 'blurkit/node'
+import { encodeMany, encodeManySettled } from 'blurkit/node'
 
-const results = await encodeMany(
-  ['./public/hero.jpg', './public/poster.jpg'],
-  { size: 32 },
-)
+const failFast = await encodeMany([
+  './public/hero.jpg',
+  './public/poster.jpg',
+])
+
+const settled = await encodeManySettled([
+  './public/hero.jpg',
+  './public/missing.jpg',
+])
 ```
 
 ## Inputs / Options / Behavior
 
 ```ts
 encodeMany(inputs: BlurKitInput[], options?: BlurKitOptions): Promise<BlurResult[]>
+encodeManySettled(inputs: BlurKitInput[], options?: BlurKitOptions): Promise<BlurEncodeManySettledResult[]>
 ```
 
-- Uses `Promise.all` semantics.
-- Preserves input order in output array.
-- Applies the same `BlurKitOptions` to each input.
+- Both preserve input order.
+- Both apply the same `BlurKitOptions` to each input.
+- `encodeMany()` uses `Promise.all` semantics.
+- `encodeManySettled()` uses `Promise.allSettled` semantics.
 
 ## Limits / Caveats
 
-- Fail-fast: one rejection rejects the whole batch.
-- No partial-success envelope is returned.
+- `encodeMany()` is fail-fast.
+- `encodeManySettled()` includes rejected entries instead of throwing batch-level rejection.
 
 ## Next read
 

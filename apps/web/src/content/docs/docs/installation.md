@@ -1,34 +1,35 @@
 ---
 title: Installation
-description: Install blurkit for your runtime and add sharp when using Node runtime or CLI.
+description: Install blurkit and understand when sharp is needed.
 ---
 
 ## When to use
 
-Use this page before running `blurkit/node` code or any CLI command.
+Use this page before running `blurkit/node`, CLI commands, or worker/browser runtime code.
 
 ## Example
 
 ```bash
-pnpm add blurkit sharp
+pnpm add blurkit
 ```
 
 ## Inputs / Options / Behavior
 
-- Install only `blurkit` when you use browser or edge entrypoints.
-- Install `blurkit` and `sharp` when you use Node runtime or CLI.
+- `blurkit` installs `sharp` as an optional dependency.
+- Node/Bun runtime and CLI require `sharp` at execution time.
+- Browser, edge, and cloudflare entrypoints do not need `sharp`.
 
-| Package manager | Browser/edge install | Node/CLI install |
+| Package manager | Default install | If optional deps are skipped |
 | --- | --- | --- |
-| `pnpm` | `pnpm add blurkit` | `pnpm add blurkit sharp` |
-| `npm` | `npm install blurkit` | `npm install blurkit sharp` |
-| `yarn` | `yarn add blurkit` | `yarn add blurkit sharp` |
-| `bun` | `bun add blurkit` | `bun add blurkit sharp` |
+| `pnpm` | `pnpm add blurkit` | `pnpm add sharp` |
+| `npm` | `npm install blurkit` | `npm install sharp` |
+| `yarn` | `yarn add blurkit` | `yarn add sharp` |
+| `bun` | `bun add blurkit` | `bun add sharp` |
 
 ## Limits / Caveats
 
-- Node runtime fails without `sharp`.
-- Root import can resolve to Node runtime in Node/Bun and therefore also needs `sharp` in those environments.
+- If `sharp` is missing, `blurkit/node` throws `BLURKIT_MISSING_SHARP` on first encode call.
+- Root import in Node/Bun resolves to Node runtime behavior and therefore also needs `sharp`.
 
 ## Next read
 

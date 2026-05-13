@@ -1,4 +1,5 @@
 import type {
+  BlurEncodeManySettledResult,
   BlurKitInput,
   BlurResult,
   DecodedImage,
@@ -90,3 +91,29 @@ export async function encodeManyWithRuntime(
   return Promise.all(inputs.map((input) => encodeWithRuntime(input, options, runtime)))
 }
 
+export async function encodeManySettledWithRuntime(
+  inputs: BlurKitInput[],
+  options: NormalizedBlurKitOptions,
+  runtime: RuntimeHandlers,
+): Promise<BlurEncodeManySettledResult[]> {
+  const results = await Promise.allSettled(
+    inputs.map((input) => encodeWithRuntime(input, options, runtime)),
+  )
+
+  return results.map((result, index) => {
+    const input = inputs[index]!
+    if (result.status === 'fulfilled') {
+      return {
+        status: 'fulfilled',
+        input,
+        value: result.value,
+      }
+    }
+
+    return {
+      status: 'rejected',
+      input,
+      reason: result.reason,
+    }
+  })
+}

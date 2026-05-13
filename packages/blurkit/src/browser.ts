@@ -1,7 +1,15 @@
 import { resolveTargetDimensions } from './internal/dimensions'
 import { normalizeOptions } from './internal/normalize-options'
-import { encodeManyWithRuntime, encodeWithRuntime } from './shared'
-import type { BlurKitInput, BlurKitOptions, BlurResult, DecodedImage, ResolvedInput } from './types'
+import { encodeManySettledWithRuntime, encodeManyWithRuntime, encodeWithRuntime } from './shared'
+import type {
+  BlurEncodeManySettledResult,
+  BlurKitBrowserInput,
+  BlurKitInput,
+  BlurKitOptions,
+  BlurResult,
+  DecodedImage,
+  ResolvedInput,
+} from './types'
 
 function isRemoteString(input: string): boolean {
   return /^https?:\/\//i.test(input)
@@ -22,7 +30,9 @@ async function loadBrowserSource(input: BlurKitInput): Promise<{ identifier: str
       }
     }
 
-    throw new Error('The browser runtime does not support local filesystem paths.')
+    throw new Error(
+      'The browser runtime does not support local filesystem paths. Use a File, Blob, ArrayBuffer, or a remote http(s) URL.',
+    )
   }
 
   if (input instanceof URL) {
@@ -135,13 +145,29 @@ const runtime = {
   renderDataURL: renderBrowserDataURL,
 }
 
+export async function encode(input: BlurKitBrowserInput, options?: BlurKitOptions): Promise<BlurResult>
 export async function encode(input: BlurKitInput, options?: BlurKitOptions): Promise<BlurResult> {
   return encodeWithRuntime(input, normalizeOptions(options), runtime)
 }
 
 export async function encodeMany(
+  inputs: BlurKitBrowserInput[],
+  options?: BlurKitOptions,
+): Promise<BlurResult[]>
+export async function encodeMany(
   inputs: BlurKitInput[],
   options?: BlurKitOptions,
 ): Promise<BlurResult[]> {
   return encodeManyWithRuntime(inputs, normalizeOptions(options), runtime)
+}
+
+export async function encodeManySettled(
+  inputs: BlurKitBrowserInput[],
+  options?: BlurKitOptions,
+): Promise<BlurEncodeManySettledResult[]>
+export async function encodeManySettled(
+  inputs: BlurKitInput[],
+  options?: BlurKitOptions,
+): Promise<BlurEncodeManySettledResult[]> {
+  return encodeManySettledWithRuntime(inputs, normalizeOptions(options), runtime)
 }

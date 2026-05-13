@@ -1,0 +1,84 @@
+name: Deploy website
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/web/**'
+  workflow_dispatch:
+
+concurrency:
+  group: website-deploy-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      should_deploy: ${{ steps.gate.outputs.should_deploy }}
+
+    steps:
+      - name: Evaluate deploy gate
+        id: gate
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            echo "Manual dispatch detected; bypassing commit message gate."
+            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          subject=$(printf '%s\n' "${HEAD_COMMIT_MESSAGE:-}" | head -n 1)
+          if [[ "$subject" =~ ^(feat|fix|docs|refactor|perf)\(website\): ]]; then
+            echo "Commit subject matches website deploy convention: $subject"
+            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Commit subject does not match website deploy convention: $subject"
+            echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  deploy:
+    needs: prepare
+    if: needs.prepare.outputs.should_deploy == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - uses: actions/configure-pages@v5
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build website
+        run: pnpm exec turbo run build --filter=@blurkit/web...
+        env:
+          ASTRO_TELEMETRY_DISABLED: 1
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/web/dist
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,17 +1,17 @@
 # blurkit
 
-Universal image placeholder generation for Node, Bun, browsers, and edge runtimes.
+Universal image placeholder generation for Node, Bun, browsers, edge runtimes, and Cloudflare Workers.
 
-`blurkit` takes an image input and returns a ready-to-use placeholder `dataURL` plus the underlying hash, placeholder dimensions, and source metadata. It supports both BlurHash and ThumbHash behind one API.
+`blurkit` takes an image input and returns a placeholder `dataURL` plus hash text, placeholder dimensions, and source metadata.
 
 ## Features
 
 - BlurHash and ThumbHash support
-- Runtime-specific entrypoints for Node, browser, and edge environments
+- Runtime-specific entrypoints for Node, browser, edge, and Cloudflare
 - Ready-to-render `dataURL` output
-- Batch encoding with `encodeMany()`
+- `encodeMany()` fail-fast batches and `encodeManySettled()` partial-success batches
 - CLI support for single images, remote URLs, and folder manifests
-- Optional cache interface with an in-memory Node helper
+- Cache interface with memory, filesystem, and Cloudflare Worker cache helpers
 - Manifest helpers for build-time image pipelines
 
 ## Install
@@ -20,49 +20,47 @@ Universal image placeholder generation for Node, Bun, browsers, and edge runtime
 npm install blurkit
 ```
 
-If you use the Node or Bun runtime, install `sharp` too:
+`sharp` is listed as an optional dependency and is required only for Node/Bun runtime paths (`blurkit/node`, CLI, or root import in Node).
+
+If your install skipped optional dependencies (for example `npm install --omit=optional`), install `sharp` manually:
 
 ```bash
 npm install sharp
 ```
 
-`sharp` is not required for `blurkit/browser` or `blurkit/edge`.
-
-## Quick Start
+## Quick Start (Node)
 
 ```ts
 import { encode } from 'blurkit/node'
 
-const result = await encode('./public/hero.jpg', {
-  size: 32,
-})
+const result = await encode('./public/hero.jpg', { size: 32 })
 
 console.log(result.dataURL)
 console.log(result.hash)
-console.log(result.meta?.originalWidth, result.meta?.originalHeight)
 ```
 
 ## Choose an Entrypoint
 
-Prefer explicit runtime imports in app code:
+Use explicit runtime entrypoints in production:
 
 ```ts
 import { encode } from 'blurkit/node'
 import { encode as encodeBrowser } from 'blurkit/browser'
 import { encode as encodeEdge } from 'blurkit/edge'
+import { encode as encodeCloudflare } from 'blurkit/cloudflare'
 ```
 
-The root import is available as a convenience wrapper:
+Root import is still supported:
 
 ```ts
 import { encode } from 'blurkit'
 ```
 
-The root import auto-selects a runtime at execution time. For libraries and production apps, explicit runtime entrypoints are safer for bundlers and clearer for readers.
+Root import now resolves via static package export conditions (`node`, `browser`, `worker`) instead of runtime dynamic detection.
 
 ## Supported Inputs
 
-`encode()` and `encodeMany()` accept:
+Shared `BlurKitInput` includes:
 
 - `string`
 - `URL`
@@ -70,13 +68,12 @@ The root import auto-selects a runtime at execution time. For libraries and prod
 - `Blob`
 - `ArrayBuffer`
 
-Runtime support differs by environment:
+Runtime support differs:
 
 - `blurkit/node`: local file paths, remote URLs, `URL`, `Blob`, `ArrayBuffer`
 - `blurkit/browser`: remote URLs, `URL`, `File`, `Blob`, `ArrayBuffer`
 - `blurkit/edge`: remote URLs, `URL`, `Blob`, `ArrayBuffer`
-
-The browser runtime does not read local filesystem paths. Remote browser URLs must allow CORS.
+- `blurkit/cloudflare`: remote URLs and `URL`
 
 ## API
 
@@ -92,24 +89,6 @@ const result = await encode('./public/hero.jpg', {
 })
 ```
 
-Returns:
-
-```ts
-type BlurResult = {
-  dataURL: string
-  hash: string
-  algorithm: 'blurhash' | 'thumbhash'
-  width: number
-  height: number
-  meta?: {
-    originalWidth: number
-    originalHeight: number
-    format?: string
-    hasAlpha?: boolean
-  }
-}
-```
-
 ### `encodeMany(inputs, options?)`
 
 ```ts
@@ -122,6 +101,25 @@ const results = await encodeMany([
 ```
 
 `encodeMany()` is fail-fast and mirrors `Promise.all()`.
+
+### `encodeManySettled(inputs, options?)`
+
+```ts
+import { encodeManySettled } from 'blurkit/node'
+
+const results = await encodeManySettled([
+  './public/hero.jpg',
+  './public/missing.jpg',
+])
+
+for (const result of results) {
+  if (result.status === 'fulfilled') {
+    console.log(result.value.hash)
+  } else {
+    console.error(result.reason)
+  }
+}
+```
 
 ### Options
 
@@ -138,71 +136,56 @@ type BlurKitOptions = {
 }
 ```
 
-Defaults:
+### Cache Helpers
 
-- `algorithm`: `blurhash`
-- `size`: `32`
-- `componentX`: `4`
-- `componentY`: `3`
-- `outputFormat`: `png`
-
-Notes:
-
-- `size` controls the longest placeholder side when `width` and `height` are not both set.
-- `componentX` and `componentY` apply to BlurHash encoding.
-- All numeric options must be positive integers.
-
-### `createMemoryCache(options?)`
-
-Available from `blurkit/node`.
+Node helpers from `blurkit/node`:
 
 ```ts
-import { createMemoryCache, encode } from 'blurkit/node'
+import { createMemoryCache, createFilesystemCache } from 'blurkit/node'
 
-const cache = createMemoryCache({ max: 500 })
-const result = await encode('./public/hero.jpg', { cache })
+const memoryCache = createMemoryCache({ max: 500 })
+const filesystemCache = createFilesystemCache({
+  dir: './.cache/blurkit',
+  ttlMs: 60_000,
+})
 ```
 
-The built-in cache is an in-memory LRU-style cache sized by entry count.
+Cloudflare Worker helper from `blurkit/cloudflare`:
+
+```ts
+import { createCloudflareCache } from 'blurkit/cloudflare'
+
+const cache = createCloudflareCache({
+  name: 'blurkit',
+  ttlSeconds: 300,
+})
+```
 
 ### `createManifest(images)`
 
 ```ts
 import { createManifest } from 'blurkit'
-
-const manifest = createManifest({
-  '/images/hero.jpg': result,
-})
 ```
 
 ### `writeManifest(filePath, manifest, options?)`
 
-Available from `blurkit` and `blurkit/node`.
+`writeManifest()` is Node-only. Use `blurkit/node` in browser/worker code.
 
-```ts
-import { createManifest, writeManifest } from 'blurkit'
+## Cloudflare Runtime Notes
 
-const manifest = createManifest({
-  '/images/hero.jpg': result,
-})
+- `blurkit/cloudflare` uses Cloudflare image transformations (`cf.image`).
+- It supports remote URL inputs only.
+- It returns normal `BlurResult` shape and supports cache integration.
+- The `hash` value is deterministic but Cloudflare-generated (not decoded via `ImageDecoder`).
 
-await writeManifest('./blur-manifest.json', manifest, { pretty: true })
-```
+## Edge Runtime Notes
 
-`createManifest()` returns:
-
-```ts
-type BlurManifest = {
-  version: 1
-  algorithm?: 'blurhash' | 'thumbhash' | 'mixed'
-  generatedAt: string
-  images: Record<string, BlurResult>
-}
-```
+- `blurkit/edge` requires `ImageDecoder` and `OffscreenCanvas`.
+- For Cloudflare Workers, prefer `blurkit/cloudflare`.
 
 ## CLI
 
-Encode a single local image:
+Encode a local image:
 
 ```bash
 npx blurkit encode ./public/hero.jpg --pretty
@@ -214,60 +197,17 @@ Encode a remote image:
 npx blurkit encode https://example.com/image.jpg --algorithm thumbhash --format jpeg
 ```
 
-Generate a manifest from a directory:
+Generate a manifest:
 
 ```bash
-npx blurkit encode ./public \
-  --glob "**/*.{jpg,jpeg,png,webp}" \
-  --out blur-manifest.json \
-  --pretty
+npx blurkit encode ./public --glob "**/*.{jpg,jpeg,png,webp}" --out blur-manifest.json --pretty
 ```
 
-CLI options:
+## Limits and Caveats
 
-- `--algorithm <blurhash|thumbhash>`
-- `--size <number>`
-- `--width <number>`
-- `--height <number>`
-- `--format <png|jpeg>`
-- `--glob <pattern>`
-- `--out <file>`
-- `--base-path <path>`
-- `--concurrency <number>`
-- `--pretty`
-
-Single-image input prints a `BlurResult`. Directory input prints or writes a `BlurManifest`.
-
-When no `--base-path` is provided for directory manifests, files inside a `/public/` folder are keyed from that public root.
-
-## Runtime Notes
-
-- `blurkit/node` and Bun rely on `sharp` for decoding and rendering.
-- `blurkit/browser` decodes with DOM image APIs and renders via `<canvas>`.
-- `blurkit/edge` requires `ImageDecoder` and `OffscreenCanvas` in the target runtime.
-- The edge runtime currently detects PNG, JPEG, and WebP input formats.
-
-## Example Manifest
-
-```json
-{
-  "version": 1,
-  "algorithm": "blurhash",
-  "generatedAt": "2026-05-12T00:00:00.000Z",
-  "images": {
-    "/images/hero.jpg": {
-      "dataURL": "data:image/png;base64,...",
-      "hash": "L9TSUA~qfQ~q~qoffQoffQfQfQfQ",
-      "algorithm": "blurhash",
-      "width": 32,
-      "height": 18,
-      "meta": {
-        "originalWidth": 1920,
-        "originalHeight": 1080,
-        "format": "jpeg",
-        "hasAlpha": false
-      }
-    }
-  }
-}
-```
+- Node runtime requires `sharp` (installed automatically unless optional dependencies are skipped).
+- Browser runtime rejects local filesystem path strings.
+- Browser remote URL decoding depends on CORS.
+- Edge runtime requires `ImageDecoder` and `OffscreenCanvas`.
+- `encodeMany()` is fail-fast; use `encodeManySettled()` for partial success.
+- Root import uses static condition resolution; explicit runtime subpaths are still recommended for clarity.
