@@ -35,6 +35,12 @@ export type BlurKitWasmInput =
   | Blob
   | ArrayBuffer
 
+export type BlurKitDenoInput =
+  | string
+  | URL
+  | Blob
+  | ArrayBuffer
+
 export interface BlurKitOptions {
   algorithm?: BlurAlgorithm
   size?: number

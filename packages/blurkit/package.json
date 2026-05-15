@@ -12,6 +12,10 @@
   "exports": {
     ".": {
       "types": "./dist/root-node.d.ts",
+      "deno": {
+        "import": "./dist/root-deno.js",
+        "require": "./dist/root-deno.cjs"
+      },
       "browser": {
         "import": "./dist/root-browser.js",
         "require": "./dist/root-browser.cjs"
@@ -28,6 +32,11 @@
         "import": "./dist/root-edge.js",
         "require": "./dist/root-edge.cjs"
       }
+    },
+    "./deno": {
+      "types": "./dist/deno.d.ts",
+      "import": "./dist/deno.js",
+      "require": "./dist/deno.cjs"
     },
     "./node": {
       "types": "./dist/node.d.ts",
@@ -61,7 +70,7 @@
     "dist/*.d.ts",
     "dist/*.d.cts"
   ],
-  "description": "Universal image placeholder generation for Node, Bun, browser, and edge runtimes.",
+  "description": "Universal image placeholder generation for Node, Bun, Deno, browser, and edge runtimes.",
   "homepage": "https://blurkit.okazakee.dev",
   "bugs": {
     "url": "https://github.com/Okazakee/blurkit/issues"

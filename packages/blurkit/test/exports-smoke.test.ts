@@ -14,8 +14,10 @@ describe('package export map and root import smoke checks', () => {
 
     expect(rootExport).toBeTruthy()
     expect(rootExport).toHaveProperty('browser')
+    expect(rootExport).toHaveProperty('deno')
     expect(rootExport).toHaveProperty('node')
     expect(rootExport).toHaveProperty('worker')
+    expect(packageJson.exports).toHaveProperty('./deno')
     expect(packageJson.exports).toHaveProperty('./wasm')
   })
 
