@@ -149,6 +149,12 @@ p {
   font-size: 0.88rem;
 }
 
+@media (max-width: 49.99rem) {
+  .site-brand-copy span {
+    display: none;
+  }
+}
+
 .site-version-chip {
   display: inline-flex;
   align-items: center;

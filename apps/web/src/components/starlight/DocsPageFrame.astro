@@ -1,5 +1,6 @@
 ---
 import MobileMenuToggle from './DocsMobileMenuToggle.astro'
+import DocsSearch from './DocsSearch.astro'
 
 const { hasSidebar } = Astro.locals.starlightRoute
 ---
@@ -8,7 +9,14 @@ const { hasSidebar } = Astro.locals.starlightRoute
   <header class="docs-topbar">
     <div class="docs-topbar__inner">
       <slot name="header" />
-      {hasSidebar && <MobileMenuToggle />}
+      {
+        hasSidebar && (
+          <div class="docs-topbar__tools">
+            <DocsSearch class="docs-search--mobile" />
+            <MobileMenuToggle />
+          </div>
+        )
+      }
     </div>
   </header>
 
@@ -112,7 +120,9 @@ const { hasSidebar } = Astro.locals.starlightRoute
     if (!(topbarInner instanceof HTMLElement)) return
     const menuButtonHost = getToggle()
     Array.from(topbarInner.children).forEach((child) => {
-      if (!(child instanceof HTMLElement) || child === menuButtonHost) return
+      if (!(child instanceof HTMLElement)) return
+      if (child === menuButtonHost) return
+      if (child.classList.contains('docs-topbar__tools')) return
       child.inert = expanded
     })
   }
@@ -160,6 +170,23 @@ const { hasSidebar } = Astro.locals.starlightRoute
   document.querySelectorAll('[data-close-sidebar]').forEach((button) => {
     button.addEventListener('click', closeMenu)
   })
+
+  /* Only enable sidebar overflow when its content exceeds the viewport. */
+  const syncSidebarOverflow = () => {
+    if (!sidebarPane) return
+    const navHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sl-nav-height')) || 0
+    const available = window.innerHeight - navHeight - 16
+    if (sidebarPane.scrollHeight > available) {
+      sidebarPane.classList.add('docs-sidebar-pane--overflow')
+    } else {
+      sidebarPane.classList.remove('docs-sidebar-pane--overflow')
+    }
+  }
+
+  const sidebarObserver = new ResizeObserver(() => syncSidebarOverflow())
+  if (sidebarPane) sidebarObserver.observe(sidebarPane)
+  window.addEventListener('resize', syncSidebarOverflow)
+  syncSidebarOverflow()
 </script>
 
 <style>
@@ -227,15 +254,26 @@ const { hasSidebar } = Astro.locals.starlightRoute
     .docs-sidebar-pane {
       position: sticky;
       top: calc(var(--sl-nav-height) + 0.25rem);
-      max-height: calc(100vh - var(--sl-nav-height) - 1rem);
-      overflow-y: auto;
       padding-inline-end: 0.25rem;
     }
+
+    .docs-sidebar-pane--overflow {
+      max-height: calc(100vh - var(--sl-nav-height) - 1rem);
+      overflow-y: auto;
+    }
+  }
+
+  .docs-topbar__tools {
+    display: none;
   }
 
   @media (max-width: 49.99rem) {
     .docs-topbar__inner {
-      align-items: start;
+      align-items: center;
+    }
+
+    .docs-topbar__tools {
+      display: inline-flex;
     }
 
     .docs-sidebar-nav {
@@ -257,11 +295,10 @@ const { hasSidebar } = Astro.locals.starlightRoute
 
     .docs-sidebar-pane {
       position: absolute;
-      top: 0;
+      top: var(--sl-nav-height);
+      bottom: 0;
       left: 0;
       width: min(88vw, 22rem);
-      height: 100%;
-      padding-top: calc(var(--sl-nav-height) + 0.5rem);
       background:
         linear-gradient(180deg, rgba(13, 17, 33, 0.98), rgba(8, 10, 18, 0.98));
       border-inline-end: 1px solid rgba(166, 184, 255, 0.08);

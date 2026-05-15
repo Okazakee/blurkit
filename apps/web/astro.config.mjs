@@ -158,10 +158,9 @@ export default defineConfig({
           ],
         },
         {
-          label: 'Decisions and Limits',
+          label: 'Limits and Roadmap',
           items: [
             { label: 'Limits and Caveats', slug: 'docs/limits' },
-            { label: 'Decision: Cache Interface', slug: 'docs/decisions/cache-interface' },
             { label: 'Roadmap', slug: 'docs/roadmap' },
           ],
         },

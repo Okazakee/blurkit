@@ -1,5 +1,4 @@
 ---
-import DocsMobileTableOfContents from './DocsMobileTableOfContents.astro'
 import TableOfContents from '@astrojs/starlight/components/TableOfContents.astro'
 
 const hasToc = Boolean(Astro.locals.starlightRoute.toc)
@@ -7,22 +6,16 @@ const hasToc = Boolean(Astro.locals.starlightRoute.toc)
 
 {
   hasToc && (
-    <>
-      <div class="docs-page-sidebar docs-page-sidebar--mobile">
-        <DocsMobileTableOfContents />
+    <div class="docs-page-sidebar">
+      <div class="bk-panel docs-page-sidebar__panel">
+        <TableOfContents />
       </div>
-
-      <div class="docs-page-sidebar docs-page-sidebar--desktop">
-        <div class="bk-panel docs-page-sidebar__panel">
-          <TableOfContents />
-        </div>
-      </div>
-    </>
+    </div>
   )
 }
 
 <style>
-  .docs-page-sidebar--desktop {
+  .docs-page-sidebar {
     display: none;
   }
 
@@ -30,12 +23,8 @@ const hasToc = Boolean(Astro.locals.starlightRoute.toc)
     padding: 1.15rem 1.1rem;
   }
 
-  @media (min-width: 72rem) {
-    .docs-page-sidebar--mobile {
-      display: none;
-    }
-
-    .docs-page-sidebar--desktop {
+  @media (min-width: 50rem) {
+    .docs-page-sidebar {
       display: block;
     }
   }

@@ -251,32 +251,6 @@ body[data-mobile-menu-expanded] {
   --pagefind-ui-border-radius: 1rem;
 }
 
-.docs-mobile-toc-shell mobile-starlight-toc nav {
-  border-top: 1px solid rgba(166, 184, 255, 0.08);
-  background: rgba(9, 11, 20, 0.82);
-  backdrop-filter: blur(10px);
-}
-
-.docs-mobile-toc-shell summary {
-  padding-inline: var(--sl-content-pad-x);
-}
-
-.docs-mobile-toc-shell .toggle {
-  border-color: rgba(166, 184, 255, 0.14);
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--sl-color-white);
-}
-
-.docs-mobile-toc-shell .display-current {
-  color: var(--sl-color-gray-1);
-}
-
-.docs-mobile-toc-shell .dropdown {
-  border-color: rgba(166, 184, 255, 0.08);
-  background:
-    linear-gradient(180deg, rgba(13, 17, 33, 0.98), rgba(8, 10, 18, 0.98));
-}
-
 .docs-page-sidebar__panel starlight-toc nav {
   display: grid;
   gap: 0.9rem;
@@ -368,21 +342,64 @@ body[data-mobile-menu-expanded] {
 }
 
 @media (max-width: 49.99rem) {
-  .docs-search button[data-open-modal] {
-    min-height: 2.9rem;
-    padding-inline: 0.9rem;
-    justify-content: center;
+  :root {
+    --sl-nav-height: 3.5rem;
   }
 
-  /*
-    This intentionally keeps only the first child (search icon) visible.
-    If Starlight search button markup changes, revisit this selector.
-  */
-  .docs-search button[data-open-modal] > :not(:first-child) {
+  .docs-topbar {
+    padding: 0.65rem calc(0.85rem + env(safe-area-inset-right)) 0.65rem
+      calc(0.85rem + env(safe-area-inset-left));
+  }
+
+  .docs-topbar__inner {
+    align-items: center;
+  }
+
+  .docs-topbar__tools {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .docs-search--mobile button[data-open-modal] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    padding: 0;
+    border-radius: 999px;
+    border: 1px solid rgba(166, 184, 255, 0.14);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--sl-color-white);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    cursor: pointer;
+  }
+
+  .docs-search--mobile button[data-open-modal] > :not(:first-child) {
     display: none;
   }
 
-  .docs-mobile-toc-shell mobile-starlight-toc nav {
-    backdrop-filter: none;
+  .docs-search--mobile button[data-open-modal]:hover {
+    border-color: rgba(103, 236, 255, 0.22);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .docs-header__search {
+    display: none;
+  }
+
+  .docs-search dialog {
+    margin-top: calc(var(--sl-nav-height) + 0.5rem);
+    width: calc(100vw - 1.5rem);
+  }
+
+  .docs-search .dialog-frame {
+    min-height: min(32rem, calc(100vh - var(--sl-nav-height) - 2rem));
+  }
+
+  .expressive-code .copy button {
+    width: 2rem;
+    height: 2rem;
   }
 }
