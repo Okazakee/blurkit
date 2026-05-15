@@ -27,8 +27,9 @@ console.log(result.hash)
 - Use explicit entrypoints for predictable runtime behavior:
   - `blurkit/node` for build and server pipelines
   - `blurkit/browser` for `File`/`Blob` input in client code
-  - `blurkit/edge` for worker-style runtimes with `ImageDecoder` + `OffscreenCanvas`
+  - `blurkit/edge` for worker-style runtimes with native decode + wasm fallback
   - `blurkit/cloudflare` for Cloudflare Workers
+  - `blurkit/wasm` for runtimes without native decode APIs
 
 ## Limits / Caveats
 

@@ -11,7 +11,6 @@ Use this page when evaluating future capabilities or deciding whether to build c
 
 Planned, not shipped:
 
-- broader edge decode coverage beyond current runtime API availability
 - framework-specific convenience adapters
 - additional manifest output targets
 

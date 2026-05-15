@@ -23,7 +23,7 @@ export default defineConfig({
     sitemap(),
     starlight({
       title: 'blurkit',
-      description: 'Production-ready placeholder generation for Node, browser, edge, and Cloudflare runtimes.',
+      description: 'Production-ready placeholder generation for Node, browser, edge, Cloudflare, and wasm runtimes.',
       logo: {
         src: './src/assets/blurkit-mark.svg',
         alt: 'blurkit',
@@ -125,6 +125,7 @@ export default defineConfig({
             { label: 'Browser Runtime', slug: 'docs/runtimes/browser' },
             { label: 'Edge Runtime', slug: 'docs/runtimes/edge' },
             { label: 'Cloudflare Runtime', slug: 'docs/runtimes/cloudflare' },
+            { label: 'WASM Runtime', slug: 'docs/runtimes/wasm' },
           ],
         },
         {

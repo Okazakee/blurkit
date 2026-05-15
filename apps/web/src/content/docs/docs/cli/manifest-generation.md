@@ -20,6 +20,7 @@ npx blurkit encode ./public \
 
 - `--glob` selects files inside the input directory.
 - `--concurrency` controls parallel file encoding.
+- `--backend` selects sharp (default) or wasm.
 - Key mapping behavior:
   - files under `/public` map to URL-style keys such as `/images/hero.jpg`
   - other folders map to normalized relative keys

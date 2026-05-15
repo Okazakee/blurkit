@@ -1,11 +1,11 @@
 ---
 title: Edge Runtime
-description: Encode placeholders in runtimes that provide ImageDecoder and OffscreenCanvas.
+description: Encode placeholders in worker-style runtimes with native decode first and wasm fallback.
 ---
 
 ## When to use
 
-Use `blurkit/edge` when your worker runtime exposes `ImageDecoder` and `OffscreenCanvas`.
+Use `blurkit/edge` for worker-style runtimes when you want one entrypoint that prefers native decode APIs and falls back to wasm when they are missing.
 
 ## Example
 
@@ -23,15 +23,19 @@ const result = await encode('https://example.com/image.jpg')
   - `Blob`
   - `ArrayBuffer`
 - Includes `encodeMany()` and `encodeManySettled()`.
+- Runtime selection:
+  - native path: `ImageDecoder` + `OffscreenCanvas`
+  - fallback path: wasm runtime (PNG/JPEG/WebP decode)
 
 ## Limits / Caveats
 
 - Non-remote string input is rejected.
-- Runtime fails when `ImageDecoder` or `OffscreenCanvas` is unavailable.
+- If native APIs are missing, edge automatically tries wasm fallback.
+- If fallback also fails, error message includes both native and fallback guidance.
 - For Cloudflare Workers, prefer `blurkit/cloudflare`.
 
 ## Next read
 
+- [WASM Runtime](/docs/runtimes/wasm/)
 - [Cloudflare Runtime](/docs/runtimes/cloudflare/)
 - [API: encode()](/docs/api/encode/)
-- [Limits and Caveats](/docs/limits/)

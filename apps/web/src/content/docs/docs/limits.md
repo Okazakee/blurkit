@@ -14,8 +14,9 @@ Runtime boundaries:
 - `blurkit/node` requires `sharp` at runtime.
 - `blurkit/browser` rejects local filesystem path strings.
 - `blurkit/browser` remote URL flow depends on CORS.
-- `blurkit/edge` requires `ImageDecoder` and `OffscreenCanvas`.
+- `blurkit/edge` prefers native `ImageDecoder` + `OffscreenCanvas` and falls back to wasm.
 - `blurkit/cloudflare` supports remote URL input only.
+- `blurkit/wasm` decode support is PNG/JPEG/WebP only.
 
 Cross-cutting behavior:
 

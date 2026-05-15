@@ -1,6 +1,6 @@
 ---
 title: CLI Overview
-description: Generate one result or one manifest from the shell using the Node runtime.
+description: Generate one result or one manifest from the shell using sharp or wasm backend.
 ---
 
 ## When to use
@@ -32,6 +32,7 @@ Common flags:
 - `--out <file>`
 - `--base-path <path>`
 - `--concurrency <number>`
+- `--backend sharp|wasm`
 - `--pretty`
 
 Behavior:
@@ -39,10 +40,12 @@ Behavior:
 - local file input returns one `BlurResult` JSON object
 - local directory input + `--glob` returns one `BlurManifest` JSON object
 - remote URL input behaves as single-image mode
+- backend defaults to `sharp`; use `--backend wasm` to force wasm path
 
 ## Limits / Caveats
 
-- CLI uses Node runtime and requires `sharp`.
+- `--backend sharp` requires `sharp`.
+- `--backend wasm` supports PNG/JPEG/WebP decode.
 - `--glob` is valid only for local directory input.
 
 ## Next read

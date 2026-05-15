@@ -17,7 +17,7 @@ pnpm add blurkit
 
 - `blurkit` installs `sharp` as an optional dependency.
 - Node/Bun runtime and CLI require `sharp` at execution time.
-- Browser, edge, and cloudflare entrypoints do not need `sharp`.
+- Browser, edge, cloudflare, and wasm entrypoints do not need `sharp`.
 
 | Package manager | Default install | If optional deps are skipped |
 | --- | --- | --- |

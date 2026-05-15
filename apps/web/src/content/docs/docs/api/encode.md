@@ -30,6 +30,7 @@ type BlurKitInput = string | URL | File | Blob | ArrayBuffer
 - Runtime entrypoint determines which input forms are valid at runtime.
 - `options` controls algorithm, target dimensions, output format, and optional cache.
 - Returns a `BlurResult` with `dataURL`, `hash`, dimensions, algorithm, and optional `meta`.
+- `blurkit/wasm` accepts remote URL/URL/Blob/ArrayBuffer and decodes PNG/JPEG/WebP.
 
 ## Limits / Caveats
 
