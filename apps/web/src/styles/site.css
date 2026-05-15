@@ -176,6 +176,7 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  min-height: 70vh;
 }
 
 .live-demo-kicker,
@@ -189,6 +190,7 @@
 
 .live-demo-intro {
   max-width: 52rem;
+  flex-shrink: 0;
 }
 
 .live-demo-intro h2 {
@@ -200,17 +202,29 @@
   display: grid;
   gap: 1rem;
   grid-template-columns: minmax(320px, 0.88fr) minmax(0, 1.12fr);
-  align-items: start;
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
 }
 
 .live-demo-rail,
-.live-demo-stage,
 .live-demo-control-groups,
 .live-demo-control-group,
-.live-demo-field,
-.live-demo-stage > * {
+.live-demo-field {
   display: grid;
   gap: 1rem;
+}
+
+.live-demo-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 0;
+  overflow: auto;
+}
+
+.live-demo-preview-card {
+  flex-shrink: 0;
 }
 
 .live-demo-card {
@@ -645,8 +659,18 @@
   color: var(--bk-text);
 }
 
+.live-demo-output-card {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  max-height: 50vh;
+}
+
 .live-demo-output-card pre {
-  min-height: 240px;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
 }
 
 .live-demo-output-header {

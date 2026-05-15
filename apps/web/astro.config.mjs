@@ -4,7 +4,7 @@ import sitemap from '@astrojs/sitemap'
 import starlight from '@astrojs/starlight'
 
 const SITE_URL = 'https://blurkit.okazakee.dev'
-const SOCIAL_IMAGE_URL = `${SITE_URL}/social-card.webp`
+const SOCIAL_IMAGE_URL = `${SITE_URL}/social-card.png`
 
 export default defineConfig({
   site: SITE_URL,
@@ -87,7 +87,7 @@ export default defineConfig({
         { tag: 'meta', attrs: { property: 'og:image:alt', content: 'blurkit social card with product title and runtime coverage' } },
         { tag: 'meta', attrs: { property: 'og:image:width', content: '1200' } },
         { tag: 'meta', attrs: { property: 'og:image:height', content: '630' } },
-        { tag: 'meta', attrs: { property: 'og:image:type', content: 'image/webp' } },
+        { tag: 'meta', attrs: { property: 'og:image:type', content: 'image/png' } },
         { tag: 'meta', attrs: { name: 'twitter:card', content: 'summary_large_image' } },
         { tag: 'meta', attrs: { name: 'twitter:image', content: SOCIAL_IMAGE_URL } },
         { tag: 'meta', attrs: { name: 'twitter:image:alt', content: 'blurkit social card with product title and runtime coverage' } },
