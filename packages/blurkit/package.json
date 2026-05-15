@@ -1,6 +1,6 @@
 {
   "name": "blurkit",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "license": "MIT",
   "type": "module",
   "bin": {
@@ -93,7 +93,7 @@
     "sharp": "^0.34.5"
   },
   "peerDependencies": {
-    "blurkit-wasm-codecs": "^0.1.4",
+    "blurkit-wasm-codecs": "^0.1.5",
     "sharp": "^0.34.5"
   },
   "peerDependenciesMeta": {
