@@ -1,7 +1,9 @@
 import { bytesToDataURL } from './internal/base64'
 import { resolveTargetDimensions } from './internal/dimensions'
 import { normalizeOptions } from './internal/normalize-options'
+import { wasmRuntime } from './internal/wasm-runtime'
 import { encodeManySettledWithRuntime, encodeManyWithRuntime, encodeWithRuntime } from './shared'
+import type { RuntimeHandlers } from './shared'
 import type {
   BlurEncodeManySettledResult,
   BlurKitEdgeInput,
@@ -28,18 +30,14 @@ function detectMimeType(bytes: Uint8Array): string | undefined {
   return undefined
 }
 
-function assertEdgeDecodeCapabilities(): void {
-  if (typeof ImageDecoder === 'undefined' || typeof OffscreenCanvas === 'undefined') {
-    throw new Error(
-      'The current edge runtime is missing ImageDecoder and/or OffscreenCanvas. Use blurkit/cloudflare on Cloudflare Workers, or run blurkit/edge in a runtime that provides both APIs.',
-    )
-  }
+function hasNativeEdgeCapabilities(): boolean {
+  return typeof ImageDecoder !== 'undefined' && typeof OffscreenCanvas !== 'undefined'
 }
 
-function assertEdgeRenderCapabilities(): void {
-  if (typeof OffscreenCanvas === 'undefined') {
+function assertNativeEdgeCapabilities(): void {
+  if (!hasNativeEdgeCapabilities()) {
     throw new Error(
-      'The current edge runtime is missing OffscreenCanvas. Use blurkit/cloudflare on Cloudflare Workers, or run blurkit/edge in a runtime that provides OffscreenCanvas.',
+      'The current edge runtime is missing ImageDecoder and/or OffscreenCanvas for native decode. The wasm fallback runtime should be used instead.',
     )
   }
 }
@@ -85,7 +83,7 @@ async function decodeEdgeImage(
   resolved: ResolvedInput,
   options: ReturnType<typeof normalizeOptions>,
 ): Promise<DecodedImage> {
-  assertEdgeDecodeCapabilities()
+  assertNativeEdgeCapabilities()
 
   const mimeType = resolved.mimeType ?? detectMimeType(resolved.bytes)
   if (!mimeType) {
@@ -142,7 +140,7 @@ async function renderEdgeDataURL(
   height: number,
   format: 'png' | 'jpeg',
 ): Promise<string> {
-  assertEdgeRenderCapabilities()
+  assertNativeEdgeCapabilities()
 
   const canvas = new OffscreenCanvas(width, height)
   const context = canvas.getContext('2d')
@@ -159,15 +157,36 @@ async function renderEdgeDataURL(
   return bytesToDataURL(new Uint8Array(await blob.arrayBuffer()), `image/${format}`)
 }
 
-const runtime = {
+const nativeRuntime: RuntimeHandlers = {
   resolveInput: resolveEdgeInput,
   decodeImage: decodeEdgeImage,
   renderDataURL: renderEdgeDataURL,
 }
 
+function selectedEdgeRuntime(): RuntimeHandlers {
+  return hasNativeEdgeCapabilities() ? nativeRuntime : wasmRuntime
+}
+
+function toFallbackError(error: unknown): Error {
+  const reason = error instanceof Error ? error.message : String(error)
+  return new Error(
+    `blurkit/edge could not run native decode APIs (ImageDecoder + OffscreenCanvas unavailable) and the wasm fallback failed: ${reason}`,
+  )
+}
+
 export async function encode(input: BlurKitEdgeInput, options?: BlurKitOptions): Promise<BlurResult>
 export async function encode(input: BlurKitInput, options?: BlurKitOptions): Promise<BlurResult> {
-  return encodeWithRuntime(input, normalizeOptions(options), runtime)
+  const normalized = normalizeOptions(options)
+  const runtime = selectedEdgeRuntime()
+  if (runtime === nativeRuntime) {
+    return encodeWithRuntime(input, normalized, runtime)
+  }
+
+  try {
+    return await encodeWithRuntime(input, normalized, runtime)
+  } catch (error) {
+    throw toFallbackError(error)
+  }
 }
 
 export async function encodeMany(
@@ -178,7 +197,17 @@ export async function encodeMany(
   inputs: BlurKitInput[],
   options?: BlurKitOptions,
 ): Promise<BlurResult[]> {
-  return encodeManyWithRuntime(inputs, normalizeOptions(options), runtime)
+  const normalized = normalizeOptions(options)
+  const runtime = selectedEdgeRuntime()
+  if (runtime === nativeRuntime) {
+    return encodeManyWithRuntime(inputs, normalized, runtime)
+  }
+
+  try {
+    return await encodeManyWithRuntime(inputs, normalized, runtime)
+  } catch (error) {
+    throw toFallbackError(error)
+  }
 }
 
 export async function encodeManySettled(
@@ -189,5 +218,15 @@ export async function encodeManySettled(
   inputs: BlurKitInput[],
   options?: BlurKitOptions,
 ): Promise<BlurEncodeManySettledResult[]> {
-  return encodeManySettledWithRuntime(inputs, normalizeOptions(options), runtime)
+  const normalized = normalizeOptions(options)
+  const runtime = selectedEdgeRuntime()
+  if (runtime === nativeRuntime) {
+    return encodeManySettledWithRuntime(inputs, normalized, runtime)
+  }
+
+  try {
+    return await encodeManySettledWithRuntime(inputs, normalized, runtime)
+  } catch (error) {
+    throw toFallbackError(error)
+  }
 }

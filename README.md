@@ -5,7 +5,7 @@
 [![Release blurkit](https://github.com/Okazakee/blurkit/actions/workflows/release.yml/badge.svg)](https://github.com/Okazakee/blurkit/actions/workflows/release.yml)
 [![Deploy website](https://github.com/Okazakee/blurkit/actions/workflows/website-deploy.yml/badge.svg)](https://github.com/Okazakee/blurkit/actions/workflows/website-deploy.yml)
 
-Universal image placeholder generation for Node, Bun, browser, and edge runtimes.
+Universal image placeholder generation for Node, Bun, browser, edge, Cloudflare, and WASM runtimes.
 
 `blurkit` takes an image input and returns a ready-to-use placeholder `dataURL` plus the underlying hash, dimensions, and source metadata. The goal is to hide the decode, resize, hash, and render pipeline behind one practical API.
 
@@ -13,7 +13,7 @@ Universal image placeholder generation for Node, Bun, browser, and edge runtimes
 
 - Ready-to-use `dataURL` output
 - BlurHash and ThumbHash support
-- Explicit runtime entrypoints for Node, browser, and edge runtimes
+- Explicit runtime entrypoints for Node, browser, edge, Cloudflare, and WASM runtimes
 - Batch encoding with `encodeMany()`
 - CLI support for single images and folder manifests
 - Optional cache interface with a Node memory cache helper
@@ -60,6 +60,8 @@ Prefer explicit runtime imports in application code:
 import { encode } from 'blurkit/node'
 import { encode as encodeBrowser } from 'blurkit/browser'
 import { encode as encodeEdge } from 'blurkit/edge'
+import { encode as encodeCloudflare } from 'blurkit/cloudflare'
+import { encode as encodeWasm } from 'blurkit/wasm'
 ```
 
 The root import is available as a convenience wrapper:
@@ -76,6 +78,12 @@ Encode a single local image:
 
 ```bash
 npx blurkit encode ./public/hero.jpg --pretty
+```
+
+Encode with wasm backend:
+
+```bash
+npx blurkit encode ./public/hero.jpg --backend wasm --pretty
 ```
 
 Encode a remote image:
@@ -172,7 +180,9 @@ await writeManifest('./blur-manifest.json', manifest, { pretty: true })
 
 - Node and Bun use the `blurkit/node` entrypoint and rely on `sharp` for image decoding and rendering.
 - The browser runtime supports `File`, `Blob`, `ArrayBuffer`, and remote URLs that permit CORS.
-- The edge runtime supports remote URLs, `ArrayBuffer`, and `Blob`, but depends on `ImageDecoder` and `OffscreenCanvas` being available in the target platform.
+- The edge runtime uses native `ImageDecoder` + `OffscreenCanvas` when available, then falls back to the wasm runtime.
+- The Cloudflare runtime is optimized for Worker image transforms.
+- The wasm runtime supports PNG/JPEG/WebP decode in runtimes without native decoding APIs.
 - The root import auto-selects a runtime, but explicit runtime imports are safer for bundlers and framework apps.
 
 ## Roadmap / Deferred
@@ -180,7 +190,6 @@ await writeManifest('./blur-manifest.json', manifest, { pretty: true })
 These are intentionally not documented as current support:
 
 - Persistent cache adapters beyond the in-memory Node helper
-- Broader edge decoding coverage across more image formats and runtimes
 - Framework-specific adapters such as Next.js convenience helpers
 - Additional manifest output formats and tighter build-tool integrations
 

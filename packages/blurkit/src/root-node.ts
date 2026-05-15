@@ -8,6 +8,7 @@ export type {
   BlurKitNodeInput,
   BlurKitOptions,
   BlurKitRemoteURLString,
+  BlurKitWasmInput,
   BlurManifest,
   BlurOutputFormat,
   BlurResult,

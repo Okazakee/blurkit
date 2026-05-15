@@ -5,14 +5,14 @@
 [![Release blurkit](https://github.com/Okazakee/blurkit/actions/workflows/release.yml/badge.svg)](https://github.com/Okazakee/blurkit/actions/workflows/release.yml)
 [![Deploy website](https://github.com/Okazakee/blurkit/actions/workflows/website-deploy.yml/badge.svg)](https://github.com/Okazakee/blurkit/actions/workflows/website-deploy.yml)
 
-Universal image placeholder generation for Node, Bun, browsers, edge runtimes, and Cloudflare Workers.
+Universal image placeholder generation for Node, Bun, browsers, edge runtimes, Cloudflare Workers, and WASM-first runtimes.
 
 `blurkit` takes an image input and returns a placeholder `dataURL` plus hash text, placeholder dimensions, and source metadata.
 
 ## Features
 
 - BlurHash and ThumbHash support
-- Runtime-specific entrypoints for Node, browser, edge, and Cloudflare
+- Runtime-specific entrypoints for Node, browser, edge, Cloudflare, and WASM
 - Ready-to-render `dataURL` output
 - `encodeMany()` fail-fast batches and `encodeManySettled()` partial-success batches
 - CLI support for single images, remote URLs, and folder manifests
@@ -60,6 +60,7 @@ import { encode } from 'blurkit/node'
 import { encode as encodeBrowser } from 'blurkit/browser'
 import { encode as encodeEdge } from 'blurkit/edge'
 import { encode as encodeCloudflare } from 'blurkit/cloudflare'
+import { encode as encodeWasm } from 'blurkit/wasm'
 ```
 
 Root import is still supported:
@@ -84,8 +85,9 @@ Runtime support differs:
 
 - `blurkit/node`: local file paths, remote URLs, `URL`, `Blob`, `ArrayBuffer`
 - `blurkit/browser`: remote URLs, `URL`, `File`, `Blob`, `ArrayBuffer`
-- `blurkit/edge`: remote URLs, `URL`, `Blob`, `ArrayBuffer`
+- `blurkit/edge`: remote URLs, `URL`, `Blob`, `ArrayBuffer` (native APIs first, wasm fallback)
 - `blurkit/cloudflare`: remote URLs and `URL`
+- `blurkit/wasm`: remote URLs, `URL`, `Blob`, `ArrayBuffer`
 
 ## API
 
@@ -192,8 +194,15 @@ import { createManifest } from 'blurkit'
 
 ## Edge Runtime Notes
 
-- `blurkit/edge` requires `ImageDecoder` and `OffscreenCanvas`.
+- `blurkit/edge` uses `ImageDecoder` + `OffscreenCanvas` when available.
+- If native APIs are unavailable, `blurkit/edge` automatically falls back to the wasm runtime path.
 - For Cloudflare Workers, prefer `blurkit/cloudflare`.
+
+## WASM Runtime Notes
+
+- `blurkit/wasm` supports PNG, JPEG, and WebP decode.
+- It accepts remote URLs, `URL`, `Blob`, and `ArrayBuffer`.
+- Local filesystem path strings are not supported in `blurkit/wasm`.
 
 ## CLI
 
@@ -209,17 +218,26 @@ Encode a remote image:
 npx blurkit encode https://example.com/image.jpg --algorithm thumbhash --format jpeg
 ```
 
+Encode with the wasm backend:
+
+```bash
+npx blurkit encode ./public/hero.jpg --backend wasm --pretty
+```
+
 Generate a manifest:
 
 ```bash
 npx blurkit encode ./public --glob "**/*.{jpg,jpeg,png,webp}" --out blur-manifest.json --pretty
 ```
 
+CLI backend defaults to `sharp`; set `--backend wasm` to force the wasm path.
+
 ## Limits and Caveats
 
 - Node runtime requires `sharp` (installed automatically unless optional dependencies are skipped).
 - Browser runtime rejects local filesystem path strings.
 - Browser remote URL decoding depends on CORS.
-- Edge runtime requires `ImageDecoder` and `OffscreenCanvas`.
+- Edge runtime prefers native decode APIs and falls back to wasm when unavailable.
+- WASM runtime decode support is limited to PNG, JPEG, and WebP.
 - `encodeMany()` is fail-fast; use `encodeManySettled()` for partial success.
 - Root import uses static condition resolution; explicit runtime subpaths are still recommended for clarity.

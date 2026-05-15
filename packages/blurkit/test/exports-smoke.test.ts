@@ -16,6 +16,7 @@ describe('package export map and root import smoke checks', () => {
     expect(rootExport).toHaveProperty('browser')
     expect(rootExport).toHaveProperty('node')
     expect(rootExport).toHaveProperty('worker')
+    expect(packageJson.exports).toHaveProperty('./wasm')
   })
 
   it('root source does not dynamically detect runtime', async () => {

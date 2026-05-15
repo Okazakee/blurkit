@@ -29,6 +29,12 @@ export type BlurKitEdgeInput =
   | Blob
   | ArrayBuffer
 
+export type BlurKitWasmInput =
+  | BlurKitRemoteURLString
+  | URL
+  | Blob
+  | ArrayBuffer
+
 export interface BlurKitOptions {
   algorithm?: BlurAlgorithm
   size?: number

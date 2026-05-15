@@ -59,6 +59,10 @@ Example:
 feat(website): improve docs runtime comparison table
 ```
 
+Full trigger and changelog rules:
+
+- See [`COMMIT_CONVENTIONS.md`](./COMMIT_CONVENTIONS.md)
+
 ## PR expectations
 
 - Include a clear problem statement and scope.

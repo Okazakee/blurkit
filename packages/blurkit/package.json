@@ -48,6 +48,11 @@
       "types": "./dist/cloudflare.d.ts",
       "import": "./dist/cloudflare.js",
       "require": "./dist/cloudflare.cjs"
+    },
+    "./wasm": {
+      "types": "./dist/wasm.d.ts",
+      "import": "./dist/wasm.js",
+      "require": "./dist/wasm.cjs"
     }
   },
   "files": [
@@ -72,6 +77,10 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
+    "@jsquash/jpeg": "^1.6.0",
+    "@jsquash/png": "^3.1.1",
+    "@jsquash/resize": "^2.1.1",
+    "@jsquash/webp": "^1.5.0",
     "blurhash": "^2.0.5",
     "commander": "^14.0.3",
     "fast-glob": "^3.3.3",

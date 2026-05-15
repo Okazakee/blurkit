@@ -10,6 +10,7 @@ export default defineConfig({
     browser: 'src/browser.ts',
     edge: 'src/edge.ts',
     cloudflare: 'src/cloudflare.ts',
+    wasm: 'src/wasm.ts',
     cli: 'src/cli.ts',
   },
   format: ['esm', 'cjs'],
