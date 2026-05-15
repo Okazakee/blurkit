@@ -1,6 +1,7 @@
 ---
 title: Cache Interface
 description: Why cache is part of options and why persistent adapters are caller-owned today.
+pagefind: false
 ---
 
 ## When to use

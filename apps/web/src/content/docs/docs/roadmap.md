@@ -1,6 +1,7 @@
 ---
 title: Roadmap
 description: Planned direction for features intentionally not shipped today.
+pagefind: false
 ---
 
 ## When to use

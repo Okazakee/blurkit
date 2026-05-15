@@ -56,7 +56,10 @@
     }
   },
   "files": [
-    "dist"
+    "dist/*.js",
+    "dist/*.cjs",
+    "dist/*.d.ts",
+    "dist/*.d.cts"
   ],
   "description": "Universal image placeholder generation for Node, Bun, browser, and edge runtimes.",
   "homepage": "https://blurkit.okazakee.dev",
