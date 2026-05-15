@@ -14,9 +14,9 @@ Universal image placeholder generation for Node, Bun, browser, edge, Cloudflare,
 - Ready-to-use `dataURL` output
 - BlurHash and ThumbHash support
 - Explicit runtime entrypoints for Node, browser, edge, Cloudflare, and WASM runtimes
-- Batch encoding with `encodeMany()`
+- Batch encoding with `encodeMany()` and `encodeManySettled()`
 - CLI support for single images and folder manifests
-- Optional cache interface with a Node memory cache helper
+- Cache interface with Node memory/filesystem helpers and Cloudflare Worker cache helper
 - Manifest helpers for build-time and CMS pipelines
 
 ## Install
@@ -77,6 +77,14 @@ import { encode } from 'blurkit'
 ```
 
 Use the root import when convenience matters more than strict runtime control. For libraries and production apps, prefer the explicit runtime entrypoints.
+
+## Runtime Picker
+
+- `blurkit/node`: Node/Bun/server pipelines, local path support, sharp-backed.
+- `blurkit/browser`: browser/client uploads (`File`/`Blob`) with CORS-compatible remote URL support.
+- `blurkit/edge`: generic worker runtimes; native decode first, wasm fallback second.
+- `blurkit/cloudflare`: Cloudflare Workers with `cf.image`; remote URLs only.
+- `blurkit/wasm`: runtimes without native decode APIs; PNG/JPEG/WebP decode.
 
 ## CLI
 
@@ -163,6 +171,19 @@ const results = await encodeMany([
 
 `encodeMany()` is intentionally fail-fast and mirrors `Promise.all()`.
 
+### `encodeManySettled()`
+
+```ts
+import { encodeManySettled } from 'blurkit/node'
+
+const settled = await encodeManySettled([
+  './public/hero.jpg',
+  './public/missing.jpg',
+])
+```
+
+`encodeManySettled()` returns ordered `fulfilled`/`rejected` results for partial success workflows.
+
 ### `createMemoryCache()`
 
 ```ts
@@ -198,7 +219,6 @@ await writeManifest('./blur-manifest.json', manifest, { pretty: true })
 
 These are intentionally not documented as current support:
 
-- Persistent cache adapters beyond the in-memory Node helper
 - Framework-specific adapters such as Next.js convenience helpers
 - Additional manifest output formats and tighter build-tool integrations
 
