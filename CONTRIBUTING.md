@@ -71,6 +71,6 @@ Full trigger and changelog rules:
 - Include a clear problem statement and scope.
 - Include reproduction steps for bug fixes.
 - Add/update tests when behavior changes.
-- Keep runtime caveats documented if behavior differs across `node`, `browser`, `edge`, or `cloudflare`.
+- Keep runtime caveats documented if behavior differs across `node`, `deno`, `browser`, `edge`, or `cloudflare`.
 - Note changelog relevance for `packages/blurkit` and `packages/blurkit-wasm-codecs` changes.
 - Check the `Library Size Report` workflow artifact on your PR when library packaging/output changes.

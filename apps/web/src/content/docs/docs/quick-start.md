@@ -26,15 +26,18 @@ console.log(result.hash)
 - `encode()` returns a data URL plus metadata in one object.
 - Use explicit entrypoints for predictable runtime behavior:
   - `blurkit/node` for build and server pipelines
+  - `blurkit/deno` for Deno with local file support and wasm-backed decode
   - `blurkit/browser` for `File`/`Blob` input in client code
   - `blurkit/edge` for worker-style runtimes with native decode + wasm fallback
   - `blurkit/cloudflare` for Cloudflare Workers
   - `blurkit/wasm` for runtimes without native decode APIs
-- Install `blurkit-wasm-codecs` when using `blurkit/wasm` or edge fallback paths.
+- Install `blurkit-wasm-codecs` when using `blurkit/deno`, `blurkit/wasm`, or edge fallback paths.
+- Install `sharp` for `blurkit/node` and CLI.
 
 ## Limits / Caveats
 
 - Node runtime requires `sharp` at execution time.
+- Deno runtime requires `blurkit-wasm-codecs` and does not use `sharp`.
 - Browser runtime does not support local path strings such as `./public/hero.jpg`.
 - WASM paths require `blurkit-wasm-codecs` at execution time.
 

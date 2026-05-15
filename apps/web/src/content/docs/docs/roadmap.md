@@ -20,6 +20,7 @@ Already shipped:
 - persistent cache helpers (`createFilesystemCache`, `createCloudflareCache`)
 - partial-success batch API (`encodeManySettled`)
 - explicit Cloudflare runtime entrypoint (`blurkit/cloudflare`)
+- explicit Deno runtime entrypoint (`blurkit/deno`)
 
 Rule of interpretation:
 

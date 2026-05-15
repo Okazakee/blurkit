@@ -31,6 +31,7 @@ type BlurKitInput = string | URL | File | Blob | ArrayBuffer
 - `options` controls algorithm, target dimensions, output format, and optional cache.
 - Returns a `BlurResult` with `dataURL`, `hash`, dimensions, algorithm, and optional `meta`.
 - `blurkit/wasm` accepts remote URL/URL/Blob/ArrayBuffer and decodes PNG/JPEG/WebP.
+- `blurkit/deno` accepts local paths, remote URL/URL/Blob/ArrayBuffer with wasm-backed decode and canvas render.
 
 ## Limits / Caveats
 

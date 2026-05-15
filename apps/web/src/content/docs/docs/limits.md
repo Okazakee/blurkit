@@ -12,12 +12,13 @@ Use this page before production rollout or when debugging behavior differences b
 Runtime boundaries:
 
 - `blurkit/node` requires `sharp` at runtime.
+- `blurkit/deno` requires `blurkit-wasm-codecs` and uses wasm-backed decode with canvas render.
 - `blurkit/browser` rejects local filesystem path strings.
 - `blurkit/browser` remote URL flow depends on CORS.
 - `blurkit/edge` prefers native `ImageDecoder` + `OffscreenCanvas` and falls back to wasm.
 - `blurkit/cloudflare` supports remote URL input only.
 - `blurkit/wasm` decode support is PNG/JPEG/WebP only.
-- `blurkit/edge` fallback and `blurkit/wasm` require `blurkit-wasm-codecs`.
+- `blurkit/deno`, `blurkit/edge` fallback, and `blurkit/wasm` require `blurkit-wasm-codecs`.
 
 Cross-cutting behavior:
 

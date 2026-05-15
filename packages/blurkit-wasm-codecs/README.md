@@ -5,6 +5,7 @@ WASM codec companion package for [`blurkit`](https://www.npmjs.com/package/blurk
 This package provides the jsquash decode/resize/encode backend used by:
 
 - `blurkit/wasm`
+- `blurkit/deno` for image decoding
 - `blurkit/edge` fallback when native `ImageDecoder` and `OffscreenCanvas` are unavailable
 - `blurkit` CLI with `--backend wasm`
 

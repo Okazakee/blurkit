@@ -22,7 +22,7 @@ console.log(result.dataURL)
 
 ## Inputs / Options / Behavior
 
-- blurkit ships explicit runtime entrypoints: `blurkit/node`, `blurkit/browser`, `blurkit/edge`, `blurkit/cloudflare`, and `blurkit/wasm`.
+- blurkit ships explicit runtime entrypoints: `blurkit/node`, `blurkit/deno`, `blurkit/browser`, `blurkit/edge`, `blurkit/cloudflare`, and `blurkit/wasm`.
 - Root import `blurkit` resolves by export conditions (`node`, `browser`, `worker`) without runtime dynamic dispatch.
 - Successful `encode()` returns `dataURL`, `hash`, `algorithm`, `width`, `height`, and optional `meta`.
 - `encodeMany()` is fail-fast.
@@ -36,6 +36,7 @@ console.log(result.dataURL)
 ## Limits / Caveats
 
 - Node runtime requires `sharp`.
+- Deno runtime requires `blurkit-wasm-codecs` and uses wasm-backed decode with canvas render.
 - Browser runtime cannot read local filesystem paths.
 - Edge runtime uses native decode APIs when available, then falls back to wasm.
 - Cloudflare runtime accepts remote URL input only.
@@ -47,3 +48,4 @@ console.log(result.dataURL)
 - [Installation](/docs/installation/)
 - [Quick Start](/docs/quick-start/)
 - [Node Runtime](/docs/runtimes/node/)
+- [Deno Runtime](/docs/runtimes/deno/)

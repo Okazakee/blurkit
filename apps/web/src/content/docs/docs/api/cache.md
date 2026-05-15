@@ -31,8 +31,8 @@ interface BlurKitCache {
 
 Built-in helpers:
 
-- `createMemoryCache({ max? })` from `blurkit/node`
-- `createFilesystemCache({ dir, ttlMs? })` from `blurkit/node`
+- `createMemoryCache({ max? })` from `blurkit/node` and `blurkit/deno`
+- `createFilesystemCache({ dir, ttlMs? })` from `blurkit/node` and `blurkit/deno`
 - `createCloudflareCache({ name?, ttlSeconds? })` from `blurkit/cloudflare`
 
 ## Limits / Caveats

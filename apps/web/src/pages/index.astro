@@ -8,7 +8,7 @@ const siteBase = Astro.site ?? fallbackSiteUrl
 const siteUrl = siteBase.origin
 const title = 'blurkit - Universal Placeholder Generation'
 const description =
-  'Generate BlurHash and ThumbHash placeholders across Node, browser, edge, Cloudflare, and WASM runtimes.'
+  'Generate BlurHash and ThumbHash placeholders across Node, Deno, browser, edge, Cloudflare, and WASM runtimes.'
 const canonicalUrl = new URL('/', siteBase).toString()
 const socialImage = new URL('/social-card.webp', siteBase).toString()
 const socialImageAlt = 'blurkit social card with product title and runtime coverage'
@@ -91,7 +91,7 @@ const structuredData = {
               Placeholder data URL out.
             </h1>
             <p>
-              Generate BlurHash or ThumbHash placeholders across Node, browser, edge, Cloudflare, and wasm runtimes, then inspect the output in the live demo below.
+              Generate BlurHash or ThumbHash placeholders across Node, Deno, browser, edge, Cloudflare, and wasm runtimes, then inspect the output in the live demo below.
             </p>
 
             <div class="site-actions">
@@ -136,7 +136,7 @@ console.log(result.dataURL)`}</code></pre>
                 </svg>
               </span>
               <h3>Runtime entrypoints</h3>
-              <p>Import <span class="site-inline-code">blurkit/node</span>, <span class="site-inline-code">blurkit/browser</span>, <span class="site-inline-code">blurkit/edge</span>, <span class="site-inline-code">blurkit/cloudflare</span>, or <span class="site-inline-code">blurkit/wasm</span> explicitly when runtime behavior matters.</p>
+              <p>Import <span class="site-inline-code">blurkit/node</span>, <span class="site-inline-code">blurkit/deno</span>, <span class="site-inline-code">blurkit/browser</span>, <span class="site-inline-code">blurkit/edge</span>, <span class="site-inline-code">blurkit/cloudflare</span>, or <span class="site-inline-code">blurkit/wasm</span> explicitly when runtime behavior matters.</p>
             </article>
             <article class="site-card site-card--stagger-2">
               <span class="site-card-icon" aria-hidden="true">

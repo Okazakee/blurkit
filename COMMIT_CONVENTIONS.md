@@ -117,6 +117,7 @@ Use these defaults unless you have a specific reason not to:
 
 - Library code change:
   - `feat(node): ...`
+  - `fix(deno): ...`
   - `fix(edge): ...`
   - `refactor(wasm): ...`
 - Website/docs-only deploy intent:

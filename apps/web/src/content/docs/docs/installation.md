@@ -5,7 +5,7 @@ description: Install blurkit and understand when sharp or wasm codecs are needed
 
 ## When to use
 
-Use this page before running `blurkit/node`, CLI commands, or worker/browser runtime code.
+Use this page before running `blurkit/node`, `blurkit/deno`, CLI commands, or worker/browser runtime code.
 
 ## Example
 
@@ -17,7 +17,8 @@ pnpm add blurkit
 
 - `blurkit` installs `sharp` as an optional dependency.
 - Node/Bun runtime and CLI require `sharp` at execution time.
-- `blurkit-wasm-codecs` is required for `blurkit/wasm` and for `blurkit/edge` fallback in runtimes without native decode APIs.
+- Deno runtime requires `blurkit-wasm-codecs` at execution time.
+- `blurkit-wasm-codecs` is also required for `blurkit/wasm` and for `blurkit/edge` fallback in runtimes without native decode APIs.
 
 | Package manager | Default install | If optional deps are skipped |
 | --- | --- | --- |
@@ -25,6 +26,12 @@ pnpm add blurkit
 | `npm` | `npm install blurkit` | `npm install sharp` |
 | `yarn` | `yarn add blurkit` | `yarn add sharp` |
 | `bun` | `bun add blurkit` | `bun add sharp` |
+
+Deno runtime also needs `blurkit-wasm-codecs` alongside `blurkit`:
+
+```bash
+npm install blurkit blurkit-wasm-codecs
+```
 
 Wasm companion install (only when needed):
 
