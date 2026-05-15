@@ -1,6 +1,6 @@
 ---
 title: Installation
-description: Install blurkit and understand when sharp is needed.
+description: Install blurkit and understand when sharp or wasm codecs are needed.
 ---
 
 ## When to use
@@ -17,7 +17,7 @@ pnpm add blurkit
 
 - `blurkit` installs `sharp` as an optional dependency.
 - Node/Bun runtime and CLI require `sharp` at execution time.
-- Browser, edge, cloudflare, and wasm entrypoints do not need `sharp`.
+- `blurkit-wasm-codecs` is required for `blurkit/wasm` and for `blurkit/edge` fallback in runtimes without native decode APIs.
 
 | Package manager | Default install | If optional deps are skipped |
 | --- | --- | --- |
@@ -26,9 +26,16 @@ pnpm add blurkit
 | `yarn` | `yarn add blurkit` | `yarn add sharp` |
 | `bun` | `bun add blurkit` | `bun add sharp` |
 
+Wasm companion install (only when needed):
+
+```bash
+pnpm add blurkit-wasm-codecs
+```
+
 ## Limits / Caveats
 
 - If `sharp` is missing, `blurkit/node` throws `BLURKIT_MISSING_SHARP` on first encode call.
+- If wasm codecs are missing, wasm paths throw `BLURKIT_MISSING_WASM_CODECS` with install guidance.
 - Root import in Node/Bun resolves to Node runtime behavior and therefore also needs `sharp`.
 
 ## Next read

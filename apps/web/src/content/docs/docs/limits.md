@@ -17,6 +17,7 @@ Runtime boundaries:
 - `blurkit/edge` prefers native `ImageDecoder` + `OffscreenCanvas` and falls back to wasm.
 - `blurkit/cloudflare` supports remote URL input only.
 - `blurkit/wasm` decode support is PNG/JPEG/WebP only.
+- `blurkit/edge` fallback and `blurkit/wasm` require `blurkit-wasm-codecs`.
 
 Cross-cutting behavior:
 

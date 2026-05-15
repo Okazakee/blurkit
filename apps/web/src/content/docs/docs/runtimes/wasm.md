@@ -27,12 +27,14 @@ const result = await encode('https://example.com/image.webp', {
 - Decode support: PNG, JPEG, WebP.
 - Output support: PNG or JPEG data URL (via `outputFormat`).
 - Includes `encodeMany()` and `encodeManySettled()`.
+- Requires `blurkit-wasm-codecs` to be installed in your project.
 
 ## Limits / Caveats
 
 - Local filesystem path strings are rejected.
 - Decode support is intentionally limited to PNG/JPEG/WebP.
 - Remote URL input still depends on network reachability and runtime fetch behavior.
+- If codecs package is missing, calls throw `BLURKIT_MISSING_WASM_CODECS`.
 
 ## Next read
 

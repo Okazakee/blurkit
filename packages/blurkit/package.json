@@ -80,10 +80,6 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@jsquash/jpeg": "^1.6.0",
-    "@jsquash/png": "^3.1.1",
-    "@jsquash/resize": "^2.1.1",
-    "@jsquash/webp": "^1.5.0",
     "blurhash": "^2.0.5",
     "commander": "^14.0.3",
     "fast-glob": "^3.3.3",
@@ -93,12 +89,17 @@
     "sharp": "^0.34.5"
   },
   "devDependencies": {
+    "blurkit-wasm-codecs": "workspace:*",
     "sharp": "^0.34.5"
   },
   "peerDependencies": {
+    "blurkit-wasm-codecs": "^0.1.4",
     "sharp": "^0.34.5"
   },
   "peerDependenciesMeta": {
+    "blurkit-wasm-codecs": {
+      "optional": true
+    },
     "sharp": {
       "optional": true
     }

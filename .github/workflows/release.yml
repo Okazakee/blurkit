@@ -17,10 +17,12 @@ jobs:
       contents: read
     outputs:
       tag_name: ${{ steps.meta.outputs.tag_name }}
-      package_name: ${{ steps.meta.outputs.package_name }}
       package_version: ${{ steps.meta.outputs.package_version }}
       previous_tag: ${{ steps.meta.outputs.previous_tag }}
-      already_published: ${{ steps.meta.outputs.already_published }}
+      blurkit_name: ${{ steps.meta.outputs.blurkit_name }}
+      wasm_codecs_name: ${{ steps.meta.outputs.wasm_codecs_name }}
+      blurkit_already_published: ${{ steps.meta.outputs.blurkit_already_published }}
+      wasm_codecs_already_published: ${{ steps.meta.outputs.wasm_codecs_already_published }}
 
     steps:
       - uses: actions/checkout@v4
@@ -47,11 +49,18 @@ jobs:
             exit 1
           fi
 
-          package_name=$(node -p "require('./packages/blurkit/package.json').name")
-          package_version=$(node -p "require('./packages/blurkit/package.json').version")
+          blurkit_name=$(node -p "require('./packages/blurkit/package.json').name")
+          wasm_codecs_name=$(node -p "require('./packages/blurkit-wasm-codecs/package.json').name")
+          blurkit_version=$(node -p "require('./packages/blurkit/package.json').version")
+          wasm_codecs_version=$(node -p "require('./packages/blurkit-wasm-codecs/package.json').version")
 
-          if [[ "$package_version" != "$normalized_tag" ]]; then
-            echo "Tag \"$tag_name\" does not match packages/blurkit/package.json version \"$package_version\"." >&2
+          if [[ "$blurkit_version" != "$normalized_tag" ]]; then
+            echo "Tag \"$tag_name\" does not match packages/blurkit/package.json version \"$blurkit_version\"." >&2
+            exit 1
+          fi
+
+          if [[ "$wasm_codecs_version" != "$normalized_tag" ]]; then
+            echo "Tag \"$tag_name\" does not match packages/blurkit-wasm-codecs/package.json version \"$wasm_codecs_version\"." >&2
             exit 1
           fi
 
@@ -98,17 +107,26 @@ jobs:
           NODE
           )
 
-          if npm view "$package_name@$package_version" version >/dev/null 2>&1; then
-            already_published=true
+          if npm view "$blurkit_name@$blurkit_version" version >/dev/null 2>&1; then
+            blurkit_already_published=true
           else
-            already_published=false
+            blurkit_already_published=false
+          fi
+
+          if npm view "$wasm_codecs_name@$wasm_codecs_version" version >/dev/null 2>&1; then
+            wasm_codecs_already_published=true
+          else
+            wasm_codecs_already_published=false
           fi
 
           echo "tag_name=$tag_name" >> "$GITHUB_OUTPUT"
-          echo "package_name=$package_name" >> "$GITHUB_OUTPUT"
-          echo "package_version=$package_version" >> "$GITHUB_OUTPUT"
+          echo "package_version=$normalized_tag" >> "$GITHUB_OUTPUT"
           echo "previous_tag=$previous_tag" >> "$GITHUB_OUTPUT"
-          echo "already_published=$already_published" >> "$GITHUB_OUTPUT"
+          echo "blurkit_name=$blurkit_name" >> "$GITHUB_OUTPUT"
+          echo "wasm_codecs_name=$wasm_codecs_name" >> "$GITHUB_OUTPUT"
+          echo "blurkit_already_published=$blurkit_already_published" >> "$GITHUB_OUTPUT"
+          echo "wasm_codecs_already_published=$wasm_codecs_already_published" >> "$GITHUB_OUTPUT"
+
   quality_and_publish:
     needs: prepare
     runs-on: ubuntu-latest
@@ -130,30 +148,41 @@ jobs:
           package-manager-cache: false
 
       - name: Install dependencies
-        if: needs.prepare.outputs.already_published != 'true'
+        if: needs.prepare.outputs.blurkit_already_published != 'true' || needs.prepare.outputs.wasm_codecs_already_published != 'true'
         run: pnpm install --frozen-lockfile
 
-      - name: Build package
-        if: needs.prepare.outputs.already_published != 'true'
-        run: pnpm --filter ./packages/blurkit build
+      - name: Build packages
+        if: needs.prepare.outputs.blurkit_already_published != 'true' || needs.prepare.outputs.wasm_codecs_already_published != 'true'
+        run: |
+          pnpm --filter ./packages/blurkit-wasm-codecs build
+          pnpm --filter ./packages/blurkit build
 
-      - name: Typecheck package
-        if: needs.prepare.outputs.already_published != 'true'
-        run: pnpm --filter ./packages/blurkit check
+      - name: Typecheck packages
+        if: needs.prepare.outputs.blurkit_already_published != 'true' || needs.prepare.outputs.wasm_codecs_already_published != 'true'
+        run: |
+          pnpm --filter ./packages/blurkit-wasm-codecs check
+          pnpm --filter ./packages/blurkit check
 
-      - name: Test package
-        if: needs.prepare.outputs.already_published != 'true'
-        run: pnpm --filter ./packages/blurkit test
+      - name: Test packages
+        if: needs.prepare.outputs.blurkit_already_published != 'true' || needs.prepare.outputs.wasm_codecs_already_published != 'true'
+        run: |
+          pnpm --filter ./packages/blurkit-wasm-codecs test
+          pnpm --filter ./packages/blurkit test
 
-      - name: Publish package
-        if: needs.prepare.outputs.already_published != 'true'
+      - name: Publish companion package
+        if: needs.prepare.outputs.wasm_codecs_already_published != 'true'
+        working-directory: packages/blurkit-wasm-codecs
+        run: npm publish
+
+      - name: Publish blurkit package
+        if: needs.prepare.outputs.blurkit_already_published != 'true'
         working-directory: packages/blurkit
         run: npm publish
 
       - name: Mark publish output state
         id: publish_state
         run: |
-          if [[ "${{ needs.prepare.outputs.already_published }}" == 'true' ]]; then
+          if [[ "${{ needs.prepare.outputs.blurkit_already_published }}" == 'true' && "${{ needs.prepare.outputs.wasm_codecs_already_published }}" == 'true' ]]; then
             echo "published=false" >> "$GITHUB_OUTPUT"
           else
             echo "published=true" >> "$GITHUB_OUTPUT"
@@ -184,7 +213,7 @@ jobs:
           CURRENT_TAG: ${{ needs.prepare.outputs.tag_name }}
           PREVIOUS_TAG: ${{ needs.prepare.outputs.previous_tag }}
           PACKAGE_VERSION: ${{ needs.prepare.outputs.package_version }}
-          COMMIT_PATH: packages/blurkit
+          COMMIT_PATHS: packages/blurkit,packages/blurkit-wasm-codecs
           REPO_URL: ${{ github.server_url }}/${{ github.repository }}
 
       - name: Create or update GitHub Release

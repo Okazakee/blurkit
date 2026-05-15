@@ -73,9 +73,10 @@ function hasBreakingBody(body) {
   return /BREAKING CHANGES?:/im.test(body)
 }
 
-function readCommits(range, commitPath) {
+function readCommits(range, commitPaths) {
   const format = '%H%x1f%s%x1f%b%x1e'
-  const log = runGit(['log', '--no-merges', `--pretty=format:${format}`, range, '--', commitPath])
+  const args = ['log', '--no-merges', `--pretty=format:${format}`, range, '--', ...commitPaths]
+  const log = runGit(args)
   if (!log) {
     return []
   }
@@ -103,7 +104,10 @@ function main() {
   const outputPath = process.argv[2] || 'release-notes.md'
   const currentTag = process.env.CURRENT_TAG || process.env.GITHUB_REF_NAME || ''
   const packageVersion = process.env.PACKAGE_VERSION || (currentTag.startsWith('v') ? currentTag.slice(1) : currentTag)
-  const commitPath = process.env.COMMIT_PATH || 'packages/blurkit'
+  const commitPaths = (process.env.COMMIT_PATHS || process.env.COMMIT_PATH || 'packages/blurkit')
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean)
   const explicitPreviousTag = process.env.PREVIOUS_TAG || ''
   const repoUrl =
     process.env.REPO_URL ||
@@ -118,7 +122,7 @@ function main() {
   const previousTag = detectPreviousStableTag(currentTag, explicitPreviousTag)
   const range = previousTag ? `${previousTag}..${currentTag}` : currentTag
 
-  const commits = readCommits(range, commitPath)
+  const commits = readCommits(range, commitPaths)
   const breaking = []
   const features = []
   const fixes = []
@@ -174,7 +178,7 @@ function main() {
   ].filter(Boolean)
 
   if (sections.length === 0) {
-    sections.push('### Notes\n- No product-impacting changes detected in `packages/blurkit` for this release.')
+    sections.push('### Notes\n- No product-impacting changes detected in `packages/blurkit` or `packages/blurkit-wasm-codecs` for this release.')
   }
 
   const markdown = `${header.join('\n\n')}\n\n${sections.join('\n\n')}\n`

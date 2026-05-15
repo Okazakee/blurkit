@@ -1,0 +1,46 @@
+{
+  "name": "blurkit-wasm-codecs",
+  "version": "0.1.4",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist/*.js",
+    "dist/*.cjs",
+    "dist/*.d.ts",
+    "dist/*.d.cts"
+  ],
+  "description": "WASM codec backend for blurkit runtimes.",
+  "homepage": "https://blurkit.okazakee.dev",
+  "bugs": {
+    "url": "https://github.com/Okazakee/blurkit/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Okazakee/blurkit.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "check": "tsc --noEmit",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@jsquash/jpeg": "^1.6.0",
+    "@jsquash/png": "^3.1.1",
+    "@jsquash/resize": "^2.1.1",
+    "@jsquash/webp": "^1.5.0"
+  }
+}

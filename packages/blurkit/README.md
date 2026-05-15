@@ -33,6 +33,12 @@ If your install skipped optional dependencies (for example `npm install --omit=o
 npm install sharp
 ```
 
+If you use `blurkit/wasm`, `blurkit/edge` fallback in non-native runtimes, or CLI `--backend wasm`, install:
+
+```bash
+npm install blurkit-wasm-codecs
+```
+
 ## Quick Start (Node)
 
 ```ts
@@ -196,6 +202,7 @@ import { createManifest } from 'blurkit'
 
 - `blurkit/edge` uses `ImageDecoder` + `OffscreenCanvas` when available.
 - If native APIs are unavailable, `blurkit/edge` automatically falls back to the wasm runtime path.
+- Edge fallback requires `blurkit-wasm-codecs`.
 - For Cloudflare Workers, prefer `blurkit/cloudflare`.
 
 ## WASM Runtime Notes
@@ -203,6 +210,7 @@ import { createManifest } from 'blurkit'
 - `blurkit/wasm` supports PNG, JPEG, and WebP decode.
 - It accepts remote URLs, `URL`, `Blob`, and `ArrayBuffer`.
 - Local filesystem path strings are not supported in `blurkit/wasm`.
+- `blurkit-wasm-codecs` must be installed to execute wasm runtime paths.
 
 ## CLI
 
@@ -231,6 +239,7 @@ npx blurkit encode ./public --glob "**/*.{jpg,jpeg,png,webp}" --out blur-manifes
 ```
 
 CLI backend defaults to `sharp`; set `--backend wasm` to force the wasm path.
+`--backend wasm` requires `blurkit-wasm-codecs`.
 
 ## Limits and Caveats
 
@@ -239,5 +248,6 @@ CLI backend defaults to `sharp`; set `--backend wasm` to force the wasm path.
 - Browser remote URL decoding depends on CORS.
 - Edge runtime prefers native decode APIs and falls back to wasm when unavailable.
 - WASM runtime decode support is limited to PNG, JPEG, and WebP.
+- Edge fallback and wasm runtime paths require `blurkit-wasm-codecs`.
 - `encodeMany()` is fail-fast; use `encodeManySettled()` for partial success.
 - Root import uses static condition resolution; explicit runtime subpaths are still recommended for clarity.

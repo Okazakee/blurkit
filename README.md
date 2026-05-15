@@ -31,6 +31,12 @@ For Node and Bun usage, install `sharp` alongside the package:
 pnpm add sharp
 ```
 
+If you use `blurkit/wasm` directly, `blurkit/edge` fallback in non-native runtimes, or CLI `--backend wasm`, install wasm codecs companion package:
+
+```bash
+pnpm add blurkit-wasm-codecs
+```
+
 ## Quick Start
 
 ```ts
@@ -85,6 +91,8 @@ Encode with wasm backend:
 ```bash
 npx blurkit encode ./public/hero.jpg --backend wasm --pretty
 ```
+
+`--backend wasm` requires `blurkit-wasm-codecs`.
 
 Encode a remote image:
 
@@ -181,6 +189,7 @@ await writeManifest('./blur-manifest.json', manifest, { pretty: true })
 - Node and Bun use the `blurkit/node` entrypoint and rely on `sharp` for image decoding and rendering.
 - The browser runtime supports `File`, `Blob`, `ArrayBuffer`, and remote URLs that permit CORS.
 - The edge runtime uses native `ImageDecoder` + `OffscreenCanvas` when available, then falls back to the wasm runtime.
+- Edge fallback and `blurkit/wasm` require `blurkit-wasm-codecs`.
 - The Cloudflare runtime is optimized for Worker image transforms.
 - The wasm runtime supports PNG/JPEG/WebP decode in runtimes without native decoding APIs.
 - The root import auto-selects a runtime, but explicit runtime imports are safer for bundlers and framework apps.
@@ -199,18 +208,18 @@ Library releases and website deployments are handled by separate workflows.
 
 ### Library Release (`.github/workflows/release.yml`)
 
-1. Bump `packages/blurkit/package.json` to the version you want to publish.
+1. Bump `packages/blurkit/package.json` and `packages/blurkit-wasm-codecs/package.json` to the version you want to publish.
 2. Push a matching stable tag like `v0.1.3` or `0.1.3`.
-3. The workflow validates tag/version match, publishes `blurkit`, generates lib-scoped release notes, and creates/updates the GitHub Release.
+3. The workflow validates tag/version match for both packages, publishes `blurkit-wasm-codecs` then `blurkit`, generates lib-scoped release notes, and creates/updates the GitHub Release.
 
 Repository setup:
 
 - Configure `blurkit` for npm trusted publishing against `Okazakee/blurkit` and the `release.yml` workflow.
 - You can do that in the npm UI or with `npm trust github blurkit --repo Okazakee/blurkit --file release.yml`.
 - Trusted publishing requires a current npm CLI with `npm trust` support and account-level 2FA enabled when you create the trust relationship.
-- The workflow accepts only stable semver tags (`vX.Y.Z` or `X.Y.Z`) and fails if the tag does not match `packages/blurkit/package.json`.
-- If that exact version is already on npm, publish/release steps are skipped.
-- GitHub Release notes are generated from commits scoped to `packages/blurkit` and include only product-impacting conventional commit types (`feat`, `fix`, `perf`, `refactor`, plus breaking changes).
+- The workflow accepts only stable semver tags (`vX.Y.Z` or `X.Y.Z`) and fails if the tag does not match both `packages/blurkit/package.json` and `packages/blurkit-wasm-codecs/package.json`.
+- If an exact version is already on npm for a package, publish for that package is skipped.
+- GitHub Release notes are generated from commits scoped to `packages/blurkit` and `packages/blurkit-wasm-codecs` and include only product-impacting conventional commit types (`feat`, `fix`, `perf`, `refactor`, plus breaking changes).
 - No long-lived `NPM_TOKEN` secret is required for publishing.
 
 ### Website Deploy (`.github/workflows/website-deploy.yml`)

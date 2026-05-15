@@ -81,11 +81,17 @@ Valid release tags:
 
 Only stable semver is allowed. Pre-release tags are rejected.
 
-Tag must match `packages/blurkit/package.json` version.
+Tag must match both:
+
+- `packages/blurkit/package.json` version
+- `packages/blurkit-wasm-codecs/package.json` version
 
 ## Changelog generation rules
 
-GitHub release notes are generated from commits in `packages/blurkit` path.
+GitHub release notes are generated from commits in:
+
+- `packages/blurkit`
+- `packages/blurkit-wasm-codecs`
 
 Included commit types:
 
@@ -118,4 +124,3 @@ Use these defaults unless you have a specific reason not to:
   - `docs(website): ...`
 - Non-deploy housekeeping:
   - `chore: ...`
-

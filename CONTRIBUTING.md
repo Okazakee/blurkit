@@ -3,6 +3,7 @@
 Thanks for contributing. This repository is a pnpm + turbo monorepo with:
 
 - `packages/blurkit` (library + CLI)
+- `packages/blurkit-wasm-codecs` (wasm codec companion package)
 - `apps/web` (docs/landing website)
 - `apps/example-*` (minimal integration examples)
 
@@ -25,6 +26,8 @@ Run package-specific confidence checks:
 ```bash
 pnpm --filter ./packages/blurkit check
 pnpm --filter ./packages/blurkit test
+pnpm --filter ./packages/blurkit-wasm-codecs check
+pnpm --filter ./packages/blurkit-wasm-codecs test
 pnpm --filter @blurkit/web check
 pnpm --filter @blurkit/web build
 ```
@@ -69,4 +72,4 @@ Full trigger and changelog rules:
 - Include reproduction steps for bug fixes.
 - Add/update tests when behavior changes.
 - Keep runtime caveats documented if behavior differs across `node`, `browser`, `edge`, or `cloudflare`.
-- Note changelog relevance for `packages/blurkit` changes (release notes are generated from conventional commits in that path).
+- Note changelog relevance for `packages/blurkit` and `packages/blurkit-wasm-codecs` changes.

@@ -30,11 +30,13 @@ console.log(result.hash)
   - `blurkit/edge` for worker-style runtimes with native decode + wasm fallback
   - `blurkit/cloudflare` for Cloudflare Workers
   - `blurkit/wasm` for runtimes without native decode APIs
+- Install `blurkit-wasm-codecs` when using `blurkit/wasm` or edge fallback paths.
 
 ## Limits / Caveats
 
 - Node runtime requires `sharp` at execution time.
 - Browser runtime does not support local path strings such as `./public/hero.jpg`.
+- WASM paths require `blurkit-wasm-codecs` at execution time.
 
 ## Next read
 

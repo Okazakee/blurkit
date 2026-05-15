@@ -168,6 +168,10 @@ function selectedEdgeRuntime(): RuntimeHandlers {
 }
 
 function toFallbackError(error: unknown): Error {
+  if (error instanceof Error && (error as Error & { code?: string }).code === 'BLURKIT_MISSING_WASM_CODECS') {
+    return error
+  }
+
   const reason = error instanceof Error ? error.message : String(error)
   return new Error(
     `blurkit/edge could not run native decode APIs (ImageDecoder + OffscreenCanvas unavailable) and the wasm fallback failed: ${reason}`,

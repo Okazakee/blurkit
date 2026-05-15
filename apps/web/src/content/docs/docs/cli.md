@@ -46,6 +46,7 @@ Behavior:
 
 - `--backend sharp` requires `sharp`.
 - `--backend wasm` supports PNG/JPEG/WebP decode.
+- `--backend wasm` requires `blurkit-wasm-codecs` installed.
 - `--glob` is valid only for local directory input.
 
 ## Next read
