@@ -1,0 +1,53 @@
+name: Library Size Report
+
+on:
+  pull_request:
+  push:
+    tags:
+      - 'v*'
+      - '*.*.*'
+  workflow_dispatch:
+
+concurrency:
+  group: library-size-report-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build library packages
+        run: |
+          pnpm --filter ./packages/blurkit-wasm-codecs build
+          pnpm --filter ./packages/blurkit build
+
+      - name: Generate size report
+        run: node .github/scripts/collect-library-size-report.mjs
+
+      - name: Upload size report artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: library-size-report-${{ github.run_id }}
+          path: |
+            artifacts/library-size-report.json
+            artifacts/library-size-report.md
+          if-no-files-found: error
+
+      - name: Publish job summary
+        run: |
+          cat artifacts/library-size-report.md >> "$GITHUB_STEP_SUMMARY"

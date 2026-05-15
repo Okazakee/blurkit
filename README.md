@@ -222,6 +222,12 @@ Repository setup:
 - GitHub Release notes are generated from commits scoped to `packages/blurkit` and `packages/blurkit-wasm-codecs` and include only product-impacting conventional commit types (`feat`, `fix`, `perf`, `refactor`, plus breaking changes).
 - No long-lived `NPM_TOKEN` secret is required for publishing.
 
+### Library Size Report (`.github/workflows/library-size-report.yml`)
+
+- Runs on pull requests and release tag pushes.
+- Produces `artifacts/library-size-report.json` and `artifacts/library-size-report.md` as downloadable workflow artifacts.
+- Use these artifacts to review package size deltas before merging and at release time.
+
 ### Website Deploy (`.github/workflows/website-deploy.yml`)
 
 - Automatic deploy trigger: push to `main` with website path changes (`apps/web/**`) and a commit subject matching `^(feat|fix|docs|refactor|perf)\(website\):`.
