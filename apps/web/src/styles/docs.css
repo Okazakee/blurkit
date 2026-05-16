@@ -361,7 +361,7 @@ body[data-mobile-menu-expanded] {
     gap: 0.45rem;
   }
 
-  .docs-search--mobile button[data-open-modal] {
+  .docs-search button[data-open-modal] {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -376,17 +376,13 @@ body[data-mobile-menu-expanded] {
     cursor: pointer;
   }
 
-  .docs-search--mobile button[data-open-modal] > :not(:first-child) {
+  .docs-search button[data-open-modal] > :not(:first-child) {
     display: none;
   }
 
-  .docs-search--mobile button[data-open-modal]:hover {
+  .docs-search button[data-open-modal]:hover {
     border-color: rgba(103, 236, 255, 0.22);
     background: rgba(255, 255, 255, 0.08);
-  }
-
-  .docs-header__search {
-    display: none;
   }
 
   .docs-search dialog {

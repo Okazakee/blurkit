@@ -103,20 +103,19 @@ const isQuickStart = id === 'docs/quick-start'
 
   @media (max-width: 49.99rem) {
     .docs-header {
-      grid-template-columns: minmax(0, 1fr);
+      display: flex;
+      align-items: center;
       gap: 0.85rem;
     }
 
-    .docs-header__search {
-      display: none;
+    .docs-header__brand {
+      flex: 1;
+      min-width: 0;
     }
 
+    .docs-header__links,
     .docs-header__social {
       display: none;
-    }
-
-    .docs-header__brand {
-      width: 100%;
     }
 
   }

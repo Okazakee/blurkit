@@ -1,6 +1,5 @@
 ---
 import MobileMenuToggle from './DocsMobileMenuToggle.astro'
-import DocsSearch from './DocsSearch.astro'
 
 const { hasSidebar } = Astro.locals.starlightRoute
 ---
@@ -12,7 +11,6 @@ const { hasSidebar } = Astro.locals.starlightRoute
       {
         hasSidebar && (
           <div class="docs-topbar__tools">
-            <DocsSearch class="docs-search--mobile" />
             <MobileMenuToggle />
           </div>
         )
