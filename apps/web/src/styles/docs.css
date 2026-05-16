@@ -392,6 +392,8 @@ body[data-mobile-menu-expanded] {
   .docs-search dialog {
     margin-top: calc(var(--sl-nav-height) + 0.5rem);
     width: calc(100vw - 1.5rem);
+    height: max-content;
+    max-height: calc(100vh - var(--sl-nav-height) - 1rem);
   }
 
   .docs-search .dialog-frame {
