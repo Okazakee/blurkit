@@ -26,10 +26,11 @@ import { encodeMany, createManifest, writeManifest } from 'blurkit/node'
 const inputs = ['./public/images/hero.jpg', './public/images/poster.jpg']
 const results = await encodeMany(inputs, { size: 32 })
 
-const manifest = createManifest({
-  '/images/hero.jpg': results[0]!,
-  '/images/poster.jpg': results[1]!,
-})
+const manifest = createManifest(
+  Object.fromEntries(
+    inputs.map((path, i) => [path.replace('./public', ''), results[i]!]),
+  ),
+)
 
 await writeManifest('./blur-manifest.json', manifest, { pretty: true })
 ```

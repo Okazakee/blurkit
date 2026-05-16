@@ -26,7 +26,7 @@ interface BlurResult {
   algorithm: 'blurhash' | 'thumbhash'
   width: number
   height: number
-  meta?: {
+  meta: {
     originalWidth: number
     originalHeight: number
     format?: string

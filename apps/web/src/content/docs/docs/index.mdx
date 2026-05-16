@@ -3,9 +3,7 @@ title: Documentation
 description: Technical reference for blurkit runtimes, API behavior, CLI usage, and production patterns.
 ---
 
-## When to use
-
-Use this page when you are new to blurkit or when you need a fast map of the docs before jumping into a specific runtime, API, or CLI flow.
+blurkit generates compact placeholder images using BlurHash or ThumbHash so you never ship a layout without knowing image dimensions. It runs on Node, Deno, the browser, edge workers, and Cloudflare — one API, no platform lock-in.
 
 ## Example
 
@@ -24,7 +22,7 @@ console.log(result.dataURL)
 
 - blurkit ships explicit runtime entrypoints: `blurkit/node`, `blurkit/deno`, `blurkit/browser`, `blurkit/edge`, `blurkit/cloudflare`, and `blurkit/wasm`.
 - Root import `blurkit` resolves by export conditions (`node`, `browser`, `worker`) without runtime dynamic dispatch.
-- Successful `encode()` returns `dataURL`, `hash`, `algorithm`, `width`, `height`, and optional `meta`.
+- Successful `encode()` returns `dataURL`, `hash`, `algorithm`, `width`, `height`, and `meta`.
 - `encodeMany()` is fail-fast.
 - `encodeManySettled()` returns per-item success/failure results.
 
