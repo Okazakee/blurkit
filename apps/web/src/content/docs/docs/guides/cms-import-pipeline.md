@@ -22,8 +22,8 @@ async function processImage(url: string) {
     blur_data_url: result.dataURL,
     blur_hash: result.hash,
     blur_algorithm: result.algorithm,
-    image_width: result.meta?.originalWidth,
-    image_height: result.meta?.originalHeight,
+    image_width: result.meta.originalWidth,
+    image_height: result.meta.originalHeight,
   }
 }
 ```

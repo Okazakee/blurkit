@@ -32,8 +32,8 @@ describe('blurkit deno runtime', () => {
     expect(result.dataURL.startsWith('data:image/')).toBe(true)
     expect(result.width).toBe(24)
     expect(result.height).toBe(12)
-    expect(result.meta?.originalWidth).toBe(64)
-    expect(result.meta?.originalHeight).toBe(32)
+    expect(result.meta.originalWidth).toBe(64)
+    expect(result.meta.originalHeight).toBe(32)
   })
 
   it('encodes a thumbhash placeholder from a Blob', async () => {

@@ -54,7 +54,7 @@ const result = await encode('./public/hero.jpg', {
 
 console.log(result.dataURL)
 console.log(result.hash)
-console.log(result.meta?.originalWidth, result.meta?.originalHeight)
+console.log(result.meta.originalWidth, result.meta.originalHeight)
 ```
 
 ## Examples

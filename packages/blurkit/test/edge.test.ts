@@ -33,8 +33,8 @@ describe('blurkit edge runtime', () => {
     expect(result.dataURL.startsWith('data:image/')).toBe(true)
     expect(result.width).toBe(9)
     expect(result.height).toBe(6)
-    expect(result.meta?.originalWidth).toBe(18)
-    expect(result.meta?.originalHeight).toBe(12)
+    expect(result.meta.originalWidth).toBe(18)
+    expect(result.meta.originalHeight).toBe(12)
   })
 
   it('uses native path when ImageDecoder and OffscreenCanvas are available', async () => {
@@ -111,8 +111,8 @@ describe('blurkit edge runtime', () => {
 
     expect(result.width).toBe(4)
     expect(result.height).toBe(2)
-    expect(result.meta?.originalWidth).toBe(4)
-    expect(result.meta?.originalHeight).toBe(2)
+    expect(result.meta.originalWidth).toBe(4)
+    expect(result.meta.originalHeight).toBe(2)
   })
 
   it('rejects non-remote string input', async () => {

@@ -14,7 +14,7 @@ const result = await encode('./public/hero.jpg')
 
 console.log(result.dataURL)
 console.log(result.hash)
-console.log(result.meta?.originalWidth)
+console.log(result.meta.originalWidth)
 ```
 
 ## Inputs / Options / Behavior

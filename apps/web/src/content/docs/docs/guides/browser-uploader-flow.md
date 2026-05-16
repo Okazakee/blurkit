@@ -21,8 +21,8 @@ async function handleFile(file: File) {
   return {
     blurDataURL: result.dataURL,
     blurHash: result.hash,
-    width: result.meta?.originalWidth,
-    height: result.meta?.originalHeight,
+    width: result.meta.originalWidth,
+    height: result.meta.originalHeight,
   }
 }
 ```

@@ -28,8 +28,8 @@ describe('blurkit wasm runtime', () => {
       expect(result.hash.length).toBeGreaterThan(10)
       expect(result.width).toBe(12)
       expect(result.height).toBe(8)
-      expect(result.meta?.originalWidth).toBe(24)
-      expect(result.meta?.originalHeight).toBe(16)
+      expect(result.meta.originalWidth).toBe(24)
+      expect(result.meta.originalHeight).toBe(16)
     }
   })
 

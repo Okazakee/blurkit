@@ -36,8 +36,8 @@ describe('blurkit node runtime', () => {
     expect(result.dataURL.startsWith('data:image/png;base64,')).toBe(true)
     expect(result.width).toBeGreaterThan(0)
     expect(result.height).toBeGreaterThan(0)
-    expect(result.meta?.originalWidth).toBe(64)
-    expect(result.meta?.originalHeight).toBe(32)
+    expect(result.meta.originalWidth).toBe(64)
+    expect(result.meta.originalHeight).toBe(32)
   })
 
   it('encodes multiple thumbhash placeholders', async () => {

@@ -59,8 +59,8 @@ describe('blurkit CLI backend selection', () => {
 
       expect(result.width).toBe(12)
       expect(result.height).toBe(6)
-      expect(result.meta?.originalWidth).toBe(24)
-      expect(result.meta?.originalHeight).toBe(12)
+      expect(result.meta.originalWidth).toBe(24)
+      expect(result.meta.originalHeight).toBe(12)
     } finally {
       await rm(dir, { recursive: true, force: true })
     }

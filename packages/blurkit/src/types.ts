@@ -58,7 +58,7 @@ export interface BlurResult {
   algorithm: BlurAlgorithm
   width: number
   height: number
-  meta?: {
+  meta: {
     originalWidth: number
     originalHeight: number
     format?: string
