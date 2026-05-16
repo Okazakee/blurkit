@@ -21,6 +21,8 @@ export interface RuntimeHandlers {
   ): Promise<string>
 }
 
+const inflight = new Map<string, Promise<BlurResult>>()
+
 export async function encodeWithRuntime(
   input: BlurKitInput,
   options: NormalizedBlurKitOptions,
@@ -36,51 +38,68 @@ export async function encodeWithRuntime(
     if (cached) {
       return cached
     }
+
+    const existing = inflight.get(cacheKey)
+    if (existing) {
+      return existing
+    }
   }
 
-  const decoded = await runtime.decodeImage(resolved, options)
+  const doWork = async (): Promise<BlurResult> => {
+    const decoded = await runtime.decodeImage(resolved, options)
 
-  let hash: string
-  let renderedPixels: Uint8ClampedArray
-  let renderWidth = decoded.width
-  let renderHeight = decoded.height
+    let hash: string
+    let renderedPixels: Uint8ClampedArray
+    let renderWidth = decoded.width
+    let renderHeight = decoded.height
 
-  if (options.algorithm === 'blurhash') {
-    hash = toBlurHash(
-      decoded.pixels,
-      decoded.width,
-      decoded.height,
-      options.componentX,
-      options.componentY,
-    )
-    renderedPixels = renderBlurHash(hash, decoded.width, decoded.height)
-  } else {
-    hash = toThumbHash(decoded.pixels, decoded.width, decoded.height)
-    const rendered = renderThumbHash(hash)
-    renderedPixels = rendered.pixels
-    renderWidth = rendered.width
-    renderHeight = rendered.height
-  }
+    if (options.algorithm === 'blurhash') {
+      hash = toBlurHash(
+        decoded.pixels,
+        decoded.width,
+        decoded.height,
+        options.componentX,
+        options.componentY,
+      )
+      renderedPixels = renderBlurHash(hash, decoded.width, decoded.height)
+    } else {
+      hash = toThumbHash(decoded.pixels, decoded.width, decoded.height)
+      const rendered = renderThumbHash(hash)
+      renderedPixels = rendered.pixels
+      renderWidth = rendered.width
+      renderHeight = rendered.height
+    }
 
-  const result: BlurResult = {
-    dataURL: await runtime.renderDataURL(
-      renderedPixels,
-      renderWidth,
-      renderHeight,
-      options.outputFormat,
-    ),
-    hash,
-    algorithm: options.algorithm,
-    width: decoded.width,
-    height: decoded.height,
-    meta: decoded.meta,
+    const result: BlurResult = {
+      dataURL: await runtime.renderDataURL(
+        renderedPixels,
+        renderWidth,
+        renderHeight,
+        options.outputFormat,
+      ),
+      hash,
+      algorithm: options.algorithm,
+      width: decoded.width,
+      height: decoded.height,
+      meta: decoded.meta,
+    }
+
+    if (options.cache && cacheKey) {
+      await options.cache.set(cacheKey, result)
+    }
+
+    return result
   }
 
   if (options.cache && cacheKey) {
-    await options.cache.set(cacheKey, result)
+    const promise = doWork().finally(() => {
+      inflight.delete(cacheKey)
+    })
+    inflight.set(cacheKey, promise)
+    return promise
   }
 
-  return result
+  return doWork()
 }
 
 export async function encodeManyWithRuntime(
