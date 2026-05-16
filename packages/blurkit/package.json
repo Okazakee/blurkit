@@ -71,6 +71,23 @@
     "dist/*.d.cts"
   ],
   "description": "Universal image placeholder generation for Node, Bun, Deno, browser, and edge runtimes.",
+  "keywords": [
+    "placeholder",
+    "blurhash",
+    "thumbhash",
+    "image",
+    "blur",
+    "blur-up",
+    "lazy-loading",
+    "image-optimization",
+    "node",
+    "deno",
+    "browser",
+    "edge",
+    "cloudflare",
+    "wasm",
+    "cli"
+  ],
   "homepage": "https://blurkit.okazakee.dev",
   "bugs": {
     "url": "https://github.com/Okazakee/blurkit/issues"

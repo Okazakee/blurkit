@@ -20,6 +20,19 @@
     "dist/*.d.cts"
   ],
   "description": "WASM codec backend for blurkit runtimes.",
+  "keywords": [
+    "wasm",
+    "codecs",
+    "image",
+    "decode",
+    "encode",
+    "jpeg",
+    "png",
+    "webp",
+    "resizing",
+    "blurhash",
+    "thumbhash"
+  ],
   "homepage": "https://blurkit.okazakee.dev",
   "bugs": {
     "url": "https://github.com/Okazakee/blurkit/issues"
