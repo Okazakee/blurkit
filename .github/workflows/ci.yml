@@ -11,8 +11,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  quality:
-    name: Quality
+  core-quality:
+    name: Core quality
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -42,8 +42,8 @@ jobs:
           pnpm --filter ./packages/blurkit-wasm-codecs test
           pnpm --filter ./packages/blurkit test
 
-  validate-package:
-    name: Validate packed packages
+  package-contract:
+    name: Package contract
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -63,20 +63,12 @@ jobs:
           pnpm --filter ./packages/blurkit-wasm-codecs build
           pnpm --filter ./packages/blurkit build
 
-      - name: Validate packed artifacts
+      - name: Validate packed artifacts (publint, attw, consumer, bundles)
         run: node .github/scripts/validate-packed-package.mjs
 
-  sharp-matrix:
-    name: Sharp ${{ matrix.sharp-line }} / Node ${{ matrix.node-version }}
+  examples:
+    name: Examples
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        # Node 20 is EOL (2026-04-30) and cannot run the repo's pinned
-        # pnpm 11.1.1 (requires node:sqlite, Node >= 22.5), so it is not
-        # claimed or tested. sharp 0.34/0.35 both support Node 22 and 24.
-        node-version: [22, 24]
-        sharp-line: ['0.34', '0.35']
     steps:
       - uses: actions/checkout@v4
 
@@ -84,7 +76,32 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build example-nextjs
+        run: pnpm exec turbo run build --filter=@blurkit/example-nextjs
+
+      - name: Build example-astro
+        run: pnpm exec turbo run build --filter=@blurkit/example-astro
+
+  pack-packages:
+    name: Pack packages for runtime matrix
+    runs-on: ubuntu-latest
+    outputs:
+      blurkit_tarball: ${{ steps.pack.outputs.blurkit_tarball }}
+      codecs_tarball: ${{ steps.pack.outputs.codecs_tarball }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
           cache: pnpm
 
       - name: Install dependencies
@@ -95,13 +112,48 @@ jobs:
           pnpm --filter ./packages/blurkit-wasm-codecs build
           pnpm --filter ./packages/blurkit build
 
-      - name: Pack blurkit tarball
+      - name: Pack both packages
+        id: pack
         run: |
+          set -euo pipefail
           mkdir -p "$RUNNER_TEMP/pack"
           cd packages/blurkit
-          npm pack --pack-destination "$RUNNER_TEMP/pack" >/dev/null
+          blurkit_tarball=$(npm pack --pack-destination "$RUNNER_TEMP/pack" 2>/dev/null | tail -1)
+          cd ../blurkit-wasm-codecs
+          codecs_tarball=$(npm pack --pack-destination "$RUNNER_TEMP/pack" 2>/dev/null | tail -1)
+          echo "blurkit_tarball=$blurkit_tarball" >> "$GITHUB_OUTPUT"
+          echo "codecs_tarball=$codecs_tarball" >> "$GITHUB_OUTPUT"
+          ls -la "$RUNNER_TEMP/pack"
 
-      - name: Install tarball with sharp ${{ matrix.sharp-line }} in clean consumer
+      - name: Upload packed tarballs
+        uses: actions/upload-artifact@v4
+        with:
+          name: packed-packages
+          path: ${{ runner.temp }}/pack/*.tgz
+          retention-days: 1
+
+  node-matrix:
+    name: Node ${{ matrix.node-version }} / sharp ${{ matrix.sharp-line }}
+    needs: pack-packages
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22, 24]
+        sharp-line: ['0.34', '0.35']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: packed-packages
+          path: ${{ runner.temp }}/pack
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install packed packages with sharp ${{ matrix.sharp-line }}
         env:
           # sharp 0.34's install check bails to a source build when a global
           # libvips >= its minimum is present (e.g. brew/mac runners), which
@@ -110,14 +162,109 @@ jobs:
           SHARP_IGNORE_GLOBAL_LIBVIPS: '1'
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/sharp-consumer"
-          cd "$RUNNER_TEMP/sharp-consumer"
+          mkdir -p "$RUNNER_TEMP/consumer"
+          cd "$RUNNER_TEMP/consumer"
           npm init -y >/dev/null
-          npm install --no-audit --no-fund "$RUNNER_TEMP"/pack/blurkit-*.tgz "sharp@${{ matrix.sharp-line }}"
+          npm install --no-audit --no-fund \
+            "$RUNNER_TEMP"/pack/*.tgz \
+            "sharp@${{ matrix.sharp-line }}"
 
       - name: Run real encodes against installed sharp
         run: |
           set -euo pipefail
-          cd "$RUNNER_TEMP/sharp-consumer"
+          cd "$RUNNER_TEMP/consumer"
           cp "$GITHUB_WORKSPACE/.github/scripts/sharp-matrix-consumer.mjs" .
           EXPECTED_SHARP_LINE="${{ matrix.sharp-line }}" node sharp-matrix-consumer.mjs
+
+  bun:
+    name: Bun runtime
+    needs: pack-packages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: packed-packages
+          path: ${{ runner.temp }}/pack
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install packed packages with sharp
+        env:
+          SHARP_IGNORE_GLOBAL_LIBVIPS: '1'
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/consumer"
+          cd "$RUNNER_TEMP/consumer"
+          npm init -y >/dev/null
+          npm install --no-audit --no-fund \
+            "$RUNNER_TEMP"/pack/*.tgz \
+            "sharp@>=0.34.5 <0.36.0"
+
+      - name: Run real encode under Bun
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/consumer"
+          cp "$GITHUB_WORKSPACE/.github/scripts/bun-smoke.ts" .
+          bun run bun-smoke.ts
+
+  deno:
+    name: Deno runtime
+    needs: pack-packages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: packed-packages
+          path: ${{ runner.temp }}/pack
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: latest
+
+      - name: Install packed packages (no sharp)
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/consumer"
+          cd "$RUNNER_TEMP/consumer"
+          npm init -y >/dev/null
+          npm install --no-audit --no-fund "$RUNNER_TEMP"/pack/*.tgz
+
+      - name: Run real encode under Deno
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/consumer"
+          cp "$GITHUB_WORKSPACE/.github/scripts/deno-smoke.ts" .
+          deno run --allow-read --allow-env --allow-ffi --allow-net deno-smoke.ts
+
+  browser:
+    name: Real browser (Chromium)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build library packages
+        run: |
+          pnpm --filter ./packages/blurkit-wasm-codecs build
+          pnpm --filter ./packages/blurkit build
+
+      - name: Install Playwright chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run real browser encodes
+        run: node .github/scripts/browser-smoke.mjs

@@ -2,6 +2,20 @@
 
 Library releases and website deployments are handled by separate workflows.
 
+## CI gate (`.github/workflows/ci.yml`)
+
+Before tagging, the tagged commit should pass the CI workflow on `main`. It covers:
+
+- `core-quality`: frozen-lockfile install, library build, typecheck, tests
+- `package-contract`: packed-artifact validation (publint, `@arethetypeswrong/cli`, ESM/CJS consumer smokes, module-graph and bundle checks)
+- `examples`: example-nextjs and example-astro production builds
+- `node-matrix`: real encodes from the packed packages on Node 20/22/24 x sharp 0.34/0.35
+- `bun`, `deno`, `browser`: real runtime encodes (Bun with sharp, Deno with wasm codecs, Chromium via Playwright)
+
+The release workflow itself retains its own install/build/typecheck/test gate so a
+tagged commit is validated again even if CI was skipped or run against a different
+head.
+
 ## Library Release (`.github/workflows/release.yml`)
 
 1. Bump `packages/blurkit/package.json` and `packages/blurkit-wasm-codecs/package.json` to the version you want to publish.
