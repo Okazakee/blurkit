@@ -33,7 +33,7 @@ const result = await encode('./public/hero.jpg', {
   - `ArrayBuffer`
   - `Uint8Array`
 - Image decoding uses `blurkit-wasm-codecs` (PNG, JPEG, WebP only).
-- DataURL rendering uses native `OffscreenCanvas` when available, falling back to wasm rendering.
+- DataURL rendering uses native `OffscreenCanvas` when a 2D context is available, otherwise falls back to wasm rendering (Deno's built-in `OffscreenCanvas` is WebGPU-only and triggers the fallback).
 - Does not require `sharp`.
 - Additional Deno exports:
   - `encodeMany()`

@@ -44,6 +44,18 @@ pnpm add blurkit-wasm-codecs
 
 Prefer explicit runtime entrypoints in production and framework code (`blurkit/node`, `blurkit/browser`, ...) over the root import so the runtime you get is the runtime you expect.
 
+## Verified runtime matrix
+
+The packed package is exercised in CI with real encodes (not only unit tests):
+
+| Runtime | Entrypoint | Backend | Verified on |
+| --- | --- | --- | --- |
+| Node | `blurkit/node` | sharp | Node 20/22/24 x sharp 0.34.x/0.35.x |
+| Bun | `blurkit/node` | sharp | Bun latest (1.x) |
+| Deno | `blurkit/deno` | wasm codecs | Deno latest (2.x), no sharp |
+| Browser | `blurkit/browser` | browser APIs | Chromium (Playwright) |
+| Edge/Cloudflare | `blurkit/edge` / `blurkit/cloudflare` | native or wasm / `cf.image` | unit tests only (real worker execution deferred; `cf.image` runs only on Cloudflare) |
+
 ## Limits / Caveats
 
 - If `sharp` is missing, `blurkit/node` throws `BLURKIT_MISSING_SHARP` on first encode call.
