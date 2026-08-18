@@ -57,6 +57,11 @@ which packs both packages, runs publint and `@arethetypeswrong/cli`, smokes ever
 entrypoint as ESM and CJS, typechecks a consumer, scans module graphs, and checks
 the bundles.
 
+Both packages declare `"sideEffects": false` so bundlers can drop unused imports.
+This is a standing contract: do not introduce module-level side effects (the CLI
+self-execution guard in `src/cli.ts` is conditional and safe). If a module ever
+needs a real top-level effect, remove the flag for that package.
+
 ## Runtime verification
 
 CI runs real-runtime smoke tests against the packed packages, not just unit tests:
