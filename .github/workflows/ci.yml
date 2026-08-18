@@ -1,0 +1,120 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build library packages
+        run: |
+          pnpm --filter ./packages/blurkit-wasm-codecs build
+          pnpm --filter ./packages/blurkit build
+
+      - name: Typecheck library packages
+        run: |
+          pnpm --filter ./packages/blurkit-wasm-codecs check
+          pnpm --filter ./packages/blurkit check
+
+      - name: Test library packages
+        run: |
+          pnpm --filter ./packages/blurkit-wasm-codecs test
+          pnpm --filter ./packages/blurkit test
+
+  validate-package:
+    name: Validate packed packages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build library packages
+        run: |
+          pnpm --filter ./packages/blurkit-wasm-codecs build
+          pnpm --filter ./packages/blurkit build
+
+      - name: Validate packed artifacts
+        run: node .github/scripts/validate-packed-package.mjs
+
+  sharp-matrix:
+    name: Sharp ${{ matrix.sharp-line }} / Node ${{ matrix.node-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22, 24]
+        sharp-line: ['0.34', '0.35']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build library packages
+        run: |
+          pnpm --filter ./packages/blurkit-wasm-codecs build
+          pnpm --filter ./packages/blurkit build
+
+      - name: Pack blurkit tarball
+        run: |
+          mkdir -p "$RUNNER_TEMP/pack"
+          cd packages/blurkit
+          npm pack --pack-destination "$RUNNER_TEMP/pack" >/dev/null
+
+      - name: Install tarball with sharp ${{ matrix.sharp-line }} in clean consumer
+        env:
+          # sharp 0.34's install check bails to a source build when a global
+          # libvips >= its minimum is present (e.g. brew/mac runners), which
+          # fails without node-addon-api. Pin the matrix scenario to the
+          # prebuilt binary regardless of runner.
+          SHARP_IGNORE_GLOBAL_LIBVIPS: '1'
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/sharp-consumer"
+          cd "$RUNNER_TEMP/sharp-consumer"
+          npm init -y >/dev/null
+          npm install --no-audit --no-fund "$RUNNER_TEMP"/pack/blurkit-*.tgz "sharp@${{ matrix.sharp-line }}"
+
+      - name: Run real encodes against installed sharp
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/sharp-consumer"
+          cp "$GITHUB_WORKSPACE/.github/scripts/sharp-matrix-consumer.mjs" .
+          EXPECTED_SHARP_LINE="${{ matrix.sharp-line }}" node sharp-matrix-consumer.mjs
