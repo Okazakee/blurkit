@@ -12,11 +12,12 @@
     "check": "turbo run check"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@types/node": "^25.6.2",
     "esbuild": "^0.28.2",
-    "tsup": "^8.5.1",
+    "tsdown": "^0.22.14",
     "turbo": "^2.9.12",
-    "typescript": "^6.0.3",
+    "typescript": "^7.0.2",
     "vitest": "^4.1.6"
   },
   "pnpm": {

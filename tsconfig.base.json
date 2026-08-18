@@ -13,7 +13,6 @@
     "isolatedModules": true,
     "noUncheckedIndexedAccess": true,
     "allowSyntheticDefaultImports": true,
-    "ignoreDeprecations": "6.0",
     "types": ["node"]
   }
 }
