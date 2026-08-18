@@ -6,6 +6,10 @@ on:
       - main
     paths:
       - 'apps/web/**'
+    # Release tags redeploy the site so the version badge tracks the
+    # published packages (the version is read at build time).
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 concurrency:
@@ -25,12 +29,19 @@ jobs:
         id: gate
         env:
           EVENT_NAME: ${{ github.event_name }}
+          REF: ${{ github.ref }}
           HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           set -euo pipefail
 
           if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
             echo "Manual dispatch detected; bypassing commit message gate."
+            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ "$EVENT_NAME" == "push" && "$REF" == refs/tags/* ]]; then
+            echo "Release tag push detected; redeploying for current package versions."
             echo "should_deploy=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
