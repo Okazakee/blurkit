@@ -25,11 +25,15 @@ Universal image placeholder generation for Node, Bun, Deno, browser, edge, Cloud
 pnpm add blurkit
 ```
 
-For Node and Bun usage, install `sharp` alongside the package:
+`sharp` is an optional dependency and an optional peer dependency of `blurkit`, auto-installed unless optional dependencies are skipped. It is required only for the Node runtime paths — `blurkit/node`, the CLI, and the root import in Node/Bun:
 
 ```bash
 pnpm add sharp
 ```
+
+Supported Sharp range: `>=0.34.5 <0.36.0` (verified against 0.34.x and 0.35.x). `blurkit/browser`, `blurkit/edge`, `blurkit/wasm`, and `blurkit/cloudflare` do not need `sharp`.
+
+If your install skipped optional dependencies (for example `npm install --omit=optional`), install `sharp` manually.
 
 For Deno, install `blurkit-wasm-codecs` alongside the package since the Deno runtime uses wasm codecs for decode:
 
@@ -215,9 +219,9 @@ await writeManifest('./blur-manifest.json', manifest, { pretty: true })
 
 ## Runtime Notes
 
-- Node and Bun use the `blurkit/node` entrypoint and rely on `sharp` for image decoding and rendering.
+- Node and Bun use the `blurkit/node` entrypoint and rely on `sharp` for image decoding and rendering. `Uint8Array` and Node `Buffer` are first-class inputs; `Buffer` views with a non-zero byte offset are handled exactly.
 - Deno uses the `blurkit/deno` entrypoint with wasm codecs for decode and native `OffscreenCanvas` for rendering. Requires `blurkit-wasm-codecs`.
-- The browser runtime supports `File`, `Blob`, `ArrayBuffer`, and remote URLs that permit CORS.
+- The browser runtime supports `File`, `Blob`, `ArrayBuffer`, `Uint8Array`, and remote URLs that permit CORS.
 - The edge runtime uses native `ImageDecoder` + `OffscreenCanvas` when available, then falls back to the wasm runtime.
 - Edge fallback, `blurkit/wasm`, and `blurkit/deno` require `blurkit-wasm-codecs`.
 - The Cloudflare runtime is optimized for Worker image transforms.

@@ -15,10 +15,15 @@ pnpm add blurkit
 
 ## Inputs / Options / Behavior
 
-- `blurkit` installs `sharp` as an optional dependency.
-- Node/Bun runtime and CLI require `sharp` at execution time.
-- Deno runtime requires `blurkit-wasm-codecs` at execution time.
-- `blurkit-wasm-codecs` is also required for `blurkit/wasm` and for `blurkit/edge` fallback in runtimes without native decode APIs.
+### Sharp: Node-only
+
+`blurkit/browser`, `blurkit/edge`, `blurkit/wasm`, and `blurkit/cloudflare` do **not** require Sharp.
+
+`blurkit/node` and the default root import in Node/Bun require Sharp at execution time:
+
+- `sharp` is declared as an optional dependency (auto-installed unless optional dependencies are skipped) and as an optional peer dependency.
+- Supported Sharp range: `>=0.34.5 <0.36.0` (tested against 0.34.x and 0.35.x).
+- If your install skipped optional dependencies (`npm install --omit=optional`), install Sharp manually.
 
 | Package manager | Default install | If optional deps are skipped |
 | --- | --- | --- |
@@ -27,17 +32,17 @@ pnpm add blurkit
 | `yarn` | `yarn add blurkit` | `yarn add sharp` |
 | `bun` | `bun add blurkit` | `bun add sharp` |
 
-Deno runtime also needs `blurkit-wasm-codecs` alongside `blurkit`:
+### WASM codecs: wasm-backed runtimes
 
-```bash
-npm install blurkit blurkit-wasm-codecs
-```
-
-Wasm companion install (only when needed):
+`blurkit-wasm-codecs` is required at execution time for `blurkit/deno`, `blurkit/wasm`, `blurkit/edge` fallback in runtimes without native decode APIs, and CLI `--backend wasm`.
 
 ```bash
 pnpm add blurkit-wasm-codecs
 ```
+
+### Explicit entrypoints
+
+Prefer explicit runtime entrypoints in production and framework code (`blurkit/node`, `blurkit/browser`, ...) over the root import so the runtime you get is the runtime you expect.
 
 ## Limits / Caveats
 

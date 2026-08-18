@@ -31,6 +31,7 @@ if (file) {
   - `File`
   - `Blob`
   - `ArrayBuffer`
+  - `Uint8Array`
   - remote URL string or `URL` when CORS allows fetch and decode
 - Includes `encodeMany()` and `encodeManySettled()`.
 

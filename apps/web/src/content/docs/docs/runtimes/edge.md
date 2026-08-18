@@ -22,6 +22,7 @@ const result = await encode('https://example.com/image.jpg')
   - `URL`
   - `Blob`
   - `ArrayBuffer`
+  - `Uint8Array`
 - Includes `encodeMany()` and `encodeManySettled()`.
 - Runtime selection:
   - native path: `ImageDecoder` + `OffscreenCanvas`

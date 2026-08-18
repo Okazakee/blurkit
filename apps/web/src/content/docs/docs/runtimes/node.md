@@ -31,6 +31,8 @@ const result = await encode('./public/hero.jpg', {
   - `URL`
   - `Blob`
   - `ArrayBuffer`
+  - `Uint8Array` (Node `Buffer` works directly, including views with a non-zero byte offset)
+- Requires `sharp` `>=0.34.5 <0.36.0` at execution time.
 - Additional Node exports:
   - `encodeMany()`
   - `encodeManySettled()`

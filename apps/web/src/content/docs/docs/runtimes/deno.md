@@ -31,6 +31,7 @@ const result = await encode('./public/hero.jpg', {
   - `URL`
   - `Blob`
   - `ArrayBuffer`
+  - `Uint8Array`
 - Image decoding uses `blurkit-wasm-codecs` (PNG, JPEG, WebP only).
 - DataURL rendering uses native `OffscreenCanvas` when available, falling back to wasm rendering.
 - Does not require `sharp`.

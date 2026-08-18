@@ -37,6 +37,7 @@ Built-in helpers:
 
 ## Limits / Caveats
 
+- Cache keys are content-aware: they include a digest of the resolved image bytes plus every output-affecting option, so a changed file, Blob, or remote URL produces a new entry instead of stale output.
 - Memory cache is process-local and reset on restart.
 - Filesystem cache is local-disk scoped.
 - Cloudflare cache depends on Worker Cache API availability and scope.

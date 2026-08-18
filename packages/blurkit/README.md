@@ -25,14 +25,24 @@ Universal image placeholder generation for Node, Bun, Deno, browsers, edge runti
 npm install blurkit
 ```
 
-`sharp` is listed as an optional dependency and is required only for Node/Bun runtime paths (`blurkit/node`, CLI, or root import in Node).
+### Sharp (Node runtime only)
 
-`blurkit-wasm-codecs` is required for `blurkit/deno`, `blurkit/wasm`, `blurkit/edge` fallback, and CLI `--backend wasm`.
+`sharp` is declared as an optional dependency and as an optional peer dependency of `blurkit`, so it is installed automatically unless optional dependencies are skipped. It is required only for Node/Bun runtime paths: `blurkit/node`, the CLI, and the root import in Node.
 
-If your install skipped optional dependencies (for example `npm install --omit=optional`), install `sharp` manually:
+- Supported Sharp range: `>=0.34.5 <0.36.0` (verified against 0.34.x and 0.35.x).
+- `blurkit/browser`, `blurkit/edge`, `blurkit/wasm`, and `blurkit/cloudflare` do not require `sharp`.
+- If your install skipped optional dependencies (for example `npm install --omit=optional`), install `sharp` manually:
 
 ```bash
 npm install sharp
+```
+
+### WASM codecs (wasm-backed runtimes)
+
+`blurkit-wasm-codecs` is required for `blurkit/deno`, `blurkit/wasm`, `blurkit/edge` fallback, and CLI `--backend wasm`:
+
+```bash
+npm install blurkit-wasm-codecs
 ```
 
 If you use `blurkit/deno`, `blurkit/wasm`, `blurkit/edge` fallback in non-native runtimes, or CLI `--backend wasm`, install:
@@ -89,15 +99,16 @@ Shared `BlurKitInput` includes:
 - `File`
 - `Blob`
 - `ArrayBuffer`
+- `Uint8Array` (Node `Buffer` is a `Uint8Array` and works directly)
 
 Runtime support differs:
 
-- `blurkit/node`: local file paths, remote URLs, `URL`, `Blob`, `ArrayBuffer`
-- `blurkit/deno`: local file paths, remote URLs, `URL`, `Blob`, `ArrayBuffer` (wasm-backed decode, canvas render)
-- `blurkit/browser`: remote URLs, `URL`, `File`, `Blob`, `ArrayBuffer`
-- `blurkit/edge`: remote URLs, `URL`, `Blob`, `ArrayBuffer` (native APIs first, wasm fallback)
+- `blurkit/node`: local file paths, remote URLs, `URL`, `Blob`, `ArrayBuffer`, `Uint8Array`/`Buffer`
+- `blurkit/deno`: local file paths, remote URLs, `URL`, `Blob`, `ArrayBuffer`, `Uint8Array` (wasm-backed decode, canvas render)
+- `blurkit/browser`: remote URLs, `URL`, `File`, `Blob`, `ArrayBuffer`, `Uint8Array`
+- `blurkit/edge`: remote URLs, `URL`, `Blob`, `ArrayBuffer`, `Uint8Array` (native APIs first, wasm fallback)
 - `blurkit/cloudflare`: remote URLs and `URL`
-- `blurkit/wasm`: remote URLs, `URL`, `Blob`, `ArrayBuffer`
+- `blurkit/wasm`: remote URLs, `URL`, `Blob`, `ArrayBuffer`, `Uint8Array`
 
 ## API
 
@@ -198,7 +209,7 @@ import { createManifest } from 'blurkit'
 ## Deno Runtime Notes
 
 - `blurkit/deno` uses wasm codecs for image decode and native `OffscreenCanvas` for rendering.
-- Supports local filesystem paths, remote URLs, `URL`, `Blob`, and `ArrayBuffer`.
+- Supports local filesystem paths, remote URLs, `URL`, `Blob`, `ArrayBuffer`, and `Uint8Array`.
 - Does not require `sharp`.
 - `blurkit-wasm-codecs` must be installed to execute deno runtime paths.
 
@@ -219,7 +230,7 @@ import { createManifest } from 'blurkit'
 ## WASM Runtime Notes
 
 - `blurkit/wasm` supports PNG, JPEG, and WebP decode.
-- It accepts remote URLs, `URL`, `Blob`, and `ArrayBuffer`.
+- It accepts remote URLs, `URL`, `Blob`, `ArrayBuffer`, and `Uint8Array`.
 - Local filesystem path strings are not supported in `blurkit/wasm`.
 - `blurkit-wasm-codecs` must be installed to execute wasm runtime paths.
 

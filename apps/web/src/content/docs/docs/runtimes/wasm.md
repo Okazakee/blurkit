@@ -24,6 +24,7 @@ const result = await encode('https://example.com/image.webp', {
   - `URL`
   - `Blob`
   - `ArrayBuffer`
+  - `Uint8Array`
 - Decode support: PNG, JPEG, WebP.
 - Output support: PNG or JPEG data URL (via `outputFormat`).
 - Includes `encodeMany()` and `encodeManySettled()`.

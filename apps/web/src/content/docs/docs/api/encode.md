@@ -24,14 +24,15 @@ const result = await encode('./public/hero.jpg', {
 ```ts
 encode(input: BlurKitInput, options?: BlurKitOptions): Promise<BlurResult>
 
-type BlurKitInput = string | URL | File | Blob | ArrayBuffer
+type BlurKitInput = string | URL | File | Blob | ArrayBuffer | Uint8Array
 ```
 
 - Runtime entrypoint determines which input forms are valid at runtime.
 - `options` controls algorithm, target dimensions, output format, and optional cache.
 - Returns a `BlurResult` with `dataURL`, `hash`, dimensions, algorithm, and optional `meta`.
-- `blurkit/wasm` accepts remote URL/URL/Blob/ArrayBuffer and decodes PNG/JPEG/WebP.
-- `blurkit/deno` accepts local paths, remote URL/URL/Blob/ArrayBuffer with wasm-backed decode and canvas render.
+- `Uint8Array` input (including Node `Buffer`) is supported by every runtime that accepts raw bytes.
+- `blurkit/wasm` accepts remote URL/URL/Blob/ArrayBuffer/Uint8Array and decodes PNG/JPEG/WebP.
+- `blurkit/deno` accepts local paths, remote URL/URL/Blob/ArrayBuffer/Uint8Array with wasm-backed decode and canvas render.
 
 ## Limits / Caveats
 
