@@ -1,8 +1,10 @@
+import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { encode } from 'blurkit/node'
 
 const imagePath = path.join(process.cwd(), 'public', 'hero.svg')
-const placeholder = await encode(imagePath, {
+const sourceBytes = await readFile(imagePath)
+const placeholder = await encode(sourceBytes, {
   algorithm: 'blurhash',
   size: 32,
   outputFormat: 'png',
@@ -13,7 +15,9 @@ export default function Page() {
     <main style={{ fontFamily: 'system-ui, sans-serif', maxWidth: 860, margin: '2rem auto', padding: '0 1rem' }}>
       <h1 style={{ marginBottom: '0.5rem' }}>blurkit + Next.js</h1>
       <p style={{ color: '#444', marginTop: 0 }}>
-        This page uses <code>blurkit/node</code> in a server component to generate a placeholder from a local file.
+        This page uses <code>blurkit/node</code> in a server component. The source file is read into a
+        Node <code>Buffer</code> and passed to <code>encode()</code> directly — no <code>ArrayBuffer</code>{' '}
+        conversion or slicing required.
       </p>
 
       <section style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>

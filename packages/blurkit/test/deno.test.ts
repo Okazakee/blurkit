@@ -1,10 +1,14 @@
+import { readFile, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
+
 import sharp from 'sharp'
 import { describe, expect, it } from 'vitest'
 
 import {
   createFilesystemCache,
-  createMemoryCache,
   createManifest,
+  createMemoryCache,
   encode,
   encodeMany,
   encodeManySettled,
@@ -232,8 +236,22 @@ describe('blurkit deno runtime', () => {
     const invalid = new Uint8Array([0x47, 0x49, 0x46, 0x38, 0x61]).buffer
     await expect(encode(invalid)).rejects.toThrowError(/supported formats are PNG, JPEG, and WebP/i)
   })
-})
 
-import { readFile, rm } from 'node:fs/promises'
-import path from 'node:path'
-import { tmpdir } from 'node:os'
+  it('encodes a placeholder from Uint8Array input', async () => {
+    const image = await sharp({
+      create: {
+        width: 32,
+        height: 32,
+        channels: 4,
+        background: { r: 60, g: 40, b: 220, alpha: 1 },
+      },
+    }).png().toBuffer()
+
+    const result = await encode(new Uint8Array(image), { size: 16 })
+
+    expect(result.width).toBe(16)
+    expect(result.height).toBe(16)
+    expect(result.meta.originalWidth).toBe(32)
+    expect(result.meta.originalHeight).toBe(32)
+  })
+})

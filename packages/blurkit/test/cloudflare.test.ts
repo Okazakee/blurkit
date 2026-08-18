@@ -98,6 +98,18 @@ describe('blurkit cloudflare runtime', () => {
           headers: { 'content-type': 'image/png' },
         }),
       )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ width: 128, height: 64, format: 'jpeg' }), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(Uint8Array.from([10, 20, 30, 40]), {
+          status: 200,
+          headers: { 'content-type': 'image/png' },
+        }),
+      )
 
     const cache = createCloudflareCache({ name: 'test-cache', ttlSeconds: 60 })
 
@@ -113,6 +125,55 @@ describe('blurkit cloudflare runtime', () => {
 
     expect(first.hash).toBe(second.hash)
     expect(first.dataURL).toBe(second.dataURL)
-    expect(fetchSpy).toHaveBeenCalledTimes(2)
+    // Content-aware cache keys hash the transformed bytes, so the same URL is
+    // fetched on each encode to prove the bytes are unchanged.
+    expect(fetchSpy).toHaveBeenCalledTimes(4)
+  })
+
+  it('does not serve stale cached results when URL content changes', async () => {
+    installMockCaches()
+
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ width: 128, height: 64, format: 'jpeg' }), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(Uint8Array.from([10, 20, 30, 40]), {
+          status: 200,
+          headers: { 'content-type': 'image/png' },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ width: 128, height: 64, format: 'jpeg' }), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(Uint8Array.from([90, 80, 70, 60]), {
+          status: 200,
+          headers: { 'content-type': 'image/png' },
+        }),
+      )
+
+    const cache = createCloudflareCache({ name: 'test-cache', ttlSeconds: 60 })
+
+    const first = await encode('https://example.com/changing.jpg', {
+      cache,
+      size: 16,
+    })
+
+    const second = await encode('https://example.com/changing.jpg', {
+      cache,
+      size: 16,
+    })
+
+    expect(second.hash).not.toBe(first.hash)
+    expect(second.dataURL).not.toBe(first.dataURL)
+    expect(fetchSpy).toHaveBeenCalledTimes(4)
   })
 })

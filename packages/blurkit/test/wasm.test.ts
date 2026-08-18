@@ -61,4 +61,21 @@ describe('blurkit wasm runtime', () => {
       /supports remote URLs, Blob, and ArrayBuffer input only/i,
     )
   })
+
+  it('encodes from Uint8Array input', async () => {
+    const input = await sharp({
+      create: {
+        width: 16,
+        height: 16,
+        channels: 4,
+        background: { r: 30, g: 140, b: 220, alpha: 1 },
+      },
+    }).png().toBuffer()
+
+    const result = await encode(new Uint8Array(input), { size: 8 })
+
+    expect(result.dataURL.startsWith('data:image/')).toBe(true)
+    expect(result.width).toBe(8)
+    expect(result.height).toBe(8)
+  })
 })

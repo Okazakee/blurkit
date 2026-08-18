@@ -1,42 +1,60 @@
-import type { BlurKitInput, NormalizedBlurKitOptions } from '../types'
+import type { NormalizedBlurKitOptions, ResolvedInput } from '../types'
+import { toOwnedBytes } from './bytes'
 
-function describeInput(input: BlurKitInput, identifier: string): string {
-  if (typeof input === 'string') {
-    return `string:${identifier}`
-  }
-
-  if (input instanceof URL) {
-    return `url:${input.toString()}`
-  }
-
-  const name = typeof File !== 'undefined' && input instanceof File ? input.name : undefined
-  return `${Object.prototype.toString.call(input)}:${name ?? identifier}`
-}
+/**
+ * Cache identity version. Bump when the key derivation changes so stale
+ * entries produced by older schemes are never read.
+ */
+const CACHE_KEY_VERSION = 2
 
 function toHex(bytes: Uint8Array): string {
-  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')
+  let result = ''
+  for (const byte of bytes) {
+    result += byte.toString(16).padStart(2, '0')
+  }
+  return result
 }
 
+async function hashBytes(bytes: Uint8Array<ArrayBuffer>): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', bytes)
+  return toHex(new Uint8Array(digest))
+}
+
+/**
+ * Content-aware cache identity.
+ *
+ * The key MUST cover the resolved image bytes, not the input identifier:
+ * identifiers are mutable/reusable (an ArrayBuffer or Blob has no stable
+ * identity, two Files can share a filename, a filesystem path or remote URL
+ * can serve different bytes over time). A cache keyed only on identifier +
+ * options can return the placeholder generated for different image bytes.
+ *
+ * All normalized options that affect output participate, and the digest is
+ * computed over the exact owned byte sequence (respecting byteOffset and
+ * byteLength of the resolved view).
+ */
 export async function createCacheKey(
-  input: BlurKitInput,
-  identifier: string,
+  resolved: ResolvedInput,
   options: NormalizedBlurKitOptions,
 ): Promise<string> {
-  const payload = JSON.stringify({
-    version: 1,
-    input: describeInput(input, identifier),
-    options: {
-      algorithm: options.algorithm,
-      size: options.size,
-      width: options.width,
-      height: options.height,
-      componentX: options.componentX,
-      componentY: options.componentY,
-      outputFormat: options.outputFormat,
-    },
-  })
+  const bytesHash = await hashBytes(toOwnedBytes(resolved.bytes))
+  const metadataHash = await hashBytes(
+    new TextEncoder().encode(
+      JSON.stringify({
+        version: CACHE_KEY_VERSION,
+        mimeType: resolved.mimeType ?? null,
+        options: {
+          algorithm: options.algorithm,
+          size: options.size,
+          width: options.width ?? null,
+          height: options.height ?? null,
+          componentX: options.componentX,
+          componentY: options.componentY,
+          outputFormat: options.outputFormat,
+        },
+      }),
+    ),
+  )
 
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(payload))
-  return `blurkit:v1:${toHex(new Uint8Array(digest))}`
+  return `blurkit:v${CACHE_KEY_VERSION}:${bytesHash}:${metadataHash}`
 }
-

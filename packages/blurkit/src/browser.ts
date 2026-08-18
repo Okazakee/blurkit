@@ -1,3 +1,5 @@
+import { bytesToDataURL } from './internal/base64'
+import { toOwnedBytes } from './internal/bytes'
 import { resolveTargetDimensions } from './internal/dimensions'
 import { normalizeOptions } from './internal/normalize-options'
 import { encodeManySettledWithRuntime, encodeManyWithRuntime, encodeWithRuntime } from './shared'
@@ -31,7 +33,7 @@ async function loadBrowserSource(input: BlurKitInput): Promise<{ identifier: str
     }
 
     throw new Error(
-      'The browser runtime does not support local filesystem paths. Use a File, Blob, ArrayBuffer, or a remote http(s) URL.',
+      'The browser runtime does not support local filesystem paths. Use a File, Blob, ArrayBuffer, Uint8Array, or a remote http(s) URL.',
     )
   }
 
@@ -50,6 +52,13 @@ async function loadBrowserSource(input: BlurKitInput): Promise<{ identifier: str
     return {
       identifier: 'arraybuffer',
       blob: new Blob([input]),
+    }
+  }
+
+  if (input instanceof Uint8Array) {
+    return {
+      identifier: 'uint8array',
+      blob: new Blob([toOwnedBytes(input)]),
     }
   }
 

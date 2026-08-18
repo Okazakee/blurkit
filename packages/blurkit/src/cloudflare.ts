@@ -124,7 +124,7 @@ async function resolveCloudflareTarget(
 async function encodeRemoteURL(
   url: string,
   options: ReturnType<typeof normalizeOptions>,
-): Promise<BlurResult> {
+): Promise<{ result: BlurResult; bytes: Uint8Array; mimeType: string }> {
   const target = await resolveCloudflareTarget(url, options)
 
   const response = await fetch(
@@ -150,17 +150,21 @@ async function encodeRemoteURL(
   const mimeType = response.headers.get('content-type') ?? `image/${options.outputFormat}`
 
   return {
-    dataURL: bytesToDataURL(bytes, mimeType),
-    hash: await createSyntheticHash(bytes, options.algorithm),
-    algorithm: options.algorithm,
-    width: target.width,
-    height: target.height,
-    meta: {
-      originalWidth: target.info.originalWidth ?? target.width,
-      originalHeight: target.info.originalHeight ?? target.height,
-      format: target.info.format,
-      hasAlpha: undefined,
+    result: {
+      dataURL: bytesToDataURL(bytes, mimeType),
+      hash: await createSyntheticHash(bytes, options.algorithm),
+      algorithm: options.algorithm,
+      width: target.width,
+      height: target.height,
+      meta: {
+        originalWidth: target.info.originalWidth ?? target.width,
+        originalHeight: target.info.originalHeight ?? target.height,
+        format: target.info.format,
+        hasAlpha: undefined,
+      },
     },
+    bytes,
+    mimeType,
   }
 }
 
@@ -169,8 +173,13 @@ async function encodeWithCache(
   options: ReturnType<typeof normalizeOptions>,
 ): Promise<BlurResult> {
   const identifier = input instanceof URL ? input.toString() : String(input)
+  const encoded = await encodeRemoteURL(identifier, options)
+
   const cacheKey = options.cache
-    ? await createCacheKey(input, identifier, options)
+    ? await createCacheKey(
+        { identifier, bytes: encoded.bytes, mimeType: encoded.mimeType },
+        options,
+      )
     : undefined
 
   if (options.cache && cacheKey) {
@@ -178,15 +187,11 @@ async function encodeWithCache(
     if (cached) {
       return cached
     }
+
+    await options.cache.set(cacheKey, encoded.result)
   }
 
-  const result = await encodeRemoteURL(identifier, options)
-
-  if (options.cache && cacheKey) {
-    await options.cache.set(cacheKey, result)
-  }
-
-  return result
+  return encoded.result
 }
 
 export async function encode(

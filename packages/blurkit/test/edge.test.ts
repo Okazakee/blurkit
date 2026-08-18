@@ -119,4 +119,22 @@ describe('blurkit edge runtime', () => {
     const encodeUnsafe = encode as (input: string) => Promise<unknown>
     await expect(encodeUnsafe('./images/hero.jpg')).rejects.toThrowError(/supports remote URLs/i)
   })
+
+  it('falls back to wasm for Uint8Array input', async () => {
+    const image = await sharp({
+      create: {
+        width: 16,
+        height: 8,
+        channels: 4,
+        background: { r: 200, g: 90, b: 30, alpha: 1 },
+      },
+    }).png().toBuffer()
+
+    const result = await encode(new Uint8Array(image), { size: 8 })
+
+    expect(result.width).toBe(8)
+    expect(result.height).toBe(4)
+    expect(result.meta.originalWidth).toBe(16)
+    expect(result.meta.originalHeight).toBe(8)
+  })
 })

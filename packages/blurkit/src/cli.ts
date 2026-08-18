@@ -122,9 +122,7 @@ export async function encodePath(input: string, options: CliOptions): Promise<Bl
 
   if (!info.isDirectory() && !options.glob) {
     if (backend === 'wasm') {
-      const bytes = await readFile(inputPath)
-      const buffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer
-      return encodeWasm(buffer, parsedOptions)
+      return encodeWasm(await readFile(inputPath), parsedOptions)
     }
 
     return encodeNode(inputPath, parsedOptions)
@@ -139,12 +137,7 @@ export async function encodePath(input: string, options: CliOptions): Promise<Bl
   const concurrency = toNumber(options.concurrency) ?? 8
   const entries = await mapWithConcurrency(files, concurrency, async (filePath) => {
     const result = backend === 'wasm'
-      ? await readFile(filePath).then((bytes) =>
-        encodeWasm(
-          bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer,
-          parsedOptions,
-        ),
-      )
+      ? await encodeWasm(await readFile(filePath), parsedOptions)
       : await encodeNode(filePath, parsedOptions)
     return [toManifestKey(filePath, inputPath, options.basePath), result] as const
   })

@@ -9,12 +9,14 @@ export type BlurKitInput =
   | File
   | Blob
   | ArrayBuffer
+  | Uint8Array
 
 export type BlurKitNodeInput =
   | string
   | URL
   | Blob
   | ArrayBuffer
+  | Uint8Array
 
 export type BlurKitBrowserInput =
   | BlurKitRemoteURLString
@@ -22,24 +24,28 @@ export type BlurKitBrowserInput =
   | File
   | Blob
   | ArrayBuffer
+  | Uint8Array
 
 export type BlurKitEdgeInput =
   | BlurKitRemoteURLString
   | URL
   | Blob
   | ArrayBuffer
+  | Uint8Array
 
 export type BlurKitWasmInput =
   | BlurKitRemoteURLString
   | URL
   | Blob
   | ArrayBuffer
+  | Uint8Array
 
 export type BlurKitDenoInput =
   | string
   | URL
   | Blob
   | ArrayBuffer
+  | Uint8Array
 
 export interface BlurKitOptions {
   algorithm?: BlurAlgorithm

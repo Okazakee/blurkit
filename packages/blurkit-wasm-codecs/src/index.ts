@@ -5,7 +5,7 @@ import pngEncode, { init as initPngEncode } from '@jsquash/png/encode.js'
 import resize, { initResize } from '@jsquash/resize'
 import webpDecode, { init as initWebpDecode } from '@jsquash/webp/decode.js'
 
-export type BlurKitInput = string | URL | Blob | ArrayBuffer
+export type BlurKitInput = string | URL | Blob | ArrayBuffer | Uint8Array
 export type BlurOutputFormat = 'png' | 'jpeg'
 
 type SupportedMimeType = 'image/png' | 'image/jpeg' | 'image/webp'
@@ -53,6 +53,18 @@ function isNodeRuntime(): boolean {
 
 function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
   return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer
+}
+
+/**
+ * Returns an exact, owned view of a byte sequence, respecting a typed-array
+ * view's byteOffset/byteLength (Buffer views may window a larger allocation).
+ */
+function toOwnedBytes(view: Uint8Array): Uint8Array {
+  if (view.byteOffset === 0 && view.byteLength === view.buffer.byteLength) {
+    return view
+  }
+
+  return new Uint8Array(view.buffer.slice(view.byteOffset, view.byteOffset + view.byteLength))
 }
 
 function detectMimeType(bytes: Uint8Array): SupportedMimeType | undefined {
@@ -301,6 +313,13 @@ async function resolveWasmInput(input: BlurKitInput): Promise<ResolvedInput> {
     return {
       identifier: 'arraybuffer',
       bytes: new Uint8Array(input),
+    }
+  }
+
+  if (input instanceof Uint8Array) {
+    return {
+      identifier: 'uint8array',
+      bytes: toOwnedBytes(input),
     }
   }
 

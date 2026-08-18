@@ -2,8 +2,9 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { createFilesystemCache, createMemoryCache } from './cache'
-import { resolveTargetDimensions } from './internal/dimensions'
 import { bytesToDataURL } from './internal/base64'
+import { toOwnedBytes } from './internal/bytes'
+import { resolveTargetDimensions } from './internal/dimensions'
 import { normalizeOptions } from './internal/normalize-options'
 import { createManifest } from './manifest-core'
 import { writeManifest } from './manifest-node'
@@ -98,6 +99,13 @@ async function toNodeBytes(input: BlurKitInput): Promise<ResolvedInput> {
     return {
       identifier: 'arraybuffer',
       bytes: new Uint8Array(input),
+    }
+  }
+
+  if (input instanceof Uint8Array) {
+    return {
+      identifier: 'uint8array',
+      bytes: toOwnedBytes(input),
     }
   }
 

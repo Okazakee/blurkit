@@ -1,4 +1,5 @@
 import { bytesToDataURL } from './internal/base64'
+import { toOwnedBytes } from './internal/bytes'
 import { resolveTargetDimensions } from './internal/dimensions'
 import { normalizeOptions } from './internal/normalize-options'
 import { wasmRuntime } from './internal/wasm-runtime'
@@ -46,7 +47,7 @@ async function resolveEdgeInput(input: BlurKitInput): Promise<ResolvedInput> {
   if (typeof input === 'string' || input instanceof URL) {
     const url = input instanceof URL ? input.toString() : input
     if (!/^https?:\/\//i.test(url)) {
-      throw new Error('The edge runtime supports remote URLs, Blob, and ArrayBuffer input only.')
+      throw new Error('The edge runtime supports remote URLs, Blob, ArrayBuffer, and Uint8Array input only.')
     }
 
     const response = await fetch(url)
@@ -73,6 +74,13 @@ async function resolveEdgeInput(input: BlurKitInput): Promise<ResolvedInput> {
     return {
       identifier: 'arraybuffer',
       bytes: new Uint8Array(input),
+    }
+  }
+
+  if (input instanceof Uint8Array) {
+    return {
+      identifier: 'uint8array',
+      bytes: toOwnedBytes(input),
     }
   }
 

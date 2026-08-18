@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { bytesToDataURL } from './internal/base64'
+import { toOwnedBytes } from './internal/bytes'
 import { normalizeOptions } from './internal/normalize-options'
 import { wasmRuntime } from './internal/wasm-runtime'
 import { encodeManySettledWithRuntime, encodeManyWithRuntime, encodeWithRuntime } from './shared'
@@ -59,6 +60,13 @@ async function resolveDenoInput(input: BlurKitInput): Promise<{ identifier: stri
     return {
       identifier: 'arraybuffer',
       bytes: new Uint8Array(input),
+    }
+  }
+
+  if (input instanceof Uint8Array) {
+    return {
+      identifier: 'uint8array',
+      bytes: toOwnedBytes(input),
     }
   }
 

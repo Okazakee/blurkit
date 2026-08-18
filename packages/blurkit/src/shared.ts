@@ -30,7 +30,7 @@ export async function encodeWithRuntime(
 ): Promise<BlurResult> {
   const resolved = await runtime.resolveInput(input)
   const cacheKey = options.cache
-    ? await createCacheKey(input, resolved.identifier, options)
+    ? await createCacheKey(resolved, options)
     : undefined
 
   if (options.cache && cacheKey) {
