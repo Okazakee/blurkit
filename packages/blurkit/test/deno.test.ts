@@ -254,4 +254,77 @@ describe('blurkit deno runtime', () => {
     expect(result.meta.originalWidth).toBe(32)
     expect(result.meta.originalHeight).toBe(32)
   })
+
+  it('falls back to wasm rendering when OffscreenCanvas lacks 2D support', async () => {
+    // Deno ships a WebGPU-only OffscreenCanvas whose getContext('2d') returns
+    // null; encoding must fall back to the wasm codecs render path.
+    class No2DCanvas {
+      width = 1
+      height = 1
+
+      getContext(_type: string): unknown {
+        return null
+      }
+
+      async convertToBlob(): Promise<Blob> {
+        return new Blob()
+      }
+    }
+
+    const original = (globalThis as { OffscreenCanvas?: unknown }).OffscreenCanvas
+    ;(globalThis as { OffscreenCanvas?: unknown }).OffscreenCanvas = No2DCanvas
+
+    try {
+      const image = await sharp({
+        create: {
+          width: 8,
+          height: 8,
+          channels: 4,
+          background: { r: 200, g: 60, b: 160, alpha: 1 },
+        },
+      }).png().toBuffer()
+
+      const result = await encode(new Uint8Array(image), { size: 8 })
+
+      expect(result.dataURL.startsWith('data:image/png;base64,')).toBe(true)
+      expect(result.hash.length).toBeGreaterThan(0)
+    } finally {
+      ;(globalThis as { OffscreenCanvas?: unknown }).OffscreenCanvas = original
+    }
+  })
+
+  it('uses canvas rendering when OffscreenCanvas supports 2D', async () => {
+    class Canvas2D {
+      width = 1
+      height = 1
+
+      getContext(type: string): unknown {
+        return type === '2d' ? { putImageData: () => {} } : null
+      }
+
+      async convertToBlob(): Promise<Blob> {
+        return new Blob([Uint8Array.from([0x89, 0x50, 0x4e, 0x47])], { type: 'image/png' })
+      }
+    }
+
+    const original = (globalThis as { OffscreenCanvas?: unknown }).OffscreenCanvas
+    ;(globalThis as { OffscreenCanvas?: unknown }).OffscreenCanvas = Canvas2D
+
+    try {
+      const image = await sharp({
+        create: {
+          width: 8,
+          height: 8,
+          channels: 4,
+          background: { r: 90, g: 180, b: 60, alpha: 1 },
+        },
+      }).png().toBuffer()
+
+      const result = await encode(new Uint8Array(image), { size: 8 })
+
+      expect(result.dataURL).toBe('data:image/png;base64,iVBORw==')
+    } finally {
+      ;(globalThis as { OffscreenCanvas?: unknown }).OffscreenCanvas = original
+    }
+  })
 })

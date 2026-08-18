@@ -74,7 +74,18 @@ async function resolveDenoInput(input: BlurKitInput): Promise<{ identifier: stri
 }
 
 function hasCanvasCapabilities(): boolean {
-  return typeof OffscreenCanvas !== 'undefined'
+  if (typeof OffscreenCanvas === 'undefined') {
+    return false
+  }
+
+  try {
+    // Deno ships a WebGPU-only OffscreenCanvas whose getContext('2d') returns
+    // null; only report canvas capabilities when a 2D context can actually be
+    // created so rendering falls back to the wasm codecs path there.
+    return new OffscreenCanvas(1, 1).getContext('2d') !== null
+  } catch {
+    return false
+  }
 }
 
 async function renderCanvasDataURL(
