@@ -3,6 +3,7 @@ import path from 'node:path'
 
 import { bytesToDataURL } from './internal/base64'
 import { toOwnedBytes } from './internal/bytes'
+import { isStringInput } from './internal/input-guards'
 import { normalizeOptions } from './internal/normalize-options'
 import { wasmRuntime } from './internal/wasm-runtime'
 import { encodeManySettledWithRuntime, encodeManyWithRuntime, encodeWithRuntime } from './shared'
@@ -23,7 +24,7 @@ function isRemote(value: string): boolean {
 }
 
 async function resolveDenoInput(input: BlurKitInput): Promise<{ identifier: string; bytes: Uint8Array; mimeType?: string }> {
-  if (typeof input === 'string') {
+  if (isStringInput(input)) {
     if (isRemote(input)) {
       const response = await fetch(input)
       if (!response.ok) {
@@ -48,7 +49,7 @@ async function resolveDenoInput(input: BlurKitInput): Promise<{ identifier: stri
     return resolveDenoInput(input.toString())
   }
 
-  if (typeof Blob !== 'undefined' && input instanceof Blob) {
+  if (globalThis.Blob !== undefined && input instanceof Blob) {
     return {
       identifier: 'blob',
       bytes: new Uint8Array(await input.arrayBuffer()),
@@ -74,7 +75,7 @@ async function resolveDenoInput(input: BlurKitInput): Promise<{ identifier: stri
 }
 
 function hasCanvasCapabilities(): boolean {
-  if (typeof OffscreenCanvas === 'undefined') {
+  if (globalThis.OffscreenCanvas === undefined) {
     return false
   }
 
@@ -128,12 +129,14 @@ const runtime: RuntimeHandlers = {
   renderDataURL: renderDenoDataURL,
 }
 
-function toDenoError(error: unknown): Error {
-  if (error instanceof Error && (error as Error & { code?: string }).code === 'BLURKIT_MISSING_WASM_CODECS') {
-    return error
+function toDenoError(cause: unknown): Error {
+  // SAFETY: Node module-resolution failures expose a string `code`; the
+  // missing-wasm-codecs error is recognized by its canonical code value.
+  if (cause instanceof Error && (cause as Error & { code?: string }).code === 'BLURKIT_MISSING_WASM_CODECS') {
+    return cause
   }
 
-  const reason = error instanceof Error ? error.message : String(error)
+  const reason = cause instanceof Error ? cause.message : String(cause)
   return new Error(
     `blurkit/deno encode failed: ${reason}`,
   )

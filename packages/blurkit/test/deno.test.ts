@@ -16,8 +16,12 @@ import {
 } from '../src/deno'
 
 function toArrayBuffer(buffer: Buffer): ArrayBuffer {
+  // SAFETY: Buffer.buffer is the underlying ArrayBuffer; the byte range is bounded by the Buffer's offset and length.
   return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer
 }
+
+// SAFETY: expose the optional OffscreenCanvas global so the test can install and remove stubs.
+const globalOffscreenCanvas = globalThis as { OffscreenCanvas?: unknown }
 
 describe('blurkit deno runtime', () => {
   it('encodes a blurhash placeholder from ArrayBuffer', async () => {
@@ -50,6 +54,7 @@ describe('blurkit deno runtime', () => {
       },
     }).png().toBuffer()
 
+    // SAFETY: Buffer.buffer is the underlying ArrayBuffer; the byte range is bounded by the Buffer's offset and length.
     const blobData = png.buffer.slice(png.byteOffset, png.byteOffset + png.byteLength) as ArrayBuffer
     const blob = new Blob([blobData], { type: 'image/png' })
     const result = await encode(blob, { algorithm: 'thumbhash', size: 20 })
@@ -228,7 +233,8 @@ describe('blurkit deno runtime', () => {
   })
 
   it('rejects local file path strings that do not exist', async () => {
-    const encodeUnsafe = encode as (input: string) => Promise<unknown>
+    // SAFETY: cast narrows encode's union input type to string to verify the local-path rejection path.
+    const encodeUnsafe = encode as (input: string) => Promise<never>
     await expect(encodeUnsafe('./nonexistent/image.png')).rejects.toThrowError()
   })
 
@@ -262,7 +268,7 @@ describe('blurkit deno runtime', () => {
       width = 1
       height = 1
 
-      getContext(_type: string): unknown {
+      getContext(_type: string) {
         return null
       }
 
@@ -271,8 +277,8 @@ describe('blurkit deno runtime', () => {
       }
     }
 
-    const original = (globalThis as { OffscreenCanvas?: unknown }).OffscreenCanvas
-    ;(globalThis as { OffscreenCanvas?: unknown }).OffscreenCanvas = No2DCanvas
+    const original = globalOffscreenCanvas.OffscreenCanvas
+    globalOffscreenCanvas.OffscreenCanvas = No2DCanvas
 
     try {
       const image = await sharp({
@@ -289,7 +295,7 @@ describe('blurkit deno runtime', () => {
       expect(result.dataURL.startsWith('data:image/png;base64,')).toBe(true)
       expect(result.hash.length).toBeGreaterThan(0)
     } finally {
-      ;(globalThis as { OffscreenCanvas?: unknown }).OffscreenCanvas = original
+      globalOffscreenCanvas.OffscreenCanvas = original
     }
   })
 
@@ -298,7 +304,7 @@ describe('blurkit deno runtime', () => {
       width = 1
       height = 1
 
-      getContext(type: string): unknown {
+      getContext(type: string) {
         return type === '2d' ? { putImageData: () => {} } : null
       }
 
@@ -307,8 +313,8 @@ describe('blurkit deno runtime', () => {
       }
     }
 
-    const original = (globalThis as { OffscreenCanvas?: unknown }).OffscreenCanvas
-    ;(globalThis as { OffscreenCanvas?: unknown }).OffscreenCanvas = Canvas2D
+    const original = globalOffscreenCanvas.OffscreenCanvas
+    globalOffscreenCanvas.OffscreenCanvas = Canvas2D
 
     try {
       const image = await sharp({
@@ -324,7 +330,7 @@ describe('blurkit deno runtime', () => {
 
       expect(result.dataURL).toBe('data:image/png;base64,iVBORw==')
     } finally {
-      ;(globalThis as { OffscreenCanvas?: unknown }).OffscreenCanvas = original
+      globalOffscreenCanvas.OffscreenCanvas = original
     }
   })
 })

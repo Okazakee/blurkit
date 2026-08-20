@@ -3,14 +3,29 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
+interface PackageRuntimeExport {
+  browser?: unknown
+  deno?: unknown
+  node?: unknown
+  worker?: unknown
+}
+
+interface PackageExports {
+  '.'?: PackageRuntimeExport
+  './deno'?: unknown
+  './wasm'?: unknown
+}
+
 describe('package export map and root import smoke checks', () => {
   it('uses static conditional exports for root import', async () => {
     const packageJsonPath = path.resolve(__dirname, '../package.json')
+    // SAFETY: package.json belongs to this package and its exports shape is verified below.
     const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf8')) as {
-      exports?: Record<string, unknown>
+      exports?: PackageExports
     }
 
-    const rootExport = packageJson.exports?.['.'] as Record<string, unknown>
+    // SAFETY: rootExport is the '.' entry of the parsed exports map.
+    const rootExport = packageJson.exports?.['.'] as PackageRuntimeExport
 
     expect(rootExport).toBeTruthy()
     expect(rootExport).toHaveProperty('browser')

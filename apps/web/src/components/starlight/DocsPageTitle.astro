@@ -4,6 +4,8 @@ import type { StarlightRouteData } from '@astrojs/starlight/route-data'
 const PAGE_TITLE_ID = '_top'
 const route = Astro.locals.starlightRoute
 const isDocsHome = route.id === 'docs'
+// SAFETY: starlight's docsSchema guarantees every docs page frontmatter
+// provides title and may provide description.
 const { title, description } = route.entry.data as { title: string; description?: string }
 
 type SidebarEntry = StarlightRouteData['sidebar'][number]

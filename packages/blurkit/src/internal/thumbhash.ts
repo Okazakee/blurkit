@@ -10,11 +10,13 @@ export function toThumbHash(
   return toBase64URL(rgbaToThumbHash(width, height, pixels))
 }
 
-export function renderThumbHash(hash: string): {
+export interface RenderedThumbHash {
   width: number
   height: number
   pixels: Uint8ClampedArray
-} {
+}
+
+export function renderThumbHash(hash: string): RenderedThumbHash {
   const decoded = thumbHashToRGBA(fromBase64URL(hash))
   return {
     width: decoded.w,

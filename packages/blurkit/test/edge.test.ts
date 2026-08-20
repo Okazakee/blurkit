@@ -4,17 +4,21 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { encode } from '../src/edge'
 
 function toArrayBuffer(buffer: Buffer): ArrayBuffer {
+  // SAFETY: Buffer.buffer is the underlying ArrayBuffer; the byte range is bounded by the Buffer's offset and length.
   return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer
 }
 
-const originalImageDecoder = (globalThis as { ImageDecoder?: unknown }).ImageDecoder
-const originalOffscreenCanvas = (globalThis as { OffscreenCanvas?: unknown }).OffscreenCanvas
-const originalImageData = (globalThis as { ImageData?: unknown }).ImageData
+// SAFETY: expose optional global API slots so the test can install and remove stubs.
+const globals = globalThis as { ImageDecoder?: unknown; OffscreenCanvas?: unknown; ImageData?: unknown }
+
+const originalImageDecoder = globals.ImageDecoder
+const originalOffscreenCanvas = globals.OffscreenCanvas
+const originalImageData = globals.ImageData
 
 afterEach(() => {
-  ;(globalThis as { ImageDecoder?: unknown }).ImageDecoder = originalImageDecoder
-  ;(globalThis as { OffscreenCanvas?: unknown }).OffscreenCanvas = originalOffscreenCanvas
-  ;(globalThis as { ImageData?: unknown }).ImageData = originalImageData
+  globals.ImageDecoder = originalImageDecoder
+  globals.OffscreenCanvas = originalOffscreenCanvas
+  globals.ImageData = originalImageData
 })
 
 describe('blurkit edge runtime', () => {
@@ -51,7 +55,7 @@ describe('blurkit edge runtime', () => {
     }
 
     class FakeImageDecoder {
-      constructor(_options: unknown) {}
+      constructor() {}
 
       async decode(): Promise<{ image: { displayWidth: number; displayHeight: number } }> {
         return {
@@ -74,14 +78,10 @@ describe('blurkit edge runtime', () => {
         this.height = height
       }
 
-      getContext(_type: string): {
-        drawImage: (..._args: unknown[]) => void
-        getImageData: (_x: number, _y: number, width: number, height: number) => { data: Uint8ClampedArray }
-        putImageData: (..._args: unknown[]) => void
-      } {
+      getContext(_type: string) {
         return {
           drawImage: () => {},
-          getImageData: (_x, _y, width, height) => ({
+          getImageData: (_x: number, _y: number, width: number, height: number) => ({
             data: new Uint8ClampedArray(width * height * 4).fill(255),
           }),
           putImageData: () => {},
@@ -93,9 +93,9 @@ describe('blurkit edge runtime', () => {
       }
     }
 
-    ;(globalThis as { ImageData?: unknown }).ImageData = FakeImageData
-    ;(globalThis as { ImageDecoder?: unknown }).ImageDecoder = FakeImageDecoder
-    ;(globalThis as { OffscreenCanvas?: unknown }).OffscreenCanvas = FakeOffscreenCanvas
+    globals.ImageData = FakeImageData
+    globals.ImageDecoder = FakeImageDecoder
+    globals.OffscreenCanvas = FakeOffscreenCanvas
 
     const png = await sharp({
       create: {
@@ -106,6 +106,7 @@ describe('blurkit edge runtime', () => {
       },
     }).png().toBuffer()
 
+    // SAFETY: Buffer.buffer is the underlying ArrayBuffer; the byte range is bounded by the Buffer's offset and length.
     const blobData = png.buffer.slice(png.byteOffset, png.byteOffset + png.byteLength) as ArrayBuffer
     const result = await encode(new Blob([blobData], { type: 'image/png' }), { width: 4, height: 2 })
 
@@ -116,7 +117,8 @@ describe('blurkit edge runtime', () => {
   })
 
   it('rejects non-remote string input', async () => {
-    const encodeUnsafe = encode as (input: string) => Promise<unknown>
+    // SAFETY: cast narrows encode's union input type to string to verify the non-remote URL rejection path.
+    const encodeUnsafe = encode as (input: string) => Promise<never>
     await expect(encodeUnsafe('./images/hero.jpg')).rejects.toThrowError(/supports remote URLs/i)
   })
 

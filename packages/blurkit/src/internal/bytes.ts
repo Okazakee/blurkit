@@ -10,6 +10,8 @@
 export function toOwnedBytes(view: Uint8Array): Uint8Array<ArrayBuffer> {
   const buffer = view.buffer
   if (view.byteOffset === 0 && view.byteLength === buffer.byteLength) {
+    // SAFETY: the checks above prove this view covers its backing buffer
+    // exactly, so it is a plain ArrayBuffer-backed Uint8Array.
     return view as Uint8Array<ArrayBuffer>
   }
 

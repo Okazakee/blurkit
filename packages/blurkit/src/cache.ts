@@ -57,6 +57,8 @@ export function createFilesystemCache(options: {
 
       try {
         const raw = await readFile(filePath, 'utf8')
+        // SAFETY: the cache file was written by createFilesystemCache.set in
+        // this exact shape; the parse is the read boundary of our own format.
         const parsed = JSON.parse(raw) as PersistentCacheEntry
 
         if (ttlMs && Date.now() - parsed.storedAt > ttlMs) {

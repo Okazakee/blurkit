@@ -47,11 +47,17 @@ export interface WasmRuntimeHandlers {
 
 let nodeWasmInitPromise: Promise<void> | undefined
 
+function isNodeProcess(process: NodeJS.Process | undefined): process is NodeJS.Process {
+  return typeof process?.versions?.node === 'string'
+}
+
 function isNodeRuntime(): boolean {
-  return typeof process !== 'undefined' && typeof process.versions?.node === 'string'
+  return isNodeProcess(globalThis.process)
 }
 
 function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
+  // SAFETY: Uint8Array buffers are plain ArrayBuffers in every supported
+  // runtime, so slicing the view's buffer cannot yield a SharedArrayBuffer.
   return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer
 }
 
@@ -117,7 +123,7 @@ function resolveSupportedMimeType(resolved: ResolvedInput): SupportedMimeType {
 }
 
 function ensureImageDataPolyfill(): void {
-  if (typeof ImageData !== 'undefined') {
+  if (globalThis.ImageData !== undefined) {
     return
   }
 
@@ -135,7 +141,12 @@ function ensureImageDataPolyfill(): void {
     }
   }
 
-  ;(globalThis as typeof globalThis & { ImageData: typeof ImageData }).ImageData = NodeImageData as unknown as typeof ImageData
+  // SAFETY: NodeImageData matches the ImageData runtime contract
+  // (data/width/height/colorSpace) required by the codec render path.
+  const imageDataPolyfill = NodeImageData as unknown
+  // SAFETY: lib.dom's ImageData constructor overloads differ from
+  // NodeImageData's, so assigning the polyfill requires a bridge from unknown.
+  globalThis.ImageData = imageDataPolyfill as typeof ImageData
 }
 
 async function initNodeWasmCodecs(): Promise<void> {
@@ -148,6 +159,8 @@ async function initNodeWasmCodecs(): Promise<void> {
 
   let runtimeRequire: NodeJS.Require
   try {
+    // SAFETY: the indirect eval returns the ambient CommonJS require that
+    // bundles expose at runtime; createRequire below is the fallback.
     runtimeRequire = (0, eval)('require') as NodeJS.Require
   } catch {
     runtimeRequire = createRequire(`${process.cwd()}/package.json`)
@@ -185,7 +198,7 @@ async function ensureWasmCodecsReady(): Promise<void> {
   }
 
   if (!nodeWasmInitPromise) {
-    nodeWasmInitPromise = initNodeWasmCodecs().catch((error: unknown) => {
+    nodeWasmInitPromise = initNodeWasmCodecs().catch((error) => {
       nodeWasmInitPromise = undefined
       throw error
     })
@@ -222,6 +235,11 @@ function hasAnyAlpha(pixels: Uint8ClampedArray): boolean {
   return false
 }
 
+interface ResolvedDimensions {
+  width: number
+  height: number
+}
+
 function roundDimension(value: number): number {
   return Math.max(1, Math.round(value))
 }
@@ -230,7 +248,7 @@ function resolveTargetDimensions(
   originalWidth: number,
   originalHeight: number,
   options: NormalizedBlurKitOptions,
-): { width: number; height: number } {
+): ResolvedDimensions {
   if (options.width && options.height) {
     return {
       width: options.width,
@@ -266,7 +284,7 @@ function resolveTargetDimensions(
 }
 
 function encodeBase64(bytes: Uint8Array): string {
-  if (typeof Buffer !== 'undefined') {
+  if (globalThis.Buffer !== undefined) {
     return Buffer.from(bytes).toString('base64')
   }
 
@@ -282,8 +300,12 @@ function bytesToDataURL(bytes: Uint8Array, mimeType: string): string {
   return `data:${mimeType};base64,${encodeBase64(bytes)}`
 }
 
+function isStringInput(input: BlurKitInput): input is string {
+  return typeof input === 'string'
+}
+
 async function resolveWasmInput(input: BlurKitInput): Promise<ResolvedInput> {
-  if (typeof input === 'string' || input instanceof URL) {
+  if (isStringInput(input) || input instanceof URL) {
     const url = input instanceof URL ? input.toString() : input
     if (!/^https?:\/\//i.test(url)) {
       throw new Error('blurkit/wasm supports remote URLs, Blob, and ArrayBuffer input only.')
@@ -301,7 +323,7 @@ async function resolveWasmInput(input: BlurKitInput): Promise<ResolvedInput> {
     }
   }
 
-  if (typeof Blob !== 'undefined' && input instanceof Blob) {
+  if (globalThis.Blob !== undefined && input instanceof Blob) {
     return {
       identifier: 'blob',
       bytes: new Uint8Array(await input.arrayBuffer()),

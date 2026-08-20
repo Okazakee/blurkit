@@ -118,6 +118,8 @@ function DemoSelect<T extends string>({
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
+      // SAFETY: pointerdown targets are always DOM nodes, and contains()
+      // requires a Node argument.
       if (!rootRef.current?.contains(event.target as Node)) {
         setOpen(false)
       }
@@ -235,7 +237,7 @@ export function BlurDemo() {
 
         const blob = await response.blob()
         const file =
-          typeof File === 'function'
+          globalThis.File !== undefined
             ? new File([blob], TEST_IMAGE_LABEL, { type: blob.type || 'image/webp' })
             : blob
 
@@ -355,6 +357,8 @@ export function BlurDemo() {
   }
 
   function handleDragLeave(event: DragEvent<HTMLDivElement>) {
+    // SAFETY: drag-related targets are DOM nodes; contains() accepts null
+    // for the no-target case.
     if (event.currentTarget.contains(event.relatedTarget as Node | null)) {
       return
     }

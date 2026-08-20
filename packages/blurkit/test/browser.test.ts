@@ -4,7 +4,8 @@ import { encode } from '../src/browser'
 
 describe('blurkit browser runtime', () => {
   it('rejects local filesystem path strings with actionable message', async () => {
-    const encodeUnsafe = encode as (input: string) => Promise<unknown>
+    // SAFETY: cast narrows encode's union input type to string to verify the local-path rejection path.
+    const encodeUnsafe = encode as (input: string) => Promise<never>
     await expect(encodeUnsafe('./images/hero.jpg')).rejects.toThrowError(
       /File, Blob, ArrayBuffer, Uint8Array, or a remote http\(s\) URL/i,
     )

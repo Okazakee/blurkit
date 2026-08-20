@@ -17,8 +17,61 @@ interface CloudflareImageInfo {
   format?: string
 }
 
+interface CloudflareInfoPayload {
+  originalWidth?: unknown
+  inputWidth?: unknown
+  width?: unknown
+  originalHeight?: unknown
+  inputHeight?: unknown
+  height?: unknown
+  format?: unknown
+  inputFormat?: unknown
+}
+
 function isRemoteURLInput(input: BlurKitInput): input is BlurKitRemoteURLString | URL {
   return (typeof input === 'string' && /^https?:\/\//i.test(input)) || input instanceof URL
+}
+
+// oxlint-disable-next-line anti-slop/no-unknown-parameters -- boundary parser for the untyped Cloudflare image-info JSON
+function isCloudflareInfoPayload(value: unknown): value is CloudflareInfoPayload {
+  return value !== null && typeof value === 'object'
+}
+
+// oxlint-disable-next-line anti-slop/no-unknown-parameters -- boundary parser for untyped JSON numbers
+function isNonEmptyFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0
+}
+
+// oxlint-disable-next-line anti-slop/no-unknown-parameters -- boundary parser for untyped JSON strings
+function isString(value: unknown): value is string {
+  return typeof value === 'string'
+}
+
+// oxlint-disable-next-line anti-slop/no-unknown-parameters -- boundary parser consuming untyped Cloudflare fetch JSON
+function readCloudflareInfo(value: unknown): CloudflareImageInfo {
+  if (!isCloudflareInfoPayload(value)) {
+    return {}
+  }
+
+  return {
+    originalWidth:
+      isNonEmptyFiniteNumber(value.originalWidth)
+        ? value.originalWidth
+        : isNonEmptyFiniteNumber(value.inputWidth)
+          ? value.inputWidth
+          : isNonEmptyFiniteNumber(value.width)
+            ? value.width
+            : undefined,
+    originalHeight:
+      isNonEmptyFiniteNumber(value.originalHeight)
+        ? value.originalHeight
+        : isNonEmptyFiniteNumber(value.inputHeight)
+          ? value.inputHeight
+          : isNonEmptyFiniteNumber(value.height)
+            ? value.height
+            : undefined,
+    format: isString(value.format) ? value.format : isString(value.inputFormat) ? value.inputFormat : undefined,
+  }
 }
 
 function toHex(bytes: Uint8Array): string {
@@ -33,46 +86,19 @@ async function createSyntheticHash(bytes: Uint8Array, algorithm: 'blurhash' | 't
   return `${prefix}:${toHex(new Uint8Array(digest)).slice(0, 32)}`
 }
 
-function readOptionalNumber(value: unknown): number | undefined {
-  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : undefined
-}
-
-function readCloudflareInfo(value: unknown): CloudflareImageInfo {
-  if (!value || typeof value !== 'object') {
-    return {}
-  }
-
-  const payload = value as Record<string, unknown>
-  return {
-    originalWidth:
-      readOptionalNumber(payload.originalWidth) ??
-      readOptionalNumber(payload.inputWidth) ??
-      readOptionalNumber(payload.width),
-    originalHeight:
-      readOptionalNumber(payload.originalHeight) ??
-      readOptionalNumber(payload.inputHeight) ??
-      readOptionalNumber(payload.height),
-    format:
-      typeof payload.format === 'string'
-        ? payload.format
-        : typeof payload.inputFormat === 'string'
-          ? payload.inputFormat
-          : undefined,
-  }
-}
-
 async function fetchCloudflareImageInfo(url: string): Promise<CloudflareImageInfo> {
-  const response = await fetch(
-    url,
-    ({
-      cf: {
-        image: {
-          format: 'json',
-          anim: false,
-        },
+  // SAFETY: `cf` is a Cloudflare-proprietary RequestInit extension; fetch
+  // tolerates unknown option keys and Cloudflare honors the image config.
+  const requestInit = {
+    cf: {
+      image: {
+        format: 'json',
+        anim: false,
       },
-    } as RequestInit),
-  )
+    },
+  } as RequestInit
+
+  const response = await fetch(url, requestInit)
 
   if (!response.ok) {
     return {}
@@ -84,8 +110,7 @@ async function fetchCloudflareImageInfo(url: string): Promise<CloudflareImageInf
   }
 
   try {
-    const json = (await response.json()) as unknown
-    return readCloudflareInfo(json)
+    return readCloudflareInfo(await response.json())
   } catch {
     return {}
   }
@@ -127,20 +152,21 @@ async function encodeRemoteURL(
 ): Promise<{ result: BlurResult; bytes: Uint8Array; mimeType: string }> {
   const target = await resolveCloudflareTarget(url, options)
 
-  const response = await fetch(
-    url,
-    ({
-      cf: {
-        image: {
-          width: target.width,
-          height: target.height,
-          fit: 'scale-down',
-          format: options.outputFormat,
-          anim: false,
-        },
+  // SAFETY: `cf` is a Cloudflare-proprietary RequestInit extension; fetch
+  // tolerates unknown option keys and Cloudflare honors the image config.
+  const requestInit = {
+    cf: {
+      image: {
+        width: target.width,
+        height: target.height,
+        fit: 'scale-down',
+        format: options.outputFormat,
+        anim: false,
       },
-    } as RequestInit),
-  )
+    },
+  } as RequestInit
+
+  const response = await fetch(url, requestInit)
 
   if (!response.ok) {
     throw new Error(`Failed to transform image via Cloudflare: ${response.status} ${response.statusText}`)
@@ -291,6 +317,8 @@ export function createCloudflareCache(options: {
       }
 
       try {
+        // SAFETY: the envelope was written by createCloudflareCache.set in
+        // this exact shape; the parse is the read boundary of our own format.
         const payload = (await response.json()) as CloudflareCacheEnvelope
         if (payload.expiresAt && Date.now() > payload.expiresAt) {
           return undefined

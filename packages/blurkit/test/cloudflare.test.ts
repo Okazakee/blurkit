@@ -19,14 +19,24 @@ class MemoryWorkerCache {
 function installMockCaches(): void {
   const namespaces = new Map<string, MemoryWorkerCache>()
 
-  ;(globalThis as { caches?: CacheStorage }).caches = {
+  // SAFETY: the literal object implements the CacheStorage open contract for this test.
+  const cacheStorage = {
     open: async (name: string) => {
       if (!namespaces.has(name)) {
         namespaces.set(name, new MemoryWorkerCache())
       }
-      return namespaces.get(name)! as unknown as Cache
+      // SAFETY: MemoryWorkerCache implements the Cache match/put contract
+      // used by createCloudflareCache; the unknown bridge spans the unused
+      // Cache members (add/addAll/delete/keys/matchAll).
+      const cache = namespaces.get(name)! as unknown
+      // SAFETY: narrowing the bridged value to the Cache contract used by the runtime.
+      return cache as Cache
     },
   } as CacheStorage
+
+  // SAFETY: globalThis may not expose caches in this test environment; cast to the optional CacheStorage slot.
+  const cachesGlobal = globalThis as { caches?: CacheStorage }
+  cachesGlobal.caches = cacheStorage
 }
 
 afterEach(() => {

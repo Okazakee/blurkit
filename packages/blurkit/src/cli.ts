@@ -89,7 +89,7 @@ async function mapWithConcurrency<T, R>(
   concurrency: number,
   mapper: (value: T) => Promise<R>,
 ): Promise<R[]> {
-  const results: R[] = new Array(values.length)
+  const results: R[] = Array.from<R>({ length: values.length })
   let cursor = 0
 
   async function worker(): Promise<void> {
@@ -114,6 +114,8 @@ export async function encodePath(input: string, options: CliOptions): Promise<Bl
       throw new Error('The --glob option is only valid for local directory input.')
     }
 
+    // SAFETY: isRemoteInput above matched an http(s) URL pattern, which is
+    // exactly the BlurKitRemoteURLString contract.
     return encodeImage(input as BlurKitRemoteURLString, parsedOptions)
   }
 
@@ -193,7 +195,7 @@ export async function runCli(argv: string[] = process.argv): Promise<void> {
 
 const entryHref = process.argv[1] ? pathToFileURL(process.argv[1]).href : undefined
 if (entryHref && import.meta.url === entryHref) {
-  runCli(process.argv).catch((error: unknown) => {
+  runCli(process.argv).catch((error) => {
     const message = error instanceof Error ? error.message : String(error)
     process.stderr.write(`${message}\n`)
     process.exitCode = 1

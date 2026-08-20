@@ -15,7 +15,7 @@ function fromBinaryString(value: string): Uint8Array {
 }
 
 function encodeBase64(bytes: Uint8Array): string {
-  if (typeof Buffer !== 'undefined') {
+  if (globalThis.Buffer !== undefined) {
     return Buffer.from(bytes).toString('base64')
   }
 
@@ -23,7 +23,7 @@ function encodeBase64(bytes: Uint8Array): string {
 }
 
 function decodeBase64(value: string): Uint8Array {
-  if (typeof Buffer !== 'undefined') {
+  if (globalThis.Buffer !== undefined) {
     return new Uint8Array(Buffer.from(value, 'base64'))
   }
 

@@ -1,6 +1,6 @@
-import { bytesToDataURL } from './internal/base64'
 import { toOwnedBytes } from './internal/bytes'
 import { resolveTargetDimensions } from './internal/dimensions'
+import { isStringInput } from './internal/input-guards'
 import { normalizeOptions } from './internal/normalize-options'
 import { encodeManySettledWithRuntime, encodeManyWithRuntime, encodeWithRuntime } from './shared'
 import type {
@@ -18,7 +18,7 @@ function isRemoteString(input: string): boolean {
 }
 
 async function loadBrowserSource(input: BlurKitInput): Promise<{ identifier: string; blob: Blob; url?: string }> {
-  if (typeof input === 'string') {
+  if (isStringInput(input)) {
     if (isRemoteString(input)) {
       const response = await fetch(input)
       if (!response.ok) {
@@ -43,7 +43,7 @@ async function loadBrowserSource(input: BlurKitInput): Promise<{ identifier: str
 
   if (input instanceof Blob) {
     return {
-      identifier: typeof File !== 'undefined' && input instanceof File ? input.name : 'blob',
+      identifier: globalThis.File !== undefined && input instanceof File ? input.name : 'blob',
       blob: input,
     }
   }

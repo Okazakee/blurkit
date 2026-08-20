@@ -1,6 +1,7 @@
 import { bytesToDataURL } from './internal/base64'
 import { toOwnedBytes } from './internal/bytes'
 import { resolveTargetDimensions } from './internal/dimensions'
+import { isStringInput } from './internal/input-guards'
 import { normalizeOptions } from './internal/normalize-options'
 import { wasmRuntime } from './internal/wasm-runtime'
 import { encodeManySettledWithRuntime, encodeManyWithRuntime, encodeWithRuntime } from './shared'
@@ -32,7 +33,7 @@ function detectMimeType(bytes: Uint8Array): string | undefined {
 }
 
 function hasNativeEdgeCapabilities(): boolean {
-  return typeof ImageDecoder !== 'undefined' && typeof OffscreenCanvas !== 'undefined'
+  return globalThis.ImageDecoder !== undefined && globalThis.OffscreenCanvas !== undefined
 }
 
 function assertNativeEdgeCapabilities(): void {
@@ -44,7 +45,7 @@ function assertNativeEdgeCapabilities(): void {
 }
 
 async function resolveEdgeInput(input: BlurKitInput): Promise<ResolvedInput> {
-  if (typeof input === 'string' || input instanceof URL) {
+  if (isStringInput(input) || input instanceof URL) {
     const url = input instanceof URL ? input.toString() : input
     if (!/^https?:\/\//i.test(url)) {
       throw new Error('The edge runtime supports remote URLs, Blob, ArrayBuffer, and Uint8Array input only.')
@@ -62,7 +63,7 @@ async function resolveEdgeInput(input: BlurKitInput): Promise<ResolvedInput> {
     }
   }
 
-  if (typeof Blob !== 'undefined' && input instanceof Blob) {
+  if (globalThis.Blob !== undefined && input instanceof Blob) {
     return {
       identifier: 'blob',
       bytes: new Uint8Array(await input.arrayBuffer()),
@@ -175,12 +176,14 @@ function selectedEdgeRuntime(): RuntimeHandlers {
   return hasNativeEdgeCapabilities() ? nativeRuntime : wasmRuntime
 }
 
-function toFallbackError(error: unknown): Error {
-  if (error instanceof Error && (error as Error & { code?: string }).code === 'BLURKIT_MISSING_WASM_CODECS') {
-    return error
+function toFallbackError(cause: unknown): Error {
+  // SAFETY: Node module-resolution failures expose a string `code`; the
+  // missing-wasm-codecs error is recognized by its canonical code value.
+  if (cause instanceof Error && (cause as Error & { code?: string }).code === 'BLURKIT_MISSING_WASM_CODECS') {
+    return cause
   }
 
-  const reason = error instanceof Error ? error.message : String(error)
+  const reason = cause instanceof Error ? cause.message : String(cause)
   return new Error(
     `blurkit/edge could not run native decode APIs (ImageDecoder + OffscreenCanvas unavailable) and the wasm fallback failed: ${reason}`,
   )

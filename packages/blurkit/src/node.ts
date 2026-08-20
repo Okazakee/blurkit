@@ -5,6 +5,7 @@ import { createFilesystemCache, createMemoryCache } from './cache'
 import { bytesToDataURL } from './internal/base64'
 import { toOwnedBytes } from './internal/bytes'
 import { resolveTargetDimensions } from './internal/dimensions'
+import { isStringInput } from './internal/input-guards'
 import { normalizeOptions } from './internal/normalize-options'
 import { createManifest } from './manifest-core'
 import { writeManifest } from './manifest-node'
@@ -20,35 +21,48 @@ import type {
 
 export const BLURKIT_MISSING_SHARP = 'BLURKIT_MISSING_SHARP'
 
-type SharpFactory = (input: unknown, options?: unknown) => any
+interface SharpFactoryOptions {
+  animated?: boolean
+  raw?: { width: number; height: number; channels: number }
+}
+
+type SharpFactory = (input: string | Buffer | Uint8Array, options?: SharpFactoryOptions) => any
 
 let sharpFactoryPromise: Promise<SharpFactory> | undefined
 
 function createMissingSharpError(cause?: unknown): Error & { code: string } {
-  const error = new Error(
-    'BLURKIT_MISSING_SHARP: The Node runtime requires "sharp". Install it with `npm install sharp` (or avoid `--omit=optional`).',
-  ) as Error & { code: string; cause?: unknown }
-  error.code = BLURKIT_MISSING_SHARP
+  const error = Object.assign(
+    new Error(
+      'BLURKIT_MISSING_SHARP: The Node runtime requires "sharp". Install it with `npm install sharp` (or avoid `--omit=optional`).',
+    ),
+    { code: BLURKIT_MISSING_SHARP },
+  )
   if (cause !== undefined) {
     error.cause = cause
   }
   return error
 }
 
+// oxlint-disable-next-line anti-slop/no-unknown-parameters -- validates the runtime shape of the dynamically imported sharp module
+function isSharpFactory(value: unknown): value is SharpFactory {
+  return typeof value === 'function'
+}
+
 async function getSharpFactory(): Promise<SharpFactory> {
   if (!sharpFactoryPromise) {
     sharpFactoryPromise = import('sharp')
       .then((module) => {
-        const maybeDefault = (module as { default?: unknown }).default
-        const sharpFactory = (maybeDefault ?? module) as unknown
+        // SAFETY: sharp ships as CommonJS; ESM interop may expose the factory
+        // as `default`, so the candidate is read off the module namespace.
+        const sharpCandidate = 'default' in module ? module.default : module
 
-        if (typeof sharpFactory !== 'function') {
+        if (!isSharpFactory(sharpCandidate)) {
           throw createMissingSharpError()
         }
 
-        return sharpFactory as SharpFactory
+        return sharpCandidate
       })
-      .catch((error: unknown) => {
+      .catch((error) => {
         throw createMissingSharpError(error)
       })
   }
@@ -61,7 +75,7 @@ function isRemote(value: string): boolean {
 }
 
 async function toNodeBytes(input: BlurKitInput): Promise<ResolvedInput> {
-  if (typeof input === 'string') {
+  if (isStringInput(input)) {
     if (isRemote(input)) {
       const response = await fetch(input)
       if (!response.ok) {
@@ -87,7 +101,7 @@ async function toNodeBytes(input: BlurKitInput): Promise<ResolvedInput> {
     return toNodeBytes(input.toString())
   }
 
-  if (typeof Blob !== 'undefined' && input instanceof Blob) {
+  if (globalThis.Blob !== undefined && input instanceof Blob) {
     return {
       identifier: 'blob',
       bytes: new Uint8Array(await input.arrayBuffer()),

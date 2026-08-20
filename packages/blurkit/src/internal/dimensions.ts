@@ -1,5 +1,10 @@
 import type { NormalizedBlurKitOptions } from '../types'
 
+export interface ResolvedDimensions {
+  width: number
+  height: number
+}
+
 function roundDimension(value: number): number {
   return Math.max(1, Math.round(value))
 }
@@ -8,7 +13,7 @@ export function resolveTargetDimensions(
   originalWidth: number,
   originalHeight: number,
   options: NormalizedBlurKitOptions,
-): { width: number; height: number } {
+): ResolvedDimensions {
   if (options.width && options.height) {
     return {
       width: options.width,

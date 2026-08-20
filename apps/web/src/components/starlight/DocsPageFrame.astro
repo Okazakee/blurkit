@@ -140,7 +140,7 @@ const { hasSidebar } = Astro.locals.starlightRoute
   }
 
   if (sidebarNav) {
-    sidebarNav.addEventListener('keydown', (event) => trapMenuFocus(event as KeyboardEvent))
+    sidebarNav.addEventListener('keydown', (event) => trapMenuFocus(event))
   }
 
   mediaQuery.addEventListener('change', () => {

@@ -1,12 +1,17 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-const originalImageDecoder = (globalThis as { ImageDecoder?: unknown }).ImageDecoder
-const originalOffscreenCanvas = (globalThis as { OffscreenCanvas?: unknown }).OffscreenCanvas
+// SAFETY: expose optional global API slots so the test can install and remove stubs.
+const globals = globalThis as { ImageDecoder?: unknown; OffscreenCanvas?: unknown }
+
+const originalImageDecoder = globals.ImageDecoder
+const originalOffscreenCanvas = globals.OffscreenCanvas
 
 function mockMissingCodecsPackage(): void {
+  // oxlint-disable-next-line anti-slop/no-module-mocking -- simulates the optional blurkit-wasm-codecs package being absent to verify BLURKIT_MISSING_WASM_CODECS.
   vi.doMock('blurkit-wasm-codecs', () => {
-    const error = new Error('Cannot find package "blurkit-wasm-codecs"') as Error & { code?: string }
-    error.code = 'ERR_MODULE_NOT_FOUND'
+    const error = Object.assign(new Error('Cannot find package "blurkit-wasm-codecs"'), {
+      code: 'ERR_MODULE_NOT_FOUND',
+    })
     throw error
   })
 }
@@ -14,8 +19,8 @@ function mockMissingCodecsPackage(): void {
 afterEach(() => {
   vi.doUnmock('blurkit-wasm-codecs')
   vi.resetModules()
-  ;(globalThis as { ImageDecoder?: unknown }).ImageDecoder = originalImageDecoder
-  ;(globalThis as { OffscreenCanvas?: unknown }).OffscreenCanvas = originalOffscreenCanvas
+  globals.ImageDecoder = originalImageDecoder
+  globals.OffscreenCanvas = originalOffscreenCanvas
 })
 
 describe('blurkit wasm codec dependency UX', () => {
@@ -36,8 +41,8 @@ describe('blurkit wasm codec dependency UX', () => {
     vi.resetModules()
     mockMissingCodecsPackage()
 
-    ;(globalThis as { ImageDecoder?: unknown }).ImageDecoder = undefined
-    ;(globalThis as { OffscreenCanvas?: unknown }).OffscreenCanvas = undefined
+    globals.ImageDecoder = undefined
+    globals.OffscreenCanvas = undefined
 
     const mod = await import('../src/edge')
 

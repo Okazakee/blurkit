@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { encode } from '../src/wasm'
 
 function toArrayBuffer(buffer: Buffer): ArrayBuffer {
+  // SAFETY: Buffer.buffer is the underlying ArrayBuffer; the byte range is bounded by the Buffer's offset and length.
   return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer
 }
 
@@ -56,7 +57,8 @@ describe('blurkit wasm runtime', () => {
   })
 
   it('rejects local path input strings', async () => {
-    const encodeUnsafe = encode as (input: string) => Promise<unknown>
+    // SAFETY: cast narrows encode's union input type to string to verify the local-path rejection path.
+    const encodeUnsafe = encode as (input: string) => Promise<never>
     await expect(encodeUnsafe('./images/hero.jpg')).rejects.toThrowError(
       /supports remote URLs, Blob, and ArrayBuffer input only/i,
     )

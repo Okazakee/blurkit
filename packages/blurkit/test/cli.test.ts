@@ -30,6 +30,7 @@ describe('blurkit CLI backend selection', () => {
       }).png().toBuffer()
       await writeFile(filePath, image)
 
+      // SAFETY: encodePath is called with a valid local image and default sharp backend, so it returns a BlurResult.
       const result = await encodePath(filePath, { size: '10' }) as BlurResult
 
       expect(result.width).toBe(10)
@@ -55,6 +56,7 @@ describe('blurkit CLI backend selection', () => {
       }).webp().toBuffer()
       await writeFile(filePath, image)
 
+      // SAFETY: encodePath is called with a valid local image and wasm backend, so it returns a BlurResult.
       const result = await encodePath(filePath, { backend: 'wasm', size: '12' }) as BlurResult
 
       expect(result.width).toBe(12)
@@ -76,7 +78,9 @@ describe('blurkit CLI backend selection', () => {
       },
     }).png().toBuffer()
 
+    // SAFETY: Buffer.buffer is the underlying ArrayBuffer; the byte range is bounded by the Buffer's offset and length.
     const body = image.buffer.slice(image.byteOffset, image.byteOffset + image.byteLength) as ArrayBuffer
+    // SAFETY: the mocked fetch returns a Response matching the fetch API contract, so it is assignable to global fetch.
     globalThis.fetch = vi.fn(async () => new Response(body, {
       status: 200,
       headers: {
@@ -84,6 +88,7 @@ describe('blurkit CLI backend selection', () => {
       },
     })) as typeof fetch
 
+    // SAFETY: encodePath is called with a mocked remote PNG and wasm backend, so it returns a BlurResult.
     const result = await encodePath('https://example.com/image.png', {
       backend: 'wasm',
       size: '8',
