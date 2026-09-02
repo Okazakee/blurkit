@@ -60,7 +60,7 @@ const { hasSidebar } = Astro.locals.starlightRoute
   const body = document.body
   const topbarInner = document.querySelector('.docs-topbar__inner')
   const mainFrame = document.querySelector('.docs-main-frame')
-  const sidebarNav = document.querySelector('.docs-sidebar-nav')
+  const sidebarNav = document.querySelector<HTMLElement>('.docs-sidebar-nav')
   const sidebarPane = sidebarNav?.querySelector('.docs-sidebar-pane')
   const scrim = sidebarNav?.querySelector('.docs-sidebar-scrim')
 

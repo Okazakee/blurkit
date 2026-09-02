@@ -8,13 +8,13 @@
     "check": "astro check"
   },
   "dependencies": {
-    "astro": "^6.3.1",
+    "astro": "^7.2.10",
     "blurkit": "workspace:*",
     "sharp": "^0.35.0"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.9",
+    "@astrojs/check": "^0.9.10",
     "typescript": "^6.0.3",
-    "vite": "^7.3.3"
+    "vite": "^7.3.5"
   }
 }
