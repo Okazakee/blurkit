@@ -21,11 +21,6 @@
     "tsdown": "^0.22.14",
     "turbo": "^2.9.14",
     "typescript": "^7.0.2",
-    "vitest": "^4.1.11"
-  },
-  "pnpm": {
-    "overrides": {
-      "vite": "^7.3.3"
-    }
+    "vitest": "^4.1.12"
   }
 }
