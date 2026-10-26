@@ -12,7 +12,7 @@
     "@astrojs/react": "^6.0.5",
     "@astrojs/sitemap": "^3.7.4",
     "@astrojs/starlight": "^0.41.11",
-    "astro": "^7.2.10",
+    "astro": "~7.3.3",
     "blurkit": "workspace:*",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
