@@ -290,3 +290,6 @@ jobs:
 
       - name: Check docs links, anchors, sidebar, and fences
         run: pnpm docs:check
+
+      - name: Test the docs checker
+        run: pnpm docs:check:test

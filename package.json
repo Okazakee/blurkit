@@ -13,7 +13,8 @@
     "check": "turbo run check",
     "docs:check": "node tools/docs/check.mjs",
     "docs:format": "prettier --write \"**/*.md\" \"**/*.mdx\"",
-    "docs:format:check": "prettier --check \"**/*.md\" \"**/*.mdx\""
+    "docs:format:check": "prettier --check \"**/*.md\" \"**/*.mdx\"",
+    "docs:check:test": "node --test tools/docs/check.test.mjs"
   },
   "devDependencies": {
     "@oxlint/plugins": "1.78.0",
