@@ -1,6 +1,6 @@
 # blurkit Next.js example
 
-Minimal Next.js app that generates a placeholder at request time with `blurkit/node` and renders it from `result.dataURL`.
+Minimal Next.js app that generates a placeholder at build time with `blurkit/node` and renders it from `result.dataURL`.
 
 ## Run
 
@@ -22,13 +22,12 @@ pnpm --filter @blurkit/example-nextjs start
 
 ## How it works
 
-`app/page.jsx` is an async Server Component:
+`app/page.jsx` is a synchronous Server Component whose encoding happens at module scope:
 
-1. Reads `public/hero.svg` with `node:fs/promises`, which returns a Node `Buffer`.
-2. Passes the buffer straight to `encode()` from `blurkit/node` (`algorithm: 'blurhash'`, `size: 32`, `outputFormat: 'png'`). No `ArrayBuffer` conversion is needed.
-3. Renders `placeholder.dataURL` as an `<img src>` next to the source image, and prints the hash and dimensions.
+1. The module reads `public/hero.svg` with `node:fs/promises` and awaits the result before the component is defined. That `Buffer` goes straight into `encode()` from `blurkit/node` (`algorithm: 'blurhash'`, `size: 32`, `outputFormat: 'png'`); no `ArrayBuffer` conversion is needed.
+2. The component then renders `placeholder.dataURL` as an `<img src>` next to the source image, and prints the hash and dimensions.
 
-The page uses no dynamic APIs, so Next.js prerenders it at build time. That means `sharp` has to resolve on the machine running `next build` as well as on the dev server.
+Because the page uses no dynamic APIs, Next.js prerenders it at build time: the module-level `await` runs during `next build`, not per request. `sharp` therefore has to resolve on the build machine as well as on the dev server. Adding a dynamic API or a per-request encode would move the work to request time.
 
 ## Notes
 

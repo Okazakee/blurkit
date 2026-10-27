@@ -19,7 +19,7 @@ Boundaries worth knowing:
 
 - `encodeMany()` is fail-fast; `encodeManySettled()` returns ordered fulfilled/rejected entries.
 - The root import resolves through conditional exports (`node`, `browser`, `worker`, `deno`). Explicit runtime subpaths are clearer in framework code.
-- Missing dependencies throw typed errors: `BLURKIT_MISSING_SHARP`, `BLURKIT_MISSING_WASM_CODECS`.
+- Missing dependencies fail with identifiable error codes: `BLURKIT_MISSING_SHARP` and `BLURKIT_MISSING_WASM_CODECS` (attach your own handling by `code`, not by message text).
 - `result.width`/`result.height` describe the encoded image. For ThumbHash the rendered data URL can use different pixel dimensions.
 
 ## Cache design
@@ -27,7 +27,7 @@ Boundaries worth knowing:
 - Cache is part of `BlurKitOptions`, so callers enable reuse without wrapping `encode()`.
 - The contract is intentionally low-level (`get` and `set`) to support sync and async adapters.
 - `blurkit/node` and `blurkit/deno` ship `createMemoryCache()` and `createFilesystemCache()`; `blurkit/cloudflare` ships `createCloudflareCache()`. See [API: Cache](/docs/api/cache/) for the canonical list.
-- Persistent storage policy is not defined by blurkit — invalidating entries across path, bytes, and options is caller-owned.
+- blurkit derives content-aware keys; persistence is caller-owned. You choose where entries live, how long they are retained, when they are cleaned up, and any custom storage policy.
 - The Cloudflare helper keys on transformed bytes, so it does not avoid the upstream transform on a hit.
 
 ## Not shipped by design

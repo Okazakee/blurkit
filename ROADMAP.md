@@ -4,7 +4,7 @@ This file and [`docs/roadmap.md`](apps/web/src/content/docs/docs/roadmap.md) des
 
 ## Product boundary
 
-`input -> placeholder result` only. blurkit decodes an image, hashes it, and renders the placeholder. Anything that grows beyond that needs an explicit decision.
+`input -> placeholder result` only. Most runtimes decode an image, hash it, and render the placeholder; Cloudflare is the documented exception, where `cf.image` produces the bytes and the hash is an opaque digest. Anything beyond that boundary needs an explicit decision.
 
 ## Working rules
 

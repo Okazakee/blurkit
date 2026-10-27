@@ -43,6 +43,10 @@ Cloudflare is the one runtime where `hash` is not a portable BlurHash or ThumbHa
 
 Use `result.dataURL` for rendering. Treat `result.hash` as an opaque, deterministic cache or deduplication key inside Cloudflare.
 
+## Dimensions
+
+`cf.image` is asked for `fit: 'scale-down'`, so the returned image can be smaller than the requested box (aspect ratio is preserved and the source is never enlarged). `result.width` and `result.height` are read from the transformed PNG/JPEG when possible, which keeps them consistent with the other runtimes. If the response cannot be measured, they fall back to the requested box.
+
 ## Metadata caveat
 
 `meta.originalWidth` and `meta.originalHeight` come from Cloudflare's image-info lookup. When that lookup fails, the runtime substitutes the requested target dimensions, so those fields are not guaranteed to describe the source image.

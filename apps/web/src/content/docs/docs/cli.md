@@ -5,20 +5,18 @@ description: Generate one result or one manifest from the shell using sharp or w
 
 ## Command surface
 
-Use the CLI when you want JSON output without writing a custom script.
+Use the CLI when you want JSON output without writing a custom script. Run it through your package runner; a global install is not required.
+
+```bash
+npx blurkit encode <input>
+# or
+pnpm exec blurkit encode <input>
+```
 
 ## Encode one image
 
 ```bash
-blurkit encode ./public/hero.jpg --pretty
-```
-
-## Flags and behavior
-
-Command surface:
-
-```bash
-blurkit encode <input>
+npx blurkit encode ./public/hero.jpg --pretty
 ```
 
 Common flags:
@@ -38,9 +36,11 @@ Common flags:
 Behavior:
 
 - local file input returns one `BlurResult` JSON object
-- local directory input + `--glob` returns one `BlurManifest` JSON object
+- local directory input returns one `BlurManifest` JSON object, with or without `--glob`
+- the default directory selection is `**/*.{jpg,jpeg,png,webp}`; `--glob` replaces it
 - remote URL input behaves as single-image mode
-- backend defaults to `sharp`; use `--backend wasm` to force wasm path
+- output goes to stdout unless `--out <file>` is set
+- backend defaults to `sharp`; use `--backend wasm` to force the wasm path
 
 ## Backend notes
 

@@ -10,6 +10,8 @@ Use this page when integrating blurkit output into UI components, manifests, or 
 ## Encode and inspect
 
 ```ts
+import { encode } from 'blurkit/node'
+
 const result = await encode('./public/hero.jpg')
 
 console.log(result.dataURL)
@@ -37,7 +39,8 @@ interface BlurResult {
 
 - `dataURL` is the direct placeholder value for UI props. It always reflects the rendered bytes.
 - `hash` is the algorithm output for storage or later decoding, with one documented exception: [Cloudflare](/docs/runtimes/cloudflare/) returns an opaque identifier instead of a portable BlurHash/ThumbHash. See [Cloudflare hash semantics](#cloudflare-hash-semantics).
-- `width`/`height` are the dimensions of the resized input passed into the hasher. For `blurhash` the rendered image uses the same dimensions. For `thumbhash` the renderer reconstructs pixels from the decoded hash, so the final image dimensions can differ slightly; decode `dataURL` if you need the exact rendered size.
+- `width`/`height` describe the encoded image. For `blurhash` the rendered image uses the resized input dimensions. For `thumbhash` the renderer reconstructs pixels from the decoded hash, so the final image dimensions can differ slightly; decode `dataURL` if you need the exact rendered size.
+- On Cloudflare, `width`/`height` are read from the transformed response when the bytes are a readable PNG or JPEG. If the response cannot be measured, they fall back to the requested transform box.
 - `meta` is always present. `meta.format` and `meta.hasAlpha` are optional because they depend on what the decoder can report.
 
 ## Caveats

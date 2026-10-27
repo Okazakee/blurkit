@@ -5,7 +5,7 @@ description: Generate one BlurManifest JSON file from a local directory.
 
 ## When to generate a manifest
 
-Use this flow when your build or app needs a precomputed placeholder map.
+Use this flow when your build or app needs a precomputed placeholder map. A directory input always produces a manifest; `--glob` only narrows what is selected.
 
 ## Build a folder manifest
 
@@ -18,7 +18,8 @@ npx blurkit encode ./public \
 
 ## Key mapping
 
-- `--glob` selects files inside the input directory.
+- Without `--glob`, the default selection is `**/*.{jpg,jpeg,png,webp}`.
+- `--glob` replaces the default selection.
 - `--concurrency` controls parallel file encoding.
 - `--backend` selects sharp (default) or wasm.
 - Key mapping behavior:

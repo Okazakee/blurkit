@@ -150,6 +150,6 @@ Backend defaults to `sharp`; `--backend wasm` requires `blurkit-wasm-codecs`.
 - Fail-fast batches: `encodeMany()`.
 - Missing dependencies raise `BLURKIT_MISSING_SHARP` / `BLURKIT_MISSING_WASM_CODECS`.
 - `result.width`/`height` describe the encoded image; ThumbHash output can render at different pixel dimensions.
-- Cloudflare `meta.originalWidth`/`originalHeight` fall back to the requested transform size when the image-info lookup fails.
+- Cloudflare `width`/`height` come from the transformed bytes (or the requested box if unreadable); `meta.originalWidth`/`originalHeight` fall back to the transform size when the image-info lookup fails.
 
 Full caveats: <https://blurkit.okazakee.dev/docs/limits/>.
