@@ -1,6 +1,10 @@
 ---
 title: WASM Runtime
 description: Encode placeholders with wasm decode/resize in runtimes without native image decode APIs.
+kind: runtime
+entrypoint: blurkit/wasm
+backend: 'wasm codecs'
+install: 'blurkit-wasm-codecs'
 ---
 
 ## Why this runtime

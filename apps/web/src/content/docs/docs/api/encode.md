@@ -1,6 +1,7 @@
 ---
 title: encode()
 description: Encode one image input into a BlurResult placeholder object.
+kind: api
 ---
 
 ## Signature

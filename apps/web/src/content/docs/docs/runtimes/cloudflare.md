@@ -1,6 +1,10 @@
 ---
 title: Cloudflare Runtime
 description: Encode placeholders in Cloudflare Workers through cf.image transforms.
+kind: runtime
+entrypoint: blurkit/cloudflare
+backend: 'cf.image'
+install: 'none'
 ---
 
 ## Why this runtime

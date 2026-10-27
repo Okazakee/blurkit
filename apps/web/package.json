@@ -5,14 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && pagefind --site dist --output-subdir pagefind",
     "check": "astro check"
   },
   "dependencies": {
+    "@astrojs/mdx": "^8.1.1",
     "@astrojs/react": "^6.0.5",
     "@astrojs/sitemap": "^3.7.4",
-    "@astrojs/starlight": "^0.41.11",
     "astro": "~7.3.3",
+    "astro-expressive-code": "^0.44.3",
     "blurkit": "workspace:*",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
@@ -21,6 +22,7 @@
     "@astrojs/check": "^0.9.10",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "pagefind": "^1.5.2",
     "typescript": "^6.0.3"
   }
 }

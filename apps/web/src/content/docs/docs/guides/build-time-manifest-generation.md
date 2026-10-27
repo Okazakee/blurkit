@@ -1,6 +1,7 @@
 ---
 title: Build-time Manifest Generation
 description: Precompute placeholder JSON during builds to avoid runtime encoding.
+kind: guide
 ---
 
 ## When this pattern fits

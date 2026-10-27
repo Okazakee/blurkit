@@ -1,6 +1,7 @@
 ---
 title: Single Image
 description: Generate one BlurResult JSON object from a local path or remote URL.
+kind: cli
 ---
 
 ## When to use single-image mode

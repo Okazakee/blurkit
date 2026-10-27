@@ -1,0 +1,36 @@
+---
+import navigation from '../../docs/navigation.json'
+import { hrefFor } from '../../docs/nav'
+
+const { pathname } = Astro.url
+const current = pathname.replace(/\/+$/, '/')
+---
+
+<aside class="docs-sidebar" id="docs-sidebar">
+  <div class="docs-sidebar__inner">
+    <a class="docs-sidebar__back" href="/">← blurkit.dev</a>
+
+    {
+      navigation.map((group) => (
+        <nav class="docs-group" aria-label={group.label}>
+          <p class="docs-group__label">{group.label}</p>
+          <ul>
+            {group.items.map((item) => {
+              const href = hrefFor(item.slug)
+              const isCurrent = href === current || (href !== '/docs/' && current.startsWith(href))
+              return (
+                <li>
+                  <a href={href} aria-current={isCurrent ? 'page' : undefined}>
+                    {item.label}
+                  </a>
+                </li>
+              )
+            })}
+          </ul>
+        </nav>
+      ))
+    }
+  </div>
+</aside>
+
+<button class="docs-scrim" type="button" data-docs-scrim aria-label="Close documentation navigation" tabindex="-1"></button>

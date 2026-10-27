@@ -1,6 +1,10 @@
 ---
 title: Node Runtime
 description: Use sharp-backed encoding for local paths, remote URLs, batching, cache, and manifests.
+kind: runtime
+entrypoint: blurkit/node
+backend: 'sharp'
+install: 'sharp'
 ---
 
 ## Why this runtime

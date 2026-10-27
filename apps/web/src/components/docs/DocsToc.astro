@@ -1,0 +1,55 @@
+---
+interface Props {
+  headings: { depth: number; slug: string; text: string }[]
+}
+
+const { headings } = Astro.props
+const items = headings.filter((heading) => heading.depth === 2 || heading.depth === 3)
+---
+
+{
+  items.length > 0 && (
+    <aside class="docs-toc" aria-label="On this page">
+      <p class="docs-toc__label">On this page</p>
+      <ul>
+        {items.map((item) => (
+          <li class:list={{ 'docs-toc__sub': item.depth === 3 }}>
+            <a href={`#${item.slug}`} data-toc-link={item.slug}>
+              {item.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </aside>
+  )
+}
+
+<script>
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'))
+  const targets = links
+    .map((link) => document.getElementById(link.dataset.tocLink ?? ''))
+    .filter((element): element is HTMLElement => element !== null)
+
+  if (targets.length > 0) {
+    const setActive = (id: string) => {
+      links.forEach((link) => {
+        if (link.dataset.tocLink === id) link.setAttribute('aria-current', 'true')
+        else link.removeAttribute('aria-current')
+      })
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter((entry) => entry.isIntersecting)
+        if (visible.length === 0) return
+
+        const top = visible.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0]
+        if (top?.target.id) setActive(top.target.id)
+      },
+      { rootMargin: '-72px 0px -70% 0px', threshold: 0 },
+    )
+
+    targets.forEach((target) => observer.observe(target))
+    if (targets[0]?.id) setActive(targets[0].id)
+  }
+</script>

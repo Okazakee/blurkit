@@ -1,6 +1,7 @@
 ---
 title: Manifest Helpers
 description: Use createManifest() and writeManifest() to persist many BlurResult entries.
+kind: api
 ---
 
 ## Manifest shape

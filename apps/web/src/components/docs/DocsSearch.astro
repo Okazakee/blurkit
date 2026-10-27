@@ -1,0 +1,228 @@
+---
+import navigation from '../../docs/navigation.json'
+import { hrefFor } from '../../docs/nav'
+
+const fallback = navigation.flatMap((group) =>
+  group.items.map((item) => ({ label: item.label, group: group.label, href: hrefFor(item.slug) })),
+)
+---
+
+<dialog class="docs-search" id="docs-search" aria-label="Search documentation">
+  <div class="docs-search__panel">
+    <div class="docs-search__field">
+      <span aria-hidden="true" class="docs-search__icon">⌕</span>
+      <input
+        id="docs-search-input"
+        type="search"
+        placeholder="Search the docs…"
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+        aria-controls="docs-search-results"
+      />
+      <button class="docs-search__close" type="button" data-docs-search-close aria-label="Close search">esc</button>
+    </div>
+
+    <div class="docs-search__results" id="docs-search-results" role="listbox" aria-label="Search results"></div>
+    <p class="docs-search__status" id="docs-search-status" aria-live="polite"></p>
+  </div>
+</dialog>
+
+<script is:inline type="application/json" id="docs-search-fallback" set:html={JSON.stringify(fallback)} />
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('#docs-search')
+  const input = document.querySelector<HTMLInputElement>('#docs-search-input')
+  const results = document.querySelector<HTMLElement>('#docs-search-results')
+  const status = document.querySelector<HTMLElement>('#docs-search-status')
+  const fallbackScript = document.querySelector<HTMLScriptElement>('#docs-search-fallback')
+
+  type Result = { label: string; group?: string; href: string; excerpt?: string }
+  interface PagefindEntry {
+    url?: string
+    excerpt?: string
+    meta?: { title?: string }
+  }
+  interface PagefindModule {
+    options?: (options: { excerptLength?: number }) => Promise<void> | void
+    search: (query: string) => Promise<{ results: { data: () => Promise<PagefindEntry> }[] }>
+  }
+
+  const readFallback = (script: HTMLScriptElement | null): Result[] => {
+    if (!script?.textContent) return []
+    // SAFETY: the inline JSON is serialized from navigation.json at build time.
+    return JSON.parse(script.textContent) as Result[]
+  }
+
+  const fallback = readFallback(fallbackScript)
+  // SAFETY: the body is a fixed import expression and the module shape is
+  // only read through PagefindModule after loading.
+  const runtimeImport = new Function('url', 'return import(url)') as (url: string) => Promise<PagefindModule>
+
+  let pagefind: PagefindModule | null = null
+  let pagefindFailed = false
+  let indexPromise: Promise<void> | null = null
+  let activeIndex = -1
+  let debounceTimer = 0
+
+  const openDialog = async () => {
+    if (!dialog || dialog.open) return
+    dialog.showModal()
+    setTimeout(() => input?.focus(), 0)
+    await ensureIndex()
+  }
+
+  const closeDialog = () => {
+    dialog?.close()
+    if (input) input.value = ''
+    render([])
+    if (status) status.textContent = ''
+  }
+
+  const ensureIndex = async () => {
+    if (pagefind || pagefindFailed) return
+    indexPromise ??= (async () => {
+      try {
+        const mod = await runtimeImport('/pagefind/pagefind.js')
+        await mod.options?.({ excerptLength: 12 })
+        pagefind = mod
+      } catch {
+        pagefindFailed = true
+      }
+    })()
+    await indexPromise
+  }
+
+  const render = (items: Result[]) => {
+    if (!results) return
+    results.replaceChildren()
+    activeIndex = -1
+
+    for (const [index, item] of items.entries()) {
+      const link = document.createElement('a')
+      link.className = 'docs-search__result'
+      link.href = item.href
+      link.setAttribute('role', 'option')
+      link.dataset.index = String(index)
+
+      const title = document.createElement('strong')
+      title.textContent = item.label
+      link.append(title)
+
+      if (item.group) {
+        const group = document.createElement('span')
+        group.className = 'docs-search__group'
+        group.textContent = item.group
+        link.append(group)
+      }
+
+      if (item.excerpt) {
+        const excerpt = document.createElement('p')
+        excerpt.innerHTML = item.excerpt
+        link.append(excerpt)
+      }
+
+      results.append(link)
+    }
+
+    if (items.length === 0) {
+      const empty = document.createElement('p')
+      empty.className = 'docs-search__empty'
+      empty.textContent = 'No pages found.'
+      results.append(empty)
+    }
+  }
+
+  const search = async (query: string) => {
+    const trimmed = query.trim()
+
+    if (trimmed.length === 0) {
+      render([])
+      if (status) status.textContent = ''
+      return
+    }
+
+    await ensureIndex()
+
+    if (pagefind) {
+      const response = await pagefind.search(trimmed)
+      const data = await Promise.all(response.results.slice(0, 8).map((result) => result.data()))
+      render(
+        data.map((entry) => ({
+          label: entry.meta?.title ?? 'Untitled',
+          href: entry.url ?? '/docs/',
+          excerpt: entry.excerpt,
+        })),
+      )
+    } else {
+      const normalized = trimmed.toLowerCase()
+      render(
+        fallback
+          .filter((item: Result) => item.label.toLowerCase().includes(normalized) || item.group?.toLowerCase().includes(normalized))
+          .slice(0, 8),
+      )
+    }
+
+    const count = results?.querySelectorAll('.docs-search__result').length ?? 0
+    if (status) status.textContent = count === 1 ? '1 result' : `${count} results`
+  }
+
+  const move = (delta: number) => {
+    const links = Array.from(results?.querySelectorAll<HTMLAnchorElement>('.docs-search__result') ?? [])
+    if (links.length === 0) return
+    activeIndex = (activeIndex + delta + links.length) % links.length
+    links.forEach((link, index) => link.classList.toggle('is-active', index === activeIndex))
+    links[activeIndex]?.scrollIntoView({ block: 'nearest' })
+  }
+
+  document.querySelectorAll('[data-docs-search]').forEach((trigger) => {
+    trigger.addEventListener('click', () => void openDialog())
+  })
+
+  document.querySelector('[data-docs-search-close]')?.addEventListener('click', closeDialog)
+
+  dialog?.addEventListener('click', (event) => {
+    if (event.target === dialog) closeDialog()
+  })
+
+  dialog?.addEventListener('close', () => {
+    render([])
+    if (status) status.textContent = ''
+  })
+
+  document.addEventListener('keydown', (event) => {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+      event.preventDefault()
+      if (dialog?.open) closeDialog()
+      else void openDialog()
+      return
+    }
+
+    if (!dialog?.open) return
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      move(1)
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      move(-1)
+    } else if (event.key === 'Enter' && activeIndex >= 0) {
+      event.preventDefault()
+      const link = results?.querySelectorAll<HTMLAnchorElement>('.docs-search__result')[activeIndex]
+      if (link) window.location.href = link.href
+    }
+  })
+
+  dialog?.addEventListener('keydown', (event) => {
+    // `<input type="search">` swallows Escape to clear itself, so close explicitly.
+    if (event.key === 'Escape') {
+      event.preventDefault()
+      closeDialog()
+    }
+  })
+
+  input?.addEventListener('input', () => {
+    window.clearTimeout(debounceTimer)
+    debounceTimer = window.setTimeout(() => void search(input.value), 120)
+  })
+</script>

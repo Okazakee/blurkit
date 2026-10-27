@@ -1,7 +1,7 @@
 ---
 title: Roadmap
 description: Committed work, exploratory ideas, and features blurkit deliberately does not plan to ship.
-pagefind: false
+kind: policy
 ---
 
 ## How to read this page

@@ -1,6 +1,7 @@
 ---
 title: Browser Uploader Flow
 description: Generate placeholders in the browser when users upload images in client UI.
+kind: guide
 ---
 
 ## When this pattern fits

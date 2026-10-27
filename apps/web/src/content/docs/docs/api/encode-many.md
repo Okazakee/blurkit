@@ -1,6 +1,7 @@
 ---
 title: encodeMany()
 description: Batch encode many inputs with fail-fast or settled semantics.
+kind: api
 ---
 
 ## Signatures

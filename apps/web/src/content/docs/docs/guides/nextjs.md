@@ -1,6 +1,7 @@
 ---
 title: Next.js
 description: Use blurkit output as blurDataURL in Next.js Image workflows.
+kind: guide
 ---
 
 ## When this pattern fits

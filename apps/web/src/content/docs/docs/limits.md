@@ -1,6 +1,7 @@
 ---
 title: Limits and Caveats
 description: Runtime boundaries, cross-cutting behavior, and features blurkit deliberately does not ship.
+kind: policy
 ---
 
 ## Runtime boundaries

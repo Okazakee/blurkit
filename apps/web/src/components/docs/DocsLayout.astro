@@ -1,0 +1,157 @@
+---
+import DocsFooter from './DocsFooter.astro'
+import DocsHeader from './DocsHeader.astro'
+import DocsPager from './DocsPager.astro'
+import DocsSearch from './DocsSearch.astro'
+import DocsSidebar from './DocsSidebar.astro'
+import DocsToc from './DocsToc.astro'
+import DocsTocMobile from './DocsTocMobile.astro'
+import type { NavItem } from '../../docs/nav'
+
+import '../../styles/shared.css'
+import '../../styles/docs.css'
+
+interface Props {
+  title: string
+  description?: string
+  group?: string
+  headings: { depth: number; slug: string; text: string }[]
+  prev?: NavItem
+  next?: NavItem
+  editUrl?: string
+  kind?: string
+  entrypoint?: string
+  backend?: string
+  install?: string
+}
+
+const { title, description, group, headings, prev, next, editUrl, kind, entrypoint, backend, install } = Astro.props
+const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://blurkit.okazakee.dev/').toString()
+const pageTitle = title === 'Documentation' ? 'Documentation · blurkit' : `${title} · blurkit docs`
+const facts = [
+  entrypoint ? { label: 'entrypoint', value: entrypoint } : undefined,
+  backend ? { label: 'backend', value: backend } : undefined,
+  install ? { label: 'install', value: install } : undefined,
+].filter((fact): fact is { label: string; value: string } => fact !== undefined)
+---
+
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    {description && <meta name="description" content={description} />}
+    <meta name="theme-color" content="#0a0a0b" />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300..700&family=Geist+Mono:wght@400;500;600&display=swap"
+    />
+    <meta property="og:title" content={pageTitle} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content="blurkit" />
+    <meta property="og:image" content="https://blurkit.okazakee.dev/social-card.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body class="docs-page">
+    <a class="skip-link" href="#docs-content">Skip to content</a>
+
+    <div class="docs-shell">
+      <DocsHeader />
+
+      <div class="docs-body">
+        <DocsSidebar />
+
+        <main class="docs-main" id="docs-main">
+          <div class="docs-columns">
+            <article class="docs-article" id="docs-content" data-pagefind-body data-kind={kind}>
+              <header class="docs-head">
+                {group && <p class="docs-head__kicker">{group}</p>}
+                <h1>{title}</h1>
+                {description && <p class="docs-head__lede">{description}</p>}
+                {
+                  facts.length > 0 && (
+                    <dl class="docs-facts">
+                      {facts.map((fact) => (
+                        <div>
+                          <dt>{fact.label}</dt>
+                          <dd>{fact.value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  )
+                }
+              </header>
+
+              <DocsTocMobile headings={headings} />
+
+              <div class="docs-prose">
+                <slot />
+              </div>
+
+              <footer class="docs-article__footer">
+                {editUrl && (
+                  <a class="docs-edit" href={editUrl}>
+                    Edit this page <span aria-hidden="true">↗</span>
+                  </a>
+                )}
+                <DocsPager prev={prev} next={next} />
+              </footer>
+            </article>
+
+            <DocsToc headings={headings} />
+          </div>
+        </main>
+      </div>
+
+      <DocsFooter />
+    </div>
+
+    <DocsSearch />
+
+    <script>
+      const body = document.body
+      const toggle = document.querySelector<HTMLButtonElement>('[data-docs-menu]')
+      const sidebar = document.querySelector<HTMLElement>('#docs-sidebar')
+      const scrim = document.querySelector<HTMLButtonElement>('[data-docs-scrim]')
+      const main = document.querySelector<HTMLElement>('#docs-main')
+
+      const setOpen = (open: boolean) => {
+        body.classList.toggle('docs-menu-open', open)
+        toggle?.setAttribute('aria-expanded', String(open))
+        scrim?.setAttribute('aria-hidden', String(!open))
+        if (scrim) scrim.tabIndex = open ? 0 : -1
+        if (main) main.inert = open
+
+        if (open) {
+          sidebar?.querySelector<HTMLAnchorElement>('a')?.focus()
+        } else {
+          toggle?.focus()
+        }
+      }
+
+      toggle?.addEventListener('click', () => setOpen(!body.classList.contains('docs-menu-open')))
+      scrim?.addEventListener('click', () => setOpen(false))
+      sidebar?.addEventListener('click', (event) => {
+        const target = event.target
+        if (target instanceof HTMLElement && target.closest('a')) setOpen(false)
+      })
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && body.classList.contains('docs-menu-open')) setOpen(false)
+      })
+
+      window.matchMedia('(min-width: 68.01rem)').addEventListener('change', (event) => {
+        if (event.matches && body.classList.contains('docs-menu-open')) setOpen(false)
+      })
+    </script>
+  </body>
+</html>

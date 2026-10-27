@@ -1,6 +1,7 @@
 ---
 title: Cache
 description: Reference for BlurKitCache and built-in cache helpers.
+kind: api
 ---
 
 ## Cache interface

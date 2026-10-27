@@ -1,0 +1,101 @@
+---
+import '../styles/site.css'
+
+const colors = [
+  { name: 'bg', value: '#0a0a0b' },
+  { name: 'panel', value: '#101012' },
+  { name: 'line', value: '#232327' },
+  { name: 'ink', value: '#ece8e1' },
+  { name: 'muted', value: '#a09c94' },
+  { name: 'accent', value: '#63dff6' },
+  { name: 'danger', value: '#ff8f7a' },
+]
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Style guide · blurkit</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300..700&family=Geist+Mono:wght@400;500;600&display=swap"
+    />
+  </head>
+  <body>
+    <main class="main">
+      <header class="sec__head" style="margin-top: 4rem">
+        <h1 class="sec__title">Design <em>system</em></h1>
+        <p class="sec__lede">
+          The landing page is the canon. Docs pages consume these tokens and primitives; they do not define their own
+          colors, radii, or type.
+        </p>
+      </header>
+
+      <section class="sec" style="padding-top: 2rem">
+        <h2 class="sec__title">Color</h2>
+        <div class="cards" style="margin-top: 1.5rem">
+          {
+            colors.map((color) => (
+              <div class="card">
+                <div style={`height: 56px; border-radius: 6px; border: 1px solid var(--bk-line); background: ${color.value}`} />
+                <h3 style="font-size: 1.1rem">{color.name}</h3>
+                <p><code>{color.value}</code></p>
+              </div>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class="sec" style="padding-top: 2rem">
+        <h2 class="sec__title">Type</h2>
+        <p style="font-family: var(--bk-serif); font-size: 3rem; line-height: 1; margin-top: 1rem">
+          Image in. <em style="color: var(--bk-accent)">Placeholder</em> out.
+        </p>
+        <p style="margin-top: 1rem">Geist body copy, 15px over 1.55. Links look like <a href="/docs/">this</a>.</p>
+        <p style="font-family: var(--bk-mono); color: var(--bk-dim); letter-spacing: 0.1em; text-transform: uppercase">
+          Geist Mono · 11px · tracked label
+        </p>
+      </section>
+
+      <section class="sec" style="padding-top: 2rem">
+        <h2 class="sec__title">Controls</h2>
+        <div class="hero__actions" style="margin-top: 1rem">
+          <a class="btn btn--accent" href="/docs/">Primary</a>
+          <a class="btn" href="/docs/">Secondary</a>
+          <span class="pill">pill</span>
+          <span class="site-eyebrow">eyebrow</span>
+        </div>
+        <div class="install" style="margin-top: 1.5rem">
+          <span class="install__prompt">$</span>
+          <code>pnpm add blurkit</code>
+          <button class="copy" type="button">copy</button>
+        </div>
+      </section>
+
+      <section class="sec" style="padding-top: 2rem; padding-bottom: 6rem">
+        <h2 class="sec__title">Surfaces</h2>
+        <div class="cards" style="margin-top: 1.5rem">
+          <article class="card">
+            <h3>Card</h3>
+            <p>1px line, 14px radius, panel surface, optional dotted accent.</p>
+            <ul class="tags"><li>tag</li><li>tag</li></ul>
+          </article>
+          <article class="live-demo-card">
+            <h3>Panel</h3>
+            <p>Same surface without hover motion.</p>
+          </article>
+          <article class="card">
+            <h3>Code</h3>
+            <pre class="site-code" style="margin-top: 0.5rem"><code>const result = await encode(input)</code></pre>
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

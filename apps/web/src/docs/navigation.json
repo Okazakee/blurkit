@@ -1,0 +1,56 @@
+[
+  {
+    "label": "Overview",
+    "items": [
+      { "label": "Overview", "slug": "docs" },
+      { "label": "Installation", "slug": "docs/installation" },
+      { "label": "Quick Start", "slug": "docs/quick-start" }
+    ]
+  },
+  {
+    "label": "Runtime Guides",
+    "items": [
+      { "label": "Node Runtime", "slug": "docs/runtimes/node" },
+      { "label": "Deno Runtime", "slug": "docs/runtimes/deno" },
+      { "label": "Browser Runtime", "slug": "docs/runtimes/browser" },
+      { "label": "Edge Runtime", "slug": "docs/runtimes/edge" },
+      { "label": "Cloudflare Runtime", "slug": "docs/runtimes/cloudflare" },
+      { "label": "WASM Runtime", "slug": "docs/runtimes/wasm" }
+    ]
+  },
+  {
+    "label": "CLI",
+    "items": [
+      { "label": "CLI Overview", "slug": "docs/cli" },
+      { "label": "Single Image", "slug": "docs/cli/single-image" },
+      { "label": "Manifest Generation", "slug": "docs/cli/manifest-generation" }
+    ]
+  },
+  {
+    "label": "API Reference",
+    "items": [
+      { "label": "API: encode()", "slug": "docs/api/encode" },
+      { "label": "API: encodeMany()", "slug": "docs/api/encode-many" },
+      { "label": "API: Options", "slug": "docs/api/options" },
+      { "label": "API: Result", "slug": "docs/api/result" },
+      { "label": "API: Manifest Helpers", "slug": "docs/api/manifest" },
+      { "label": "API: Cache", "slug": "docs/api/cache" }
+    ]
+  },
+  {
+    "label": "Use Cases",
+    "items": [
+      { "label": "Guide: Next.js", "slug": "docs/guides/nextjs" },
+      { "label": "Guide: Build-time Manifests", "slug": "docs/guides/build-time-manifest-generation" },
+      { "label": "Guide: Browser Uploader Flow", "slug": "docs/guides/browser-uploader-flow" },
+      { "label": "Guide: CMS Import Pipeline", "slug": "docs/guides/cms-import-pipeline" }
+    ]
+  },
+  {
+    "label": "Limits and Roadmap",
+    "items": [
+      { "label": "Limits and Caveats", "slug": "docs/limits" },
+      { "label": "Roadmap", "slug": "docs/roadmap" }
+    ]
+  }
+]

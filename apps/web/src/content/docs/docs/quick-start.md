@@ -1,6 +1,7 @@
 ---
 title: Quick Start
 description: Generate your first placeholder and verify the blurkit result shape.
+kind: overview
 ---
 
 ## What you need

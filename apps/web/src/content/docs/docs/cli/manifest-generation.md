@@ -1,6 +1,7 @@
 ---
 title: Manifest Generation
 description: Generate one BlurManifest JSON file from a local directory.
+kind: cli
 ---
 
 ## When to generate a manifest

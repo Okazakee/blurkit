@@ -1,0 +1,41 @@
+---
+import { getCollection, render } from 'astro:content'
+
+import DocsLayout from '../../components/docs/DocsLayout.astro'
+import navigation from '../../docs/navigation.json'
+import { groupFor, pagerFor } from '../../docs/nav'
+
+export async function getStaticPaths() {
+  const entries = await getCollection('docs')
+
+  return entries.map((entry) => {
+    const navSlug = entry.id.replace(/\/index$/, '')
+    const slug = navSlug === 'docs' ? undefined : navSlug.replace(/^docs\//, '')
+
+    return { params: { slug }, props: { entry, navSlug } }
+  })
+}
+
+const { entry, navSlug } = Astro.props
+const { Content, headings } = await render(entry)
+const group = groupFor(navigation, navSlug)?.label
+const { prev, next } = pagerFor(navigation, navSlug)
+const file = entry.filePath ?? `src/content/docs/${entry.id}.md`
+const editUrl = `https://github.com/okazakee/blurkit/edit/main/apps/web/${file}`
+---
+
+<DocsLayout
+  title={entry.data.title}
+  description={entry.data.description}
+  group={group}
+  headings={headings}
+  prev={prev}
+  next={next}
+  editUrl={editUrl}
+  kind={entry.data.kind}
+  entrypoint={entry.data.entrypoint}
+  backend={entry.data.backend}
+  install={entry.data.install}
+>
+  <Content />
+</DocsLayout>

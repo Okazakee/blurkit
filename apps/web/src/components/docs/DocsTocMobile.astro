@@ -1,0 +1,23 @@
+---
+interface Props {
+  headings: { depth: number; slug: string; text: string }[]
+}
+
+const { headings } = Astro.props
+const items = headings.filter((heading) => heading.depth === 2 || heading.depth === 3)
+---
+
+{
+  items.length > 0 && (
+    <details class="docs-toc-mobile">
+      <summary>On this page</summary>
+      <ul>
+        {items.map((item) => (
+          <li class:list={{ 'docs-toc__sub': item.depth === 3 }}>
+            <a href={`#${item.slug}`}>{item.text}</a>
+          </li>
+        ))}
+      </ul>
+    </details>
+  )
+}

@@ -1,6 +1,10 @@
 ---
 title: Edge Runtime
 description: Encode placeholders in worker-style runtimes with native decode first and wasm fallback.
+kind: runtime
+entrypoint: blurkit/edge
+backend: 'native + wasm'
+install: 'blurkit-wasm-codecs (fallback)'
 ---
 
 ## Why this runtime

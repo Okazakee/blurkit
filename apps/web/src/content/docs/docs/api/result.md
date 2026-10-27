@@ -1,6 +1,7 @@
 ---
 title: Result
 description: Reference for the BlurResult returned by encode() and encodeMany().
+kind: api
 ---
 
 ## Result shape

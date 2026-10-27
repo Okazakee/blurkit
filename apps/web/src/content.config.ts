@@ -1,9 +1,17 @@
 import { defineCollection } from 'astro:content'
-import { docsLoader } from '@astrojs/starlight/loaders'
-import { docsSchema } from '@astrojs/starlight/schema'
+import { z } from 'astro/zod'
+import { glob } from 'astro/loaders'
 
-const docs: ReturnType<typeof defineCollection> = defineCollection({ loader: docsLoader(), schema: docsSchema() })
+const docs = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/docs' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string().optional(),
+    kind: z.enum(['overview', 'runtime', 'api', 'guide', 'cli', 'policy']).optional(),
+    entrypoint: z.string().optional(),
+    backend: z.string().optional(),
+    install: z.string().optional(),
+  }),
+})
 
-export const collections = {
-  docs,
-}
+export const collections = { docs }

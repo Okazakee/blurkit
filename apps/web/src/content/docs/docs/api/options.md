@@ -1,6 +1,7 @@
 ---
 title: Options
 description: Reference for BlurKitOptions used by encode() and encodeMany().
+kind: api
 ---
 
 ## Option object

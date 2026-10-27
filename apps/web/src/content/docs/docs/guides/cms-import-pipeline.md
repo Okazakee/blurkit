@@ -1,6 +1,7 @@
 ---
 title: CMS Import Pipeline
 description: Generate placeholders during Node import jobs before writing CMS records.
+kind: guide
 ---
 
 ## When this pattern fits

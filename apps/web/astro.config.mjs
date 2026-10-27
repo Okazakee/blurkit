@@ -1,10 +1,10 @@
 import { defineConfig } from 'astro/config'
+import mdx from '@astrojs/mdx'
 import react from '@astrojs/react'
 import sitemap from '@astrojs/sitemap'
-import starlight from '@astrojs/starlight'
+import expressiveCode from 'astro-expressive-code'
 
 const SITE_URL = 'https://blurkit.okazakee.dev'
-const SOCIAL_IMAGE_URL = `${SITE_URL}/social-card.png`
 
 export default defineConfig({
   site: SITE_URL,
@@ -20,152 +20,34 @@ export default defineConfig({
   },
   integrations: [
     react(),
-    sitemap(),
-    starlight({
-      title: 'blurkit',
-      description: 'Placeholder generation for Node, Deno, browser, edge, Cloudflare, and wasm runtimes.',
-      logo: {
-        src: './src/assets/blurkit-mark.svg',
-        alt: 'blurkit',
-      },
-      social: [
-        {
-          icon: 'github',
-          label: 'GitHub',
-          href: 'https://github.com/okazakee/blurkit',
-        },
-        {
-          icon: 'npm',
-          label: 'npm',
-          href: 'https://www.npmjs.com/package/blurkit',
-        },
-      ],
-      editLink: {
-        baseUrl: 'https://github.com/okazakee/blurkit/edit/main/apps/web/src/content/docs/',
-      },
-      lastUpdated: true,
-      pagination: true,
-      tableOfContents: {
-        minHeadingLevel: 2,
-        maxHeadingLevel: 3,
-      },
-      expressiveCode: {
-        themes: ['github-dark'],
-        styleOverrides: {
-          borderRadius: '0.55rem',
-          borderWidth: '1px',
-          borderColor: 'rgba(236, 232, 225, 0.1)',
-          codeFontFamily: "var(--sl-font-mono)",
-          codeFontSize: '0.86rem',
-          codeLineHeight: '1.55',
-          codePaddingBlock: '0.95rem',
-          codePaddingInline: '1rem',
-          frames: {
-            shadowColor: 'transparent',
-          },
+    expressiveCode({
+      themes: ['github-dark'],
+      styleOverrides: {
+        borderRadius: '4px',
+        borderWidth: '1px',
+        borderColor: '#232327',
+        codeFontFamily: 'var(--bk-mono)',
+        codeFontSize: '0.84rem',
+        codeLineHeight: '1.6',
+        codePaddingBlock: '1rem',
+        codePaddingInline: '1.15rem',
+        codeBackground: '#0a0a0c',
+        codeForeground: '#cfcac2',
+        frames: {
+          shadowColor: 'transparent',
+          editorActiveTabBackground: '#101012',
+          editorTabBarBackground: '#0d0d0f',
+          editorTabBarBorderBottomColor: '#232327',
+          terminalBackground: '#0a0a0c',
+          frameBoxShadowCssValue: 'none',
+          editorActiveTabIndicatorTopColor: 'transparent',
+          editorActiveTabIndicatorBottomColor: 'transparent',
         },
       },
-      components: {
-        PageFrame: './src/components/starlight/DocsPageFrame.astro',
-        Header: './src/components/starlight/DocsHeader.astro',
-        Sidebar: './src/components/starlight/DocsSidebar.astro',
-        MobileMenuFooter: './src/components/starlight/DocsMobileMenuFooter.astro',
-        TwoColumnContent: './src/components/starlight/DocsTwoColumnContent.astro',
-        PageSidebar: './src/components/starlight/DocsPageSidebar.astro',
-        ContentPanel: './src/components/starlight/DocsContentPanel.astro',
-        PageTitle: './src/components/starlight/DocsPageTitle.astro',
-        Footer: './src/components/starlight/DocsFooter.astro',
-        Search: './src/components/starlight/DocsSearch.astro',
-        MobileMenuToggle: './src/components/starlight/DocsMobileMenuToggle.astro',
-        MobileTableOfContents: './src/components/starlight/DocsMobileTableOfContents.astro',
-      },
-      favicon: '/favicon.svg',
-      disable404Route: true,
-      head: [
-        { tag: 'meta', attrs: { name: 'theme-color', content: '#0a0a0b' } },
-        { tag: 'meta', attrs: { property: 'og:image', content: SOCIAL_IMAGE_URL } },
-        { tag: 'meta', attrs: { property: 'og:image:alt', content: 'blurkit social card with product title and runtime coverage' } },
-        { tag: 'meta', attrs: { property: 'og:image:width', content: '1200' } },
-        { tag: 'meta', attrs: { property: 'og:image:height', content: '630' } },
-        { tag: 'meta', attrs: { property: 'og:image:type', content: 'image/png' } },
-        { tag: 'meta', attrs: { name: 'twitter:card', content: 'summary_large_image' } },
-        { tag: 'meta', attrs: { name: 'twitter:image', content: SOCIAL_IMAGE_URL } },
-        { tag: 'meta', attrs: { name: 'twitter:image:alt', content: 'blurkit social card with product title and runtime coverage' } },
-        { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.googleapis.com' } },
-        {
-          tag: 'link',
-          attrs: {
-            rel: 'preconnect',
-            href: 'https://fonts.gstatic.com',
-            crossorigin: true,
-          },
-        },
-        {
-          tag: 'link',
-          attrs: {
-            rel: 'stylesheet',
-            href:
-              'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300..700&family=Geist+Mono:wght@400;500;600&display=swap',
-          },
-        },
-      ],
-      sidebar: [
-        {
-          label: 'Overview',
-          items: [
-            { label: 'Overview', slug: 'docs' },
-            { label: 'Installation', slug: 'docs/installation' },
-            { label: 'Quick Start', slug: 'docs/quick-start' },
-          ],
-        },
-        {
-          label: 'Runtime Guides',
-          items: [
-            { label: 'Node Runtime', slug: 'docs/runtimes/node' },
-            { label: 'Deno Runtime', slug: 'docs/runtimes/deno' },
-            { label: 'Browser Runtime', slug: 'docs/runtimes/browser' },
-            { label: 'Edge Runtime', slug: 'docs/runtimes/edge' },
-            { label: 'Cloudflare Runtime', slug: 'docs/runtimes/cloudflare' },
-            { label: 'WASM Runtime', slug: 'docs/runtimes/wasm' },
-          ],
-        },
-        {
-          label: 'CLI',
-          items: [
-            { label: 'CLI Overview', slug: 'docs/cli' },
-            { label: 'Single Image', slug: 'docs/cli/single-image' },
-            { label: 'Manifest Generation', slug: 'docs/cli/manifest-generation' },
-          ],
-        },
-        {
-          label: 'API Reference',
-          items: [
-            { label: 'API: encode()', slug: 'docs/api/encode' },
-            { label: 'API: encodeMany()', slug: 'docs/api/encode-many' },
-            { label: 'API: Options', slug: 'docs/api/options' },
-            { label: 'API: Result', slug: 'docs/api/result' },
-            { label: 'API: Manifest Helpers', slug: 'docs/api/manifest' },
-            { label: 'API: Cache', slug: 'docs/api/cache' },
-          ],
-        },
-        {
-          label: 'Use Cases',
-          items: [
-            { label: 'Guide: Next.js', slug: 'docs/guides/nextjs' },
-            { label: 'Guide: Build-time Manifests', slug: 'docs/guides/build-time-manifest-generation' },
-            { label: 'Guide: Browser Uploader Flow', slug: 'docs/guides/browser-uploader-flow' },
-            { label: 'Guide: CMS Import Pipeline', slug: 'docs/guides/cms-import-pipeline' },
-          ],
-        },
-        {
-          label: 'Limits and Roadmap',
-          items: [
-            { label: 'Limits and Caveats', slug: 'docs/limits' },
-            { label: 'Roadmap', slug: 'docs/roadmap' },
-          ],
-        },
-      ],
-      customCss: ['./src/styles/shared.css', './src/styles/docs.css'],
+    }),
+    mdx(),
+    sitemap({
+      filter: (page) => !page.includes('/styleguide'),
     }),
   ],
 })

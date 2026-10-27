@@ -1,0 +1,42 @@
+---
+import { BLURKIT_VERSION } from '../../utils/blurkit-version'
+---
+
+<footer class="docs-footer">
+  <div class="docs-footer__inner">
+    <div class="docs-footer__brand">
+      <span class="docs-footer__word">blurkit<i>.</i></span>
+      <p>Runtime-aware placeholder generation, kept small and boring on purpose.</p>
+    </div>
+
+    <nav class="docs-footer__col" aria-label="Documentation">
+      <h2>Docs</h2>
+      <a href="/docs/">Overview</a>
+      <a href="/docs/installation/">Installation</a>
+      <a href="/docs/quick-start/">Quick Start</a>
+      <a href="/docs/api/encode/">API</a>
+    </nav>
+
+    <nav class="docs-footer__col" aria-label="Runtimes">
+      <h2>Runtimes</h2>
+      <a href="/docs/runtimes/node/">Node</a>
+      <a href="/docs/runtimes/deno/">Deno</a>
+      <a href="/docs/runtimes/browser/">Browser</a>
+      <a href="/docs/runtimes/cloudflare/">Cloudflare</a>
+    </nav>
+
+    <nav class="docs-footer__col" aria-label="Elsewhere">
+      <h2>Elsewhere</h2>
+      <a href="/">Home</a>
+      <a href="https://github.com/okazakee/blurkit">GitHub</a>
+      <a href="https://www.npmjs.com/package/blurkit">npm</a>
+      <a href="https://github.com/okazakee/blurkit/blob/main/LICENSE">MIT</a>
+    </nav>
+  </div>
+
+  <div class="docs-footer__base">
+    <span>© {new Date().getFullYear()} blurkit</span>
+    <span class="docs-footer__dots" aria-hidden="true"></span>
+    <span>v{BLURKIT_VERSION}</span>
+  </div>
+</footer>

@@ -1,6 +1,10 @@
 ---
 title: Deno Runtime
 description: Use wasm-backed encoding with local file support and OffscreenCanvas rendering for Deno.
+kind: runtime
+entrypoint: blurkit/deno
+backend: 'wasm codecs'
+install: 'blurkit-wasm-codecs'
 ---
 
 ## Why this runtime

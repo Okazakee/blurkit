@@ -1,0 +1,53 @@
+---
+import { BLURKIT_NPM_VERSION_URL, BLURKIT_VERSION } from '../../utils/blurkit-version'
+
+const { pathname } = Astro.url
+const isDocs = pathname.startsWith('/docs/')
+
+const links = [
+  { label: 'Docs', href: '/docs/', current: isDocs },
+  { label: 'Quick start', href: '/docs/quick-start/' },
+  { label: 'Live demo', href: '/#live-demo' },
+  { label: 'GitHub', href: 'https://github.com/okazakee/blurkit' },
+]
+---
+
+<header class="bar">
+  <div class="bar__in">
+    <a class="brand" href="/">
+      <img class="brand__mark" src="/favicon.svg" alt="" width="34" height="34" />
+      <span class="brand__name">blurkit<i>.</i></span>
+    </a>
+
+    <nav class="bar__nav" aria-label="Primary">
+      {
+        links.map((link) => (
+          <a href={link.href} aria-current={link.current ? 'page' : undefined}>
+            {link.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="bar__tools">
+      <button class="docs-search-trigger" type="button" data-docs-search aria-keyshortcuts="Control+K Meta+K">
+        <span>Search</span>
+        <kbd>⌘K</kbd>
+      </button>
+
+      <a class="pill" href={BLURKIT_NPM_VERSION_URL}>v{BLURKIT_VERSION}</a>
+
+      <button
+        class="docs-menu-toggle"
+        type="button"
+        data-docs-menu
+        aria-controls="docs-sidebar"
+        aria-expanded="false"
+        aria-label="Open documentation navigation"
+      >
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </button>
+    </div>
+  </div>
+</header>

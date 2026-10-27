@@ -1,6 +1,10 @@
 ---
 title: Browser Runtime
 description: Encode placeholders from File, Blob, ArrayBuffer, or CORS-enabled remote URLs in client code.
+kind: runtime
+entrypoint: blurkit/browser
+backend: 'browser APIs'
+install: 'none'
 ---
 
 ## Why this runtime

@@ -1,0 +1,33 @@
+---
+import { hrefFor, type NavItem } from '../../docs/nav'
+
+interface Props {
+  prev?: NavItem
+  next?: NavItem
+}
+
+const { prev, next } = Astro.props
+---
+
+{
+  (prev ?? next) && (
+    <nav class="docs-pager" aria-label="Documentation pagination">
+      {prev ? (
+        <a class="docs-pager__card" href={hrefFor(prev.slug)} rel="prev">
+          <span class="docs-pager__dir">← Previous</span>
+          <strong>{prev.label}</strong>
+        </a>
+      ) : (
+        <span />
+      )}
+      {next ? (
+        <a class="docs-pager__card docs-pager__card--next" href={hrefFor(next.slug)} rel="next">
+          <span class="docs-pager__dir">Next →</span>
+          <strong>{next.label}</strong>
+        </a>
+      ) : (
+        <span />
+      )}
+    </nav>
+  )
+}

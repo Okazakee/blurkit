@@ -1,6 +1,7 @@
 ---
 title: Installation
 description: Install blurkit, pick an entrypoint, and check which runtime needs sharp or wasm codecs.
+kind: overview
 ---
 
 ## Install the package
