@@ -44,8 +44,8 @@ function buildTones(columns: number, rows: number, seconds: number) {
       const tone = Math.min(0.87, 0.04 + 0.8 * diffuse ** 1.5 + 0.22 * rim)
 
       tones[y * columns + x] = tone
-      // Sparse shadow dots carry the accent; lit dots stay bone.
-      highlight[y * columns + x] = tone > 0.03 && tone < 0.24 ? 1 : 0
+      // Lit dots carry the accent; shadow dots stay bone.
+      highlight[y * columns + x] = tone >= 0.24 ? 1 : 0
     }
   }
 
