@@ -146,7 +146,31 @@ const facts = [
       })
 
       document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && body.classList.contains('docs-menu-open')) setOpen(false)
+        if (!body.classList.contains('docs-menu-open')) return
+
+        if (event.key === 'Escape') {
+          setOpen(false)
+          return
+        }
+
+        if (event.key !== 'Tab' || !sidebar) return
+
+        const focusables = Array.from(
+          sidebar.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'),
+        )
+        if (focusables.length === 0) return
+
+        const first = focusables[0]
+        const last = focusables[focusables.length - 1]
+        const active = document.activeElement
+
+        if (event.shiftKey && active === first) {
+          event.preventDefault()
+          last?.focus()
+        } else if (!event.shiftKey && active === last) {
+          event.preventDefault()
+          first?.focus()
+        }
       })
 
       window.matchMedia('(min-width: 68.01rem)').addEventListener('change', (event) => {
