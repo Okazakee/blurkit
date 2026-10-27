@@ -21,12 +21,10 @@ const isDocsHome = Astro.locals.starlightRoute.id === 'docs'
     max-width: var(--sl-content-width);
     margin: 0 auto;
     padding: 1.35rem clamp(1rem, 2.4vw, 1.5rem);
-    border-radius: 1.45rem;
-    border: 1px solid rgba(166, 184, 255, 0.12);
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
-      linear-gradient(180deg, rgba(13, 17, 33, 0.72), rgba(8, 10, 18, 0.72));
-    box-shadow: var(--bk-shadow);
+    border-radius: 4px;
+    border: 1px solid rgba(236, 232, 225, 0.12);
+    background: var(--bk-panel);
+    box-shadow: none;
   }
 
   .docs-content-panel__inner > :global(* + *) {

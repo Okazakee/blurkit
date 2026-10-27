@@ -50,11 +50,11 @@ export default defineConfig({
         maxHeadingLevel: 3,
       },
       expressiveCode: {
-        themes: ['github-dark', 'github-light'],
+        themes: ['github-dark'],
         styleOverrides: {
-          borderRadius: '1.1rem',
+          borderRadius: '0.55rem',
           borderWidth: '1px',
-          borderColor: 'rgba(103, 236, 255, 0.12)',
+          borderColor: 'rgba(236, 232, 225, 0.1)',
           codeFontFamily: "var(--sl-font-mono)",
           codeFontSize: '0.86rem',
           codeLineHeight: '1.55',
@@ -79,10 +79,10 @@ export default defineConfig({
         MobileMenuToggle: './src/components/starlight/DocsMobileMenuToggle.astro',
         MobileTableOfContents: './src/components/starlight/DocsMobileTableOfContents.astro',
       },
-      favicon: '/apple-touch-icon.png',
+      favicon: '/favicon.svg',
       disable404Route: true,
       head: [
-        { tag: 'meta', attrs: { name: 'theme-color', content: '#0b0a16' } },
+        { tag: 'meta', attrs: { name: 'theme-color', content: '#0a0a0b' } },
         { tag: 'meta', attrs: { property: 'og:image', content: SOCIAL_IMAGE_URL } },
         { tag: 'meta', attrs: { property: 'og:image:alt', content: 'blurkit social card with product title and runtime coverage' } },
         { tag: 'meta', attrs: { property: 'og:image:width', content: '1200' } },
@@ -105,7 +105,7 @@ export default defineConfig({
           attrs: {
             rel: 'stylesheet',
             href:
-              'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700;800&display=swap',
+              'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300..700&family=Geist+Mono:wght@400;500;600&display=swap',
           },
         },
       ],

@@ -126,9 +126,30 @@ const sectionCards = route.sidebar
   .docs-page-header h1,
   .docs-home-hero h1 {
     color: var(--sl-color-white);
+    font-family: var(--bk-serif);
+    font-weight: 400;
     font-size: var(--sl-text-h1);
     line-height: 0.95;
-    letter-spacing: -0.05em;
+    letter-spacing: -0.02em;
+  }
+
+  .docs-page-header__kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    color: var(--bk-accent);
+    font-family: var(--bk-mono);
+    font-weight: 400;
+    letter-spacing: 0.1em;
+  }
+
+  .docs-page-header__kicker::before {
+    content: '';
+    width: 22px;
+    height: 4px;
+    flex: none;
+    background-image: radial-gradient(currentColor 1px, transparent 1.2px);
+    background-size: 4px 4px;
   }
 
   .docs-page-header__description,

@@ -8,40 +8,50 @@ import '../styles/site.css'
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>404 - blurkit</title>
     <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#0a0a0b" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300..700&family=Geist+Mono:wght@400;500;600&display=swap"
+    />
   </head>
   <body>
-    <a class="site-skip-link" href="#main-content">Skip to main content</a>
-    <div class="site-shell">
-      <main class="site-main site-section--flush" id="main-content">
-        <header class="site-header">
-          <a class="site-brand" href="/">
-            <span class="site-brand-mark">bk</span>
-            <span class="site-brand-copy">
-              <strong>blurkit</strong>
-              <span>Universal placeholder generation</span>
-            </span>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <div class="shell">
+      <header class="bar">
+        <div class="bar__in">
+          <a class="brand" href="/">
+            <img class="brand__mark" src="/favicon.svg" alt="" width="34" height="34" />
+            <span class="brand__name">blurkit<i>.</i></span>
           </a>
-        </header>
+          <nav class="bar__nav" aria-label="Primary">
+            <a href="/docs/">Docs</a>
+            <a href="/docs/quick-start/">Quick start</a>
+          </nav>
+        </div>
+      </header>
 
-        <section class="site-section site-section--flush">
-          <div class="site-section-header">
-            <span class="site-eyebrow">Page not found</span>
-            <h1 class="site-page-title">This route does not exist.</h1>
-            <p>
-              The page may have moved, or the URL may be wrong. Use the docs index or head back to the homepage.
-            </p>
-          </div>
-
-          <div class="site-actions">
-            <a class="site-button site-button--primary" href="/">
-              Back to homepage
-            </a>
-            <a class="site-button site-button--ghost" href="/docs/">
-              Open docs
-            </a>
+      <main class="main" id="main-content">
+        <section class="notfound">
+          <span class="site-eyebrow">404 · no signal</span>
+          <h1>This route <em>never encoded</em>.</h1>
+          <p>The page may have moved, or the URL may be wrong. Head back to the homepage or open the docs index.</p>
+          <div class="hero__actions">
+            <a class="btn btn--accent" href="/">Back to homepage</a>
+            <a class="btn" href="/docs/">Open docs</a>
           </div>
         </section>
       </main>
+
+      <footer class="foot">
+        <div class="foot__base">
+          <span>© {new Date().getFullYear()} blurkit</span>
+          <span class="foot__dots" aria-hidden="true"></span>
+          <span>404</span>
+        </div>
+      </footer>
     </div>
   </body>
 </html>

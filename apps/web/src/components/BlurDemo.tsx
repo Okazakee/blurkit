@@ -375,12 +375,6 @@ export function BlurDemo() {
 
   return (
     <div className="live-demo">
-      <div className="live-demo-intro">
-        <span className="live-demo-kicker">Live demo</span>
-        <h2>Test blurkit in the browser.</h2>
-        <p>Drop an image, adjust the settings, and inspect the generated output.</p>
-      </div>
-
       <div className="live-demo-shell">
         <aside className="live-demo-rail">
           <section
