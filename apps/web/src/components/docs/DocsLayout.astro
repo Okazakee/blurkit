@@ -140,6 +140,7 @@ const facts = [
 
       toggle?.addEventListener('click', () => setOpen(!body.classList.contains('docs-menu-open')))
       scrim?.addEventListener('click', () => setOpen(false))
+      document.querySelector('[data-docs-close]')?.addEventListener('click', () => setOpen(false))
       sidebar?.addEventListener('click', (event) => {
         const target = event.target
         if (target instanceof HTMLElement && target.closest('a')) setOpen(false)
