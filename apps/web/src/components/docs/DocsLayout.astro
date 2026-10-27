@@ -26,8 +26,45 @@ interface Props {
 }
 
 const { title, description, group, headings, prev, next, editUrl, kind, entrypoint, backend, install } = Astro.props
-const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://blurkit.okazakee.dev/').toString()
+const site = Astro.site ?? new URL('https://blurkit.okazakee.dev/')
+const canonical = new URL(Astro.url.pathname, site).toString()
+const socialImage = new URL('/social-card.png', site).toString()
+const socialAlt = 'blurkit social card with product title and runtime coverage'
 const pageTitle = title === 'Documentation' ? 'Documentation · blurkit' : `${title} · blurkit docs`
+const isDocsHome = Astro.url.pathname === '/docs/'
+const breadcrumbs = [
+  { '@type': 'ListItem', position: 1, name: 'Home', item: site.origin },
+  { '@type': 'ListItem', position: 2, name: 'Docs', item: new URL('/docs/', site).toString() },
+]
+if (!isDocsHome) {
+  breadcrumbs.push({ '@type': 'ListItem', position: 3, name: title, item: canonical })
+}
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'TechArticle',
+      headline: title,
+      description,
+      url: canonical,
+      mainEntityOfPage: canonical,
+      inLanguage: 'en',
+      isPartOf: { '@type': 'WebSite', name: 'blurkit', url: site.origin },
+      publisher: {
+        '@type': 'Organization',
+        name: 'blurkit',
+        url: site.origin,
+        logo: { '@type': 'ImageObject', url: new URL('/apple-touch-icon.png', site).toString() },
+      },
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: breadcrumbs,
+    },
+  ],
+}
+
 const facts = [
   entrypoint ? { label: 'entrypoint', value: entrypoint } : undefined,
   backend ? { label: 'backend', value: backend } : undefined,
@@ -43,7 +80,9 @@ const facts = [
     <title>{pageTitle}</title>
     {description && <meta name="description" content={description} />}
     <meta name="theme-color" content="#0a0a0b" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
     <link rel="canonical" href={canonical} />
+    <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-readable index" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -58,8 +97,18 @@ const facts = [
     <meta property="og:type" content="article" />
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content="blurkit" />
-    <meta property="og:image" content="https://blurkit.okazakee.dev/social-card.png" />
+    <meta property="og:image" content={socialImage} />
+    <meta property="og:image:alt" content={socialAlt} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
+    {group && <meta property="article:section" content={group} />}
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    {description && <meta name="twitter:description" content={description} />}
+    <meta name="twitter:image" content={socialImage} />
+    <meta name="twitter:image:alt" content={socialAlt} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(structuredData)} />
   </head>
   <body class="docs-page">
     <a class="skip-link" href="#docs-content">Skip to content</a>
@@ -127,6 +176,7 @@ const facts = [
       const setOpen = (open: boolean) => {
         body.classList.toggle('docs-menu-open', open)
         toggle?.setAttribute('aria-expanded', String(open))
+        toggle?.setAttribute('aria-label', open ? 'Close documentation navigation' : 'Open documentation navigation')
         scrim?.setAttribute('aria-hidden', String(!open))
         if (scrim) scrim.tabIndex = open ? 0 : -1
         if (main) main.inert = open
@@ -140,7 +190,6 @@ const facts = [
 
       toggle?.addEventListener('click', () => setOpen(!body.classList.contains('docs-menu-open')))
       scrim?.addEventListener('click', () => setOpen(false))
-      document.querySelector('[data-docs-close]')?.addEventListener('click', () => setOpen(false))
       sidebar?.addEventListener('click', (event) => {
         const target = event.target
         if (target instanceof HTMLElement && target.closest('a')) setOpen(false)

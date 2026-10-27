@@ -1,0 +1,50 @@
+# blurkit
+
+> Universal image placeholder generation. blurkit turns an image into a BlurHash or ThumbHash placeholder `dataURL` plus the hash, encoded dimensions, and source metadata, with explicit entrypoints for Node/Bun, Deno, the browser, edge workers, Cloudflare Workers, and WASM runtimes.
+
+- Package: blurkit (MIT), current version on npm: https://www.npmjs.com/package/blurkit
+- Repository: https://github.com/okazakee/blurkit
+- Canonical docs: https://blurkit.okazakee.dev/docs/
+- Install: `pnpm add blurkit` (Node/Bun also need `sharp`; Deno/WASM/edge fallback need `blurkit-wasm-codecs`)
+
+## Start here
+
+- [Overview](https://blurkit.okazakee.dev/docs/): how `encode()` flows from input to placeholder, and what the result contains.
+- [Installation](https://blurkit.okazakee.dev/docs/installation/): dependency rules and the canonical runtime compatibility matrix.
+- [Quick Start](https://blurkit.okazakee.dev/docs/quick-start/): first successful encode and result fields.
+
+## Runtime guides
+
+- [Node Runtime](https://blurkit.okazakee.dev/docs/runtimes/node/): `blurkit/node`, sharp-backed, local paths plus URL/Blob/bytes.
+- [Deno Runtime](https://blurkit.okazakee.dev/docs/runtimes/deno/): `blurkit/deno`, wasm decode, canvas or wasm render.
+- [Browser Runtime](https://blurkit.okazakee.dev/docs/runtimes/browser/): `blurkit/browser`, File/Blob inputs, CORS-only remote URLs.
+- [Edge Runtime](https://blurkit.okazakee.dev/docs/runtimes/edge/): `blurkit/edge`, native decode when available, wasm when not.
+- [Cloudflare Runtime](https://blurkit.okazakee.dev/docs/runtimes/cloudflare/): `blurkit/cloudflare`, `cf.image` transforms, opaque `cfbh:`/`cfth:` hash.
+- [WASM Runtime](https://blurkit.okazakee.dev/docs/runtimes/wasm/): `blurkit/wasm`, PNG/JPEG/WebP decode.
+
+## API reference
+
+- [encode()](https://blurkit.okazakee.dev/docs/api/encode/): signature, accepted inputs, errors.
+- [encodeMany()](https://blurkit.okazakee.dev/docs/api/encode-many/): fail-fast and settled batch semantics.
+- [Options](https://blurkit.okazakee.dev/docs/api/options/): algorithm, size, dimensions, output format, cache.
+- [Result](https://blurkit.okazakee.dev/docs/api/result/): `BlurResult` fields, ThumbHash render dimensions, Cloudflare hash exception.
+- [Manifest helpers](https://blurkit.okazakee.dev/docs/api/manifest/): `createManifest()` and `writeManifest()` runtime support.
+- [Cache](https://blurkit.okazakee.dev/docs/api/cache/): memory, filesystem, and Cloudflare helpers; key behavior.
+
+## CLI
+
+- [CLI overview](https://blurkit.okazakee.dev/docs/cli/): flags, defaults, output behavior.
+- [Single image](https://blurkit.okazakee.dev/docs/cli/single-image/): one `BlurResult` from a path or URL.
+- [Manifest generation](https://blurkit.okazakee.dev/docs/cli/manifest-generation/): folder manifests and key mapping.
+
+## Guides
+
+- [Next.js](https://blurkit.okazakee.dev/docs/guides/nextjs/): `blurDataURL` in a Server Component, sharp/Turbopack caveat.
+- [Build-time manifests](https://blurkit.okazakee.dev/docs/guides/build-time-manifest-generation/): precompute placeholders during builds.
+- [Browser uploader flow](https://blurkit.okazakee.dev/docs/guides/browser-uploader-flow/): client-side placeholders for user uploads.
+- [CMS import pipeline](https://blurkit.okazakee.dev/docs/guides/cms-import-pipeline/): encode during import jobs.
+
+## Policy
+
+- [Limits and caveats](https://blurkit.okazakee.dev/docs/limits/): runtime boundaries, error codes, cache ownership.
+- [Roadmap](https://blurkit.okazakee.dev/docs/roadmap/): committed work, exploratory ideas, and unsupported features.
