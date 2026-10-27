@@ -63,7 +63,6 @@ export function checkDocs({ root = DEFAULT_ROOT, sidebarExempt = DEFAULT_SIDEBAR
 
   const docsRoot = join(root, 'apps/web/src/content/docs/docs')
   const publicRoot = join(root, 'apps/web/public')
-  const configPath = join(root, 'apps/web/astro.config.mjs')
 
   const fail = (file, message) => {
     errors.push(`${relative(root, file)}: ${message}`)
@@ -84,6 +83,24 @@ export function checkDocs({ root = DEFAULT_ROOT, sidebarExempt = DEFAULT_SIDEBAR
 
     docsBySlug.set(slug, { file, headings, text })
     slugByFile.set(file, slug)
+  }
+
+  // Frontmatter: only known page kinds are allowed.
+  const kinds = new Set(['overview', 'runtime', 'api', 'guide', 'cli', 'policy'])
+  for (const [slug, doc] of docsBySlug) {
+    const match = /^kind:\s*(\S+)/m.exec(doc.text)
+    if (match && !kinds.has(match[1])) {
+      errors.push(`${slug}: unknown frontmatter kind '${match[1]}'`)
+    }
+  }
+
+  // The docs shell must not depend on the previous Starlight layer.
+  const sourceFiles = walk(join(root, 'apps/web/src')).filter((file) => /\.(astro|ts|tsx|css|mjs)$/.test(file))
+  for (const file of sourceFiles) {
+    const text = readFileSync(file, 'utf8')
+    if (text.includes('@astrojs/starlight') || text.includes('--sl-')) {
+      fail(file, 'uses the removed Starlight layer')
+    }
   }
 
   // Code fences: every opening fence needs a language.
@@ -182,19 +199,19 @@ export function checkDocs({ root = DEFAULT_ROOT, sidebarExempt = DEFAULT_SIDEBAR
     }
   }
 
-  // Sidebar slugs must be unique, must resolve, and should cover every page.
-  const config = readFileSync(configPath, 'utf8')
-  const sidebarSlugs = [...config.matchAll(/slug:\s*'([^']+)'/g)].map((match) => match[1])
+  // Navigation slugs must be unique, must resolve, and should cover every page.
+  const navigation = JSON.parse(readFileSync(join(root, 'apps/web/src/docs/navigation.json'), 'utf8'))
+  const sidebarSlugs = navigation.flatMap((group) => group.items.map((item) => item.slug))
   const seenSlugs = new Set()
 
   for (const slug of sidebarSlugs) {
     if (seenSlugs.has(slug)) {
-      errors.push(`astro.config.mjs: duplicate sidebar slug '${slug}'`)
+      errors.push(`navigation.json: duplicate slug '${slug}'`)
     }
     seenSlugs.add(slug)
 
     if (!docsBySlug.has(slug)) {
-      errors.push(`astro.config.mjs: sidebar slug '${slug}' has no page`)
+      errors.push(`navigation.json: slug '${slug}' has no page`)
     }
   }
 

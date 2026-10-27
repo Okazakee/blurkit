@@ -293,3 +293,8 @@ jobs:
 
       - name: Test the docs checker
         run: pnpm docs:check:test
+
+      - name: Build docs and search index
+        run: |
+          pnpm --filter @blurkit/web build
+          test -f apps/web/dist/pagefind/pagefind.js

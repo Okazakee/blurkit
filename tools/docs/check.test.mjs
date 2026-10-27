@@ -8,19 +8,19 @@ import { checkDocs, extractLinks, slugify, stripCode } from './check.mjs'
 
 const fixtures = []
 
-function createFixture(pages, { config, readme = '[docs](./apps/web/src/content/docs/docs/index.md)\n' } = {}) {
+function createFixture(pages, { nav, readme = '[docs](./apps/web/src/content/docs/docs/index.md)\n' } = {}) {
   const root = mkdtempSync(join(tmpdir(), 'blurkit-docs-'))
   fixtures.push(root)
 
   const docsRoot = join(root, 'apps/web/src/content/docs/docs')
-  const sidebar = config ?? Object.keys(pages).map((slug) => `        { label: 'Page', slug: '${slug}' },`).join('\n')
+  const navigation = nav ?? [
+    { label: 'Docs', items: Object.keys(pages).map((slug) => ({ label: slug, slug })) },
+  ]
 
   mkdirSync(docsRoot, { recursive: true })
   mkdirSync(join(root, 'apps/web/public'), { recursive: true })
-  writeFileSync(
-    join(root, 'apps/web/astro.config.mjs'),
-    `export default {\n  sidebar: [\n${sidebar}\n  ],\n}\n`,
-  )
+  mkdirSync(join(root, 'apps/web/src/docs'), { recursive: true })
+  writeFileSync(join(root, 'apps/web/src/docs/navigation.json'), JSON.stringify(navigation, null, 2))
   writeFileSync(join(root, 'README.md'), readme)
 
   for (const [slug, content] of Object.entries(pages)) {
@@ -80,7 +80,7 @@ describe('checkDocs', () => {
         docs: '# Docs\n',
         'docs/installation': '# Installation\n',
       },
-      { config: "        { label: 'Docs', slug: 'docs' }," },
+      { nav: [{ label: 'Docs', items: [{ label: 'Docs', slug: 'docs' }] }] },
     )
 
     assert.match(checkDocs({ root }).errors.join('\n'), /docs\/installation: page is not linked/)
@@ -92,7 +92,7 @@ describe('checkDocs', () => {
         docs: '# Docs\n',
         'docs/installation': '# Installation\n',
       },
-      { config: "        { label: 'Docs', slug: 'docs' }," },
+      { nav: [{ label: 'Docs', items: [{ label: 'Docs', slug: 'docs' }] }] },
     )
 
     const result = checkDocs({ root, sidebarExempt: new Set(['docs/installation']) })
@@ -102,12 +102,23 @@ describe('checkDocs', () => {
   it('reports duplicate and unknown sidebar slugs', () => {
     const root = createFixture(
       { docs: '# Docs\n' },
-      { config: "        { label: 'Docs', slug: 'docs' },\n        { label: 'Docs again', slug: 'docs' },\n        { label: 'Ghost', slug: 'docs/missing' }," },
+      {
+        nav: [
+          {
+            label: 'Docs',
+            items: [
+              { label: 'Docs', slug: 'docs' },
+              { label: 'Docs again', slug: 'docs' },
+              { label: 'Ghost', slug: 'docs/missing' },
+            ],
+          },
+        ],
+      },
     )
 
     const errors = checkDocs({ root }).errors.join('\n')
-    assert.match(errors, /duplicate sidebar slug 'docs'/)
-    assert.match(errors, /sidebar slug 'docs\/missing' has no page/)
+    assert.match(errors, /duplicate slug 'docs'/)
+    assert.match(errors, /slug 'docs\/missing' has no page/)
   })
 
   it('reports broken routes and anchors', () => {
