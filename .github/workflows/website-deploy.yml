@@ -10,6 +10,7 @@ on:
     # published packages (the version is read at build time).
     tags:
       - 'v*'
+      - '*.*.*'
   workflow_dispatch:
 
 concurrency:
@@ -41,8 +42,15 @@ jobs:
           fi
 
           if [[ "$EVENT_NAME" == "push" && "$REF" == refs/tags/* ]]; then
-            echo "Release tag push detected; redeploying for current package versions."
-            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+            tag="${REF#refs/tags/}"
+            normalized="${tag#v}"
+            if [[ "$normalized" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "Stable release tag detected ($tag); redeploying for current package versions."
+              echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "Tag $tag is not a stable semver release; skipping website deploy."
+              echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+            fi
             exit 0
           fi
 

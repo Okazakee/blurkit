@@ -66,6 +66,8 @@ feat: update docs layout
 docs(web): typo fixes
 ```
 
+A stable release tag (`vX.Y.Z` or `X.Y.Z`) also deploys the website, regardless of the commit subject, so the version badge tracks the published package. Prerelease tags and unrelated tags do not deploy.
+
 Manual `workflow_dispatch` can still deploy website without subject match.
 
 ### Library release workflow
