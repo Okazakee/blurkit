@@ -2,6 +2,7 @@ import { resolveTargetDimensions } from './internal/dimensions'
 import { normalizeOptions } from './internal/normalize-options'
 import { bytesToDataURL } from './internal/base64'
 import { createCacheKey } from './internal/cache-key'
+import { readImageDimensions } from './internal/image-size'
 import type {
   BlurEncodeManySettledResult,
   BlurKitCache,
@@ -174,14 +175,17 @@ async function encodeRemoteURL(
 
   const bytes = new Uint8Array(await response.arrayBuffer())
   const mimeType = response.headers.get('content-type') ?? `image/${options.outputFormat}`
+  // `fit: scale-down` can return a smaller image than the requested box, so
+  // describe the bytes we actually hand back when they are readable.
+  const dimensions = readImageDimensions(bytes) ?? target
 
   return {
     result: {
       dataURL: bytesToDataURL(bytes, mimeType),
       hash: await createSyntheticHash(bytes, options.algorithm),
       algorithm: options.algorithm,
-      width: target.width,
-      height: target.height,
+      width: dimensions.width,
+      height: dimensions.height,
       meta: {
         originalWidth: target.info.originalWidth ?? target.width,
         originalHeight: target.info.originalHeight ?? target.height,
@@ -262,7 +266,9 @@ export async function encodeManySettled(
 ): Promise<BlurEncodeManySettledResult[]> {
   const normalized = normalizeOptions(options)
   const settled = await Promise.allSettled(
-    inputs.map((input) => {
+    // An async callback turns synchronous validation throws into per-item
+    // rejections, so one invalid input cannot reject the whole batch.
+    inputs.map(async (input) => {
       if (!isRemoteURLInput(input)) {
         throw new Error('blurkit/cloudflare supports only remote http(s) URL string or URL input.')
       }
