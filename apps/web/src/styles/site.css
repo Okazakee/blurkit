@@ -1186,6 +1186,10 @@ a.matrix__row:focus-visible {
     gap: 8px 12px;
   }
 
+  .bar__tools {
+    margin-left: auto;
+  }
+
   .bar__nav {
     order: 3;
     flex-basis: 100%;
