@@ -400,9 +400,9 @@ export function BlurDemo() {
                   d="M12 16V7m0 0-3 3m3-3 3 3M5 17.5v.5A2 2 0 0 0 7 20h10a2 2 0 0 0 2-2v-.5"
                   fill="none"
                   stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="1.8"
                 ></path>
               </svg>
             </span>
