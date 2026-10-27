@@ -3,9 +3,7 @@ title: Documentation
 description: Technical reference for blurkit runtimes, API behavior, CLI usage, and production patterns.
 ---
 
-blurkit generates compact placeholder images using BlurHash or ThumbHash so you never ship a layout without knowing image dimensions. It runs on Node, Deno, the browser, edge workers, and Cloudflare — one API, no platform lock-in.
-
-## Example
+## One encode, end to end
 
 ```ts title="scripts/encode-hero.ts"
 import { encode } from 'blurkit/node'
@@ -18,32 +16,33 @@ const result = await encode('./public/hero.jpg', {
 console.log(result.dataURL)
 ```
 
-## Inputs / Options / Behavior
+`encode()` decodes the input, resizes it to the target dimensions, hashes it, and renders the hash back to an image data URL. The same call shape works on every runtime; only the entrypoint and its input forms change.
 
-- blurkit ships explicit runtime entrypoints: `blurkit/node`, `blurkit/deno`, `blurkit/browser`, `blurkit/edge`, `blurkit/cloudflare`, and `blurkit/wasm`.
-- Root import `blurkit` resolves by export conditions (`node`, `browser`, `worker`) without runtime dynamic dispatch.
-- Successful `encode()` returns `dataURL`, `hash`, `algorithm`, `width`, `height`, and `meta`.
-- `encodeMany()` is fail-fast.
-- `encodeManySettled()` returns per-item success/failure results.
+## What comes back
 
-## Integration Examples
+- `dataURL` — the placeholder to pass to an image `src` or `blurDataURL`.
+- `hash` — the BlurHash or ThumbHash string for storage and later decoding.
+- `width` / `height` — the dimensions of the encoded image.
+- `meta` — source dimensions and, when the decoder reports them, format and alpha.
 
-- Next.js minimal example: [apps/example-nextjs](https://github.com/Okazakee/blurkit/tree/main/apps/example-nextjs)
-- Astro minimal example: [apps/example-astro](https://github.com/Okazakee/blurkit/tree/main/apps/example-astro)
+See [API: Result](/docs/api/result/) for the full contract, including the Cloudflare exception.
 
-## Limits / Caveats
+## How the package is organized
 
-- Node runtime requires `sharp`.
-- Deno runtime requires `blurkit-wasm-codecs` and uses wasm-backed decode with canvas render.
-- Browser runtime cannot read local filesystem paths.
-- Edge runtime uses native decode APIs when available, then falls back to wasm.
-- Cloudflare runtime accepts remote URL input only.
-- WASM runtime decode support is PNG/JPEG/WebP.
-- Remote URL input depends on network reachability and, in browsers, CORS.
+- Explicit entrypoints: `blurkit/node`, `blurkit/deno`, `blurkit/browser`, `blurkit/edge`, `blurkit/cloudflare`, `blurkit/wasm`.
+- The root `blurkit` import resolves through export conditions (`node`, `browser`, `worker`, `deno`) rather than a runtime switch.
+- `encodeMany()` fails fast; `encodeManySettled()` returns per-item envelopes.
+- The CLI, manifest helpers, and cache helpers cover build steps and repeated work.
 
-## Next read
+## Start here
 
-- [Installation](/docs/installation/)
-- [Quick Start](/docs/quick-start/)
-- [Node Runtime](/docs/runtimes/node/)
-- [Deno Runtime](/docs/runtimes/deno/)
+- [Installation](/docs/installation/) — dependency rules and the canonical runtime matrix.
+- [Quick Start](/docs/quick-start/) — first successful encode.
+- [Runtime guides](/docs/runtimes/node/) — pick the entrypoint that matches your platform.
+- [API reference](/docs/api/encode/) — `encode()`, options, result, cache, manifests.
+- [Guides](/docs/guides/nextjs/) — Next.js, browser uploads, build-time manifests, CMS imports.
+
+Minimal integrations live in the repository:
+
+- [Next.js example](https://github.com/Okazakee/blurkit/tree/main/apps/example-nextjs)
+- [Astro example](https://github.com/Okazakee/blurkit/tree/main/apps/example-astro)

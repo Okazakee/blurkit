@@ -3,11 +3,11 @@ title: Manifest Helpers
 description: Use createManifest() and writeManifest() to persist many BlurResult entries.
 ---
 
-## When to use
+## Manifest shape
 
 Use manifest helpers when you precompute placeholders and need one stable JSON file for runtime lookup.
 
-## Example
+## Create and write a manifest
 
 ```ts
 import { encode } from 'blurkit/node'
@@ -21,7 +21,7 @@ const manifest = createManifest({
 await writeManifest('./blur-manifest.json', manifest, { pretty: true })
 ```
 
-## Inputs / Options / Behavior
+## Signatures and runtime support
 
 ```ts
 createManifest(images: Record<string, BlurResult>): BlurManifest
@@ -37,15 +37,16 @@ interface BlurManifest {
 
 - `createManifest()` infers `algorithm` as single value or `mixed`.
 - `writeManifest()` creates parent directories and writes UTF-8 JSON.
-- `createManifest()` is runtime-agnostic. `writeManifest()` only writes files in `blurkit/node` and `blurkit/deno`; the browser and edge root exports expose it as a function that throws.
+- `createManifest()` has no filesystem dependency: `blurkit/node`, `blurkit/deno`, and the root `blurkit` import all export it. The `blurkit/browser`, `blurkit/edge`, `blurkit/cloudflare`, and `blurkit/wasm` subpaths do not re-export it, so import it from the root there.
+- `writeManifest()` only writes files in `blurkit/node` and `blurkit/deno`; the browser and edge root exports expose it as a function that throws.
 - In browser or worker code, call `createManifest()` and persist the JSON with your own storage layer (R2, KV, an API route, and so on).
 
-## Limits / Caveats
+## Caveats
 
 - Path key strategy is chosen by caller when creating `images` map.
 - Manifest helpers do not validate downstream URL conventions.
 
-## Next read
+## Related
 
 - [CLI: Manifest Generation](/docs/cli/manifest-generation/)
 - [API: Result](/docs/api/result/)

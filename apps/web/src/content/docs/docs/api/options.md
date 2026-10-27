@@ -3,11 +3,11 @@ title: Options
 description: Reference for BlurKitOptions used by encode() and encodeMany().
 ---
 
-## When to use
+## Option object
 
 Use this page when you need predictable placeholder dimensions, algorithm selection, or output format control.
 
-## Example
+## Encode with explicit dimensions
 
 ```ts
 import { encode } from 'blurkit/node'
@@ -20,7 +20,7 @@ await encode('./public/hero.jpg', {
 })
 ```
 
-## Inputs / Options / Behavior
+## Defaults
 
 ```ts
 interface BlurKitOptions {
@@ -50,12 +50,12 @@ Dimension behavior:
 - `height` only derives `width` from source ratio.
 - `width` + `height` uses exact dimensions.
 
-## Limits / Caveats
+## Algorithm-specific options
 
 - `componentX` and `componentY` only affect `blurhash`.
 - Cache helpers are runtime-specific: see [API: Cache](/docs/api/cache/) for the full matrix.
 
-## Next read
+## Related
 
 - [API: encode()](/docs/api/encode/)
 - [API: Cache](/docs/api/cache/)

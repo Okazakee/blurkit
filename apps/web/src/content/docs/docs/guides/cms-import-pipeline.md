@@ -3,11 +3,11 @@ title: CMS Import Pipeline
 description: Generate placeholders during Node import jobs before writing CMS records.
 ---
 
-## When to use
+## When this pattern fits
 
 Use this pattern when your importer already fetches images and writes structured records.
 
-## Example
+## Encode on import
 
 ```ts
 import { encode } from 'blurkit/node'
@@ -28,18 +28,18 @@ async function processImage(url: string) {
 }
 ```
 
-## Inputs / Options / Behavior
+## How the pipeline behaves
 
 - Remote input is fetched in Node runtime.
 - Placeholder and source metadata are emitted in one result.
 - The same pattern works for DB, CMS, or search index writes.
 
-## Limits / Caveats
+## Caveats
 
 - Import job must handle network and decode failures.
 - Batch jobs should decide between fail-fast and per-item error handling.
 
-## Next read
+## Related
 
 - [Node Runtime](/docs/runtimes/node/)
 - [API: Result](/docs/api/result/)

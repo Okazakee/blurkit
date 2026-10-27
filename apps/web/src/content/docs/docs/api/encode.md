@@ -3,11 +3,11 @@ title: encode()
 description: Encode one image input into a BlurResult placeholder object.
 ---
 
-## When to use
+## Signature
 
 Use `encode()` when one image should produce one placeholder result.
 
-## Example
+## Encode a local file
 
 ```ts
 import { encode } from 'blurkit/node'
@@ -19,7 +19,7 @@ const result = await encode('./public/hero.jpg', {
 })
 ```
 
-## Inputs / Options / Behavior
+## Accepted input forms
 
 ```ts
 encode(input: BlurKitInput, options?: BlurKitOptions): Promise<BlurResult>
@@ -35,12 +35,12 @@ type BlurKitInput = string | URL | File | Blob | ArrayBuffer | Uint8Array
 - `blurkit/wasm` accepts remote URL/URL/Blob/ArrayBuffer/Uint8Array and decodes PNG/JPEG/WebP.
 - `blurkit/deno` accepts local paths, remote URL/URL/Blob/ArrayBuffer/Uint8Array with wasm-backed decode and canvas render.
 
-## Limits / Caveats
+## Errors
 
 - Input support is runtime-specific.
 - Remote URL input can fail from network or CORS constraints.
 
-## Next read
+## Related
 
 - [API: Options](/docs/api/options/)
 - [API: Result](/docs/api/result/)

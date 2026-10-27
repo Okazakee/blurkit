@@ -3,17 +3,17 @@ title: Single Image
 description: Generate one BlurResult JSON object from a local path or remote URL.
 ---
 
-## When to use
+## When to use single-image mode
 
 Use this flow when one asset must be encoded and consumed immediately.
 
-## Example
+## Write JSON to stdout
 
 ```bash
 npx blurkit encode ./public/hero.jpg --pretty
 ```
 
-## Inputs / Options / Behavior
+## Remote and wasm variants
 
 Alternative remote input example:
 
@@ -32,12 +32,12 @@ npx blurkit encode ./public/hero.jpg --backend wasm --pretty
 - Backend defaults to `sharp`; use `--backend wasm` for wasm decode path.
 - `--backend wasm` requires `blurkit-wasm-codecs` installed.
 
-## Limits / Caveats
+## Behavior notes
 
 - Remote URL mode can fail on network errors.
 - Single-image mode does not create a manifest envelope.
 
-## Next read
+## Related
 
 - [CLI Overview](/docs/cli/)
 - [CLI: Manifest Generation](/docs/cli/manifest-generation/)

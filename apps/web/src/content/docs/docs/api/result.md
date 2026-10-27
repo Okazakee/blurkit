@@ -3,11 +3,11 @@ title: Result
 description: Reference for the BlurResult returned by encode() and encodeMany().
 ---
 
-## When to use
+## Result shape
 
 Use this page when integrating blurkit output into UI components, manifests, or database records.
 
-## Example
+## Encode and inspect
 
 ```ts
 const result = await encode('./public/hero.jpg')
@@ -17,7 +17,7 @@ console.log(result.hash)
 console.log(result.meta.originalWidth)
 ```
 
-## Inputs / Options / Behavior
+## Field semantics
 
 ```ts
 interface BlurResult {
@@ -40,7 +40,7 @@ interface BlurResult {
 - `width`/`height` are the dimensions of the resized input passed into the hasher. For `blurhash` the rendered image uses the same dimensions. For `thumbhash` the renderer reconstructs pixels from the decoded hash, so the final image dimensions can differ slightly; decode `dataURL` if you need the exact rendered size.
 - `meta` is always present. `meta.format` and `meta.hasAlpha` are optional because they depend on what the decoder can report.
 
-## Limits / Caveats
+## Caveats
 
 - `meta.originalWidth` and `meta.originalHeight` describe the source image as reported by the runtime. On Cloudflare they fall back to the requested transform dimensions when the image-info lookup fails, so do not treat them as guaranteed source dimensions there.
 - Stored `dataURL` size depends on the chosen `outputFormat` and dimensions, not on the hash length.
@@ -53,7 +53,7 @@ interface BlurResult {
 - `algorithm` echoes the requested option; it does not mean those pixels were hashed with that algorithm.
 - Use `dataURL` for rendering. Treat `hash` as an opaque cache or deduplication id on Cloudflare.
 
-## Next read
+## Related
 
 - [API: encode()](/docs/api/encode/)
 - [API: Manifest Helpers](/docs/api/manifest/)

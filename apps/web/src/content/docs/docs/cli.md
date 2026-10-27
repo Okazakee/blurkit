@@ -3,17 +3,17 @@ title: CLI Overview
 description: Generate one result or one manifest from the shell using sharp or wasm backend.
 ---
 
-## When to use
+## Command surface
 
 Use the CLI when you want JSON output without writing a custom script.
 
-## Example
+## Encode one image
 
 ```bash
 blurkit encode ./public/hero.jpg --pretty
 ```
 
-## Inputs / Options / Behavior
+## Flags and behavior
 
 Command surface:
 
@@ -42,14 +42,14 @@ Behavior:
 - remote URL input behaves as single-image mode
 - backend defaults to `sharp`; use `--backend wasm` to force wasm path
 
-## Limits / Caveats
+## Backend notes
 
 - `--backend sharp` requires `sharp`.
 - `--backend wasm` supports PNG/JPEG/WebP decode.
 - `--backend wasm` requires `blurkit-wasm-codecs` installed.
 - `--glob` is valid only for local directory input.
 
-## Next read
+## Related
 
 - [CLI: Single Image](/docs/cli/single-image/)
 - [CLI: Manifest Generation](/docs/cli/manifest-generation/)

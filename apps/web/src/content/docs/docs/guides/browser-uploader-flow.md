@@ -3,11 +3,11 @@ title: Browser Uploader Flow
 description: Generate placeholders in the browser when users upload images in client UI.
 ---
 
-## When to use
+## When this pattern fits
 
 Use this pattern when images are selected by users and should not be uploaded just to generate a placeholder.
 
-## Example
+## Client-side encode
 
 ```ts
 import { encode } from 'blurkit/browser'
@@ -27,18 +27,18 @@ async function handleFile(file: File) {
 }
 ```
 
-## Inputs / Options / Behavior
+## What to store
 
 - Use `File` or `Blob` input for local user images.
 - `meta` fields can be stored with upload payloads.
 - `thumbhash` produces a shorter hash string than `blurhash`. That does not automatically shrink `dataURL`: the rendered bytes depend on the image dimensions and `outputFormat`, so compare the stored `dataURL` size if payload budget is the concern.
 
-## Limits / Caveats
+## Caveats
 
 - Remote URL input requires CORS.
 - Browser runtime cannot read local path strings.
 
-## Next read
+## Related
 
 - [Browser Runtime](/docs/runtimes/browser/)
 - [API: Options](/docs/api/options/)

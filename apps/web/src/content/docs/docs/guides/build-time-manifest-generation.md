@@ -3,11 +3,11 @@ title: Build-time Manifest Generation
 description: Precompute placeholder JSON during builds to avoid runtime encoding.
 ---
 
-## When to use
+## When this pattern fits
 
 Use this pattern when your image set is known at build time and runtime latency must stay low.
 
-## Example
+## Generate a manifest in a build step
 
 ```bash
 npx blurkit encode ./public \
@@ -16,7 +16,7 @@ npx blurkit encode ./public \
   --pretty
 ```
 
-## Inputs / Options / Behavior
+## Wiring it into the build
 
 Programmatic equivalent:
 
@@ -27,9 +27,7 @@ const inputs = ['./public/images/hero.jpg', './public/images/poster.jpg']
 const results = await encodeMany(inputs, { size: 32 })
 
 const manifest = createManifest(
-  Object.fromEntries(
-    inputs.map((path, i) => [path.replace('./public', ''), results[i]!]),
-  ),
+  Object.fromEntries(inputs.map((path, i) => [path.replace('./public', ''), results[i]!])),
 )
 
 await writeManifest('./blur-manifest.json', manifest, { pretty: true })
@@ -38,12 +36,12 @@ await writeManifest('./blur-manifest.json', manifest, { pretty: true })
 - Use deterministic manifest keys that match runtime image paths.
 - Build once, read many at runtime.
 
-## Limits / Caveats
+## Caveats
 
 - `encodeMany()` is fail-fast.
 - Key mismatches between manifest and app URLs break placeholder lookup.
 
-## Next read
+## Related
 
 - [API: Manifest Helpers](/docs/api/manifest/)
 - [CLI: Manifest Generation](/docs/cli/manifest-generation/)

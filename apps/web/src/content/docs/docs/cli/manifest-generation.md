@@ -3,11 +3,11 @@ title: Manifest Generation
 description: Generate one BlurManifest JSON file from a local directory.
 ---
 
-## When to use
+## When to generate a manifest
 
 Use this flow when your build or app needs a precomputed placeholder map.
 
-## Example
+## Build a folder manifest
 
 ```bash
 npx blurkit encode ./public \
@@ -16,7 +16,7 @@ npx blurkit encode ./public \
   --pretty
 ```
 
-## Inputs / Options / Behavior
+## Key mapping
 
 - `--glob` selects files inside the input directory.
 - `--concurrency` controls parallel file encoding.
@@ -26,12 +26,12 @@ npx blurkit encode ./public \
   - other folders map to normalized relative keys
   - `--base-path` prepends a custom key prefix
 
-## Limits / Caveats
+## Caveats
 
 - `--glob` cannot be used with remote URL input.
 - Manifest key conventions must match your app lookup strategy.
 
-## Next read
+## Related
 
 - [API: Manifest Helpers](/docs/api/manifest/)
 - [Guide: Build-time Manifest Generation](/docs/guides/build-time-manifest-generation/)

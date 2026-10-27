@@ -1,13 +1,17 @@
 ---
 title: Quick Start
-description: Generate your first placeholder and verify blurkit output shape.
+description: Generate your first placeholder and verify the blurkit result shape.
 ---
 
-## When to use
+## What you need
 
-Use this page when you need one working placeholder quickly before reading full runtime and API references.
+Node 20.9+ (or Bun), an image on disk, and `sharp` available to the Node runtime. Install both packages:
 
-## Example
+```bash
+pnpm add blurkit sharp
+```
+
+## Generate a placeholder
 
 ```ts
 import { encode } from 'blurkit/node'
@@ -20,29 +24,33 @@ console.log(result.dataURL)
 console.log(result.hash)
 ```
 
-## Inputs / Options / Behavior
+`size` sets the longest side of the encoded image and preserves the aspect ratio. `dataURL` is ready to render immediately; `hash` is the algorithm output if you want to decode later.
 
-- `size` sets longest-side target while preserving aspect ratio.
-- `encode()` returns a data URL plus metadata in one object.
-- Use explicit entrypoints for predictable runtime behavior:
-  - `blurkit/node` for build and server pipelines
-  - `blurkit/deno` for Deno with local file support and wasm-backed decode
-  - `blurkit/browser` for `File`/`Blob` input in client code
-  - `blurkit/edge` for worker-style runtimes with native decode + wasm fallback
-  - `blurkit/cloudflare` for Cloudflare Workers
-  - `blurkit/wasm` for runtimes without native decode APIs
-- Install `blurkit-wasm-codecs` when using `blurkit/deno`, `blurkit/wasm`, or edge fallback paths.
-- Install `sharp` for `blurkit/node` and CLI.
+## What came back
 
-## Limits / Caveats
+| Field              | Meaning                                      |
+| ------------------ | -------------------------------------------- |
+| `dataURL`          | Rendered PNG or JPEG placeholder             |
+| `hash`             | BlurHash or ThumbHash string                 |
+| `algorithm`        | Algorithm used for this result               |
+| `width` / `height` | Dimensions of the encoded image              |
+| `meta`             | Source dimensions, optional format and alpha |
 
-- Node runtime requires `sharp` at execution time.
-- Deno runtime requires `blurkit-wasm-codecs` and does not use `sharp`.
-- Browser runtime does not support local path strings such as `./public/hero.jpg`.
-- WASM paths require `blurkit-wasm-codecs` at execution time.
+Full contract: [API: Result](/docs/api/result/). Options and defaults: [API: Options](/docs/api/options/).
 
-## Next read
+## Choose your entrypoint
+
+- `blurkit/node` — build steps, servers, CMS jobs.
+- `blurkit/deno` — Deno with local paths and wasm-backed decode.
+- `blurkit/browser` — `File`/`Blob` uploads in the client.
+- `blurkit/edge` — worker runtimes with native decode, wasm when unavailable.
+- `blurkit/cloudflare` — Workers that transform through `cf.image`.
+- `blurkit/wasm` — runtimes without native decode APIs.
+
+The [runtime matrix](/docs/installation/#runtime-compatibility-matrix) lists decode backends, accepted inputs, and the extra package each entrypoint needs.
+
+## Next steps
 
 - [API: encode()](/docs/api/encode/)
-- [API: Options](/docs/api/options/)
-- [Runtime Guides](/docs/runtimes/node/)
+- [Runtime guides](/docs/runtimes/node/)
+- [CLI](/docs/cli/)

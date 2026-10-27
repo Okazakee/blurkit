@@ -268,3 +268,25 @@ jobs:
 
       - name: Run real browser encodes
         run: node .github/scripts/browser-smoke.mjs
+
+  docs:
+    name: Docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check Markdown formatting
+        run: pnpm docs:format:check
+
+      - name: Check docs links, anchors, sidebar, and fences
+        run: pnpm docs:check

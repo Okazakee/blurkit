@@ -39,6 +39,18 @@ pnpm --filter @blurkit/example-nextjs build
 pnpm --filter @blurkit/example-astro build
 ```
 
+## Documentation checks
+
+Markdown is formatted with Prettier and validated by a dependency-free link checker:
+
+```bash
+pnpm docs:format        # rewrite Markdown with Prettier
+pnpm docs:format:check  # verify formatting (CI)
+pnpm docs:check         # validate links, anchors, sidebar slugs, and code fences
+```
+
+`docs:check` also verifies that every docs page appears in the Starlight sidebar and that links to `https://blurkit.okazakee.dev` resolve to real pages. CI runs both commands in the `docs` job.
+
 ## Build tooling
 
 The library packages are built with [tsdown](https://tsdown.dev) (Rolldown-based).

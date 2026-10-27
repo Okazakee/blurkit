@@ -1,32 +1,30 @@
 ---
 title: Limits and Caveats
-description: Runtime boundaries, behavior constraints, and design decisions to account for in production.
+description: Runtime boundaries, cross-cutting behavior, and features blurkit deliberately does not ship.
 ---
-
-## When to use
-
-Use this page before production rollout or when debugging behavior differences between runtimes.
 
 ## Runtime boundaries
 
-- `blurkit/node` requires `sharp` at runtime.
-- `blurkit/deno` requires `blurkit-wasm-codecs` and uses wasm-backed decode with canvas render.
-- `blurkit/browser` rejects local filesystem path strings.
-- `blurkit/browser` remote URL flow depends on CORS.
-- `blurkit/edge` prefers native `ImageDecoder` + `OffscreenCanvas` and falls back to wasm.
-- `blurkit/cloudflare` supports remote URL input only.
-- `blurkit/wasm` decode support is PNG/JPEG/WebP only.
-- `blurkit/deno`, `blurkit/edge` fallback, and `blurkit/wasm` require `blurkit-wasm-codecs`.
+The [runtime compatibility matrix](/docs/installation/#runtime-compatibility-matrix) is the canonical list of entrypoints, decode backends, accepted inputs, and extra packages. This page covers the behavior that matrix cannot express.
 
-## Cross-cutting behavior
+Boundaries worth knowing:
 
-- `encodeMany()` is fail-fast.
-- `encodeManySettled()` returns per-item success/failure envelopes.
-- Root import is condition-based (node/browser/worker), but explicit runtime subpaths are clearer.
+- `blurkit/browser` rejects local filesystem path strings, and remote URLs depend on CORS.
+- `blurkit/cloudflare` accepts remote URLs only, and its `hash` is not a portable BlurHash/ThumbHash. See [Cloudflare hash semantics](/docs/api/result/#cloudflare-hash-semantics).
+- `blurkit/edge` selects wasm only when `ImageDecoder` or `OffscreenCanvas` is missing. Native decode errors are not retried with wasm.
+- `blurkit/wasm` decodes PNG, JPEG, and WebP only.
+- `blurkit/deno`, `blurkit/wasm`, and edge fallback paths need `blurkit-wasm-codecs` at execution time.
+
+## Behavior that applies everywhere
+
+- `encodeMany()` is fail-fast; `encodeManySettled()` returns ordered fulfilled/rejected entries.
+- The root import resolves through conditional exports (`node`, `browser`, `worker`, `deno`). Explicit runtime subpaths are clearer in framework code.
+- Missing dependencies throw typed errors: `BLURKIT_MISSING_SHARP`, `BLURKIT_MISSING_WASM_CODECS`.
+- `result.width`/`result.height` describe the encoded image. For ThumbHash the rendered data URL can use different pixel dimensions.
 
 ## Cache design
 
-- Cache is part of `BlurKitOptions` so callers can enable reuse without wrapping `encode()`.
+- Cache is part of `BlurKitOptions`, so callers enable reuse without wrapping `encode()`.
 - The contract is intentionally low-level (`get` and `set`) to support sync and async adapters.
 - `blurkit/node` and `blurkit/deno` ship `createMemoryCache()` and `createFilesystemCache()`; `blurkit/cloudflare` ships `createCloudflareCache()`. See [API: Cache](/docs/api/cache/) for the canonical list.
 - Persistent storage policy is not defined by blurkit — invalidating entries across path, bytes, and options is caller-owned.
@@ -34,4 +32,10 @@ Use this page before production rollout or when debugging behavior differences b
 
 ## Not shipped by design
 
-- Framework-specific adapters are not shipped.
+- Framework-specific adapters and component wrappers.
+- Full image processing beyond placeholder output.
+- Placeholder animation or progressive-enhancement helpers.
+- Preset collections or curated hash libraries.
+- CDN-specific transform pipelines beyond the Cloudflare runtime.
+
+See the [Roadmap](/docs/roadmap/) for committed work, exploratory ideas, and the reasoning behind these boundaries.

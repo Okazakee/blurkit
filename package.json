@@ -10,7 +10,10 @@
     "dev": "turbo run dev --parallel",
     "lint": "turbo run lint && oxlint",
     "test": "turbo run test",
-    "check": "turbo run check"
+    "check": "turbo run check",
+    "docs:check": "node tools/docs/check.mjs",
+    "docs:format": "prettier --write \"**/*.md\" \"**/*.mdx\"",
+    "docs:format:check": "prettier --check \"**/*.md\" \"**/*.mdx\""
   },
   "devDependencies": {
     "@oxlint/plugins": "1.78.0",
@@ -18,6 +21,7 @@
     "@types/node": "^25.6.2",
     "esbuild": "^0.28.2",
     "oxlint": "1.78.0",
+    "prettier": "^3.9.6",
     "tsdown": "^0.22.14",
     "turbo": "^2.9.14",
     "typescript": "^7.0.2",

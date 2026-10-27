@@ -3,11 +3,11 @@ title: Cloudflare Runtime
 description: Encode placeholders in Cloudflare Workers through cf.image transforms.
 ---
 
-## When to use
+## Why this runtime
 
 Use `blurkit/cloudflare` for Cloudflare Workers where `ImageDecoder` or `OffscreenCanvas` is not available.
 
-## Example
+## Encode with Worker cache
 
 ```ts
 import { createCloudflareCache, encode } from 'blurkit/cloudflare'
@@ -23,7 +23,7 @@ const result = await encode('https://example.com/image.jpg', {
 // result.hash is opaque on Cloudflare (see below).
 ```
 
-## Inputs / Options / Behavior
+## Inputs and transform path
 
 - Supported inputs:
   - remote `http`/`https` URL string
@@ -47,13 +47,13 @@ Use `result.dataURL` for rendering. Treat `result.hash` as an opaque, determinis
 
 `meta.originalWidth` and `meta.originalHeight` come from Cloudflare's image-info lookup. When that lookup fails, the runtime substitutes the requested target dimensions, so those fields are not guaranteed to describe the source image.
 
-## Limits / Caveats
+## Limits
 
 - Local paths, `Blob`, and `ArrayBuffer` are not supported.
 - Requires Cloudflare Worker runtime features (`cf.image`, Cache API).
 - The cache key is derived from the transformed response bytes, so the fetch and transform run before the cache is consulted. See [API: Cache](/docs/api/cache/).
 
-## Next read
+## Related
 
 - [Edge Runtime](/docs/runtimes/edge/)
 - [API: Cache](/docs/api/cache/)

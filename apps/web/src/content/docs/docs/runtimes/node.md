@@ -3,11 +3,11 @@ title: Node Runtime
 description: Use sharp-backed encoding for local paths, remote URLs, batching, cache, and manifests.
 ---
 
-## When to use
+## Why this runtime
 
 Use `blurkit/node` for build steps, CMS import jobs, server-side processing, and manifest generation.
 
-## Example
+## Encode from a Node pipeline
 
 ```ts
 import { createFilesystemCache, encode } from 'blurkit/node'
@@ -23,7 +23,7 @@ const result = await encode('./public/hero.jpg', {
 })
 ```
 
-## Inputs / Options / Behavior
+## Inputs and behavior
 
 - Supported inputs:
   - local path string
@@ -41,13 +41,13 @@ const result = await encode('./public/hero.jpg', {
   - `createManifest()`
   - `writeManifest()`
 
-## Limits / Caveats
+## Runtime notes
 
 - Requires `sharp`.
 - Missing `sharp` throws `BLURKIT_MISSING_SHARP` with install guidance.
 - `encodeMany()` is fail-fast.
 
-## Next read
+## Related
 
 - [API: encodeMany()](/docs/api/encode-many/)
 - [API: Cache](/docs/api/cache/)

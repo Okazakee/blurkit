@@ -5,21 +5,19 @@
 [![Release blurkit](https://github.com/Okazakee/blurkit/actions/workflows/release.yml/badge.svg)](https://github.com/Okazakee/blurkit/actions/workflows/release.yml)
 [![Deploy website](https://github.com/Okazakee/blurkit/actions/workflows/website-deploy.yml/badge.svg)](https://github.com/Okazakee/blurkit/actions/workflows/website-deploy.yml)
 
-Universal image placeholder generation for Node, Bun, Deno, browser, edge, Cloudflare, and WASM runtimes.
+Universal image placeholder generation for Node, Bun, Deno, browsers, edge runtimes, Cloudflare Workers, and WASM-first runtimes.
 
-`blurkit` takes an image input and returns a ready-to-use placeholder `dataURL` plus the underlying hash, dimensions, and source metadata. The goal is to hide the decode, resize, hash, and render pipeline behind one practical API.
+`blurkit` takes an image and returns a ready-to-render placeholder `dataURL` plus the hash, dimensions, and source metadata. One call hides the decode, resize, hash, and render pipeline.
 
-Full documentation: <https://blurkit.okazakee.dev/docs/>.
+**Documentation:** <https://blurkit.okazakee.dev/docs/>
 
 ## Features
 
-- Ready-to-use `dataURL` output
-- BlurHash and ThumbHash support
-- Explicit runtime entrypoints for Node, Deno, browser, edge, Cloudflare, and WASM runtimes
-- Batch encoding with `encodeMany()` and `encodeManySettled()`
-- CLI support for single images and folder manifests
-- Cache interface with Node memory/filesystem helpers and Cloudflare Worker cache helper
-- Manifest helpers for build-time and CMS pipelines
+- BlurHash and ThumbHash output as a `dataURL`
+- Explicit entrypoints for Node, Deno, browser, edge, Cloudflare, and WASM
+- Fail-fast batches with `encodeMany()`, partial success with `encodeManySettled()`
+- Cache helpers, manifest helpers, and a CLI for build-time pipelines
+- No platform lock-in: the same result shape on every runtime
 
 ## Install
 
@@ -27,216 +25,78 @@ Full documentation: <https://blurkit.okazakee.dev/docs/>.
 pnpm add blurkit
 ```
 
-`sharp` is an optional dependency and an optional peer dependency of `blurkit`, auto-installed unless optional dependencies are skipped. It is required only for the Node runtime paths — `blurkit/node`, the CLI, and the root import in Node/Bun:
+`sharp` is an optional dependency of `blurkit` (auto-installed unless optional dependencies are skipped) and is only needed by the Node/Bun paths:
 
 ```bash
 pnpm add sharp
 ```
 
-Supported Sharp range: `>=0.34.5 <0.36.0` (verified against 0.34.x and 0.35.x). `blurkit/browser`, `blurkit/edge`, `blurkit/wasm`, and `blurkit/cloudflare` do not need `sharp`.
-
-If your install skipped optional dependencies (for example `npm install --omit=optional`), install `sharp` manually.
-
-For Deno, install `blurkit-wasm-codecs` alongside the package since the Deno runtime uses wasm codecs for decode:
+Supported range: `>=0.34.5 <0.36.0`. Deno, WASM, and edge fallback paths need the wasm codecs instead:
 
 ```bash
 pnpm add blurkit-wasm-codecs
 ```
 
-If you use `blurkit/wasm` directly, `blurkit/edge` fallback in non-native runtimes, or CLI `--backend wasm`, install wasm codecs companion package:
+The [runtime matrix](https://blurkit.okazakee.dev/docs/installation/#runtime-compatibility-matrix) lists every entrypoint, backend, accepted input, and extra package.
 
-```bash
-pnpm add blurkit-wasm-codecs
-```
-
-## Quick Start
+## Quick start
 
 ```ts
 import { encode } from 'blurkit/node'
 
-const result = await encode('./public/hero.jpg', {
-  size: 32,
-})
+const result = await encode('./public/hero.jpg', { size: 32 })
 
 console.log(result.dataURL)
 console.log(result.hash)
 console.log(result.meta.originalWidth, result.meta.originalHeight)
 ```
 
+## Runtime entrypoints
+
+| Runtime            | Import               | Needs                                  |
+| ------------------ | -------------------- | -------------------------------------- |
+| Node, Bun          | `blurkit/node`       | `sharp`                                |
+| Deno               | `blurkit/deno`       | `blurkit-wasm-codecs`                  |
+| Browser            | `blurkit/browser`    | —                                      |
+| Edge workers       | `blurkit/edge`       | `blurkit-wasm-codecs` for the fallback |
+| Cloudflare Workers | `blurkit/cloudflare` | —                                      |
+| WASM runtimes      | `blurkit/wasm`       | `blurkit-wasm-codecs`                  |
+
+The root import (`import { encode } from 'blurkit'`) resolves through package export conditions (`node`, `browser`, `worker`, `deno`). Prefer explicit entrypoints in applications and libraries.
+
 ## Examples
 
-Copy these minimal integrations as starting points:
+- [Next.js example](https://github.com/Okazakee/blurkit/tree/main/apps/example-nextjs)
+- [Astro example](https://github.com/Okazakee/blurkit/tree/main/apps/example-astro)
 
-- Next.js: [`apps/example-nextjs`](https://github.com/Okazakee/blurkit/tree/main/apps/example-nextjs)
-- Astro: [`apps/example-astro`](https://github.com/Okazakee/blurkit/tree/main/apps/example-astro)
+## Docs
 
-## Runtime Imports
-
-Prefer explicit runtime imports in application code:
-
-```ts
-import { encode } from 'blurkit/node'
-import { encode as encodeBrowser } from 'blurkit/browser'
-import { encode as encodeDeno } from 'blurkit/deno'
-import { encode as encodeEdge } from 'blurkit/edge'
-import { encode as encodeCloudflare } from 'blurkit/cloudflare'
-import { encode as encodeWasm } from 'blurkit/wasm'
-```
-
-The root import is available as a convenience wrapper:
-
-```ts
-import { encode } from 'blurkit'
-```
-
-Use the root import when convenience matters more than strict runtime control. For libraries and production apps, prefer the explicit runtime entrypoints.
-
-## Runtime Picker
-
-- `blurkit/node`: Node/Bun/server pipelines, local path support, sharp-backed.
-- `blurkit/deno`: Deno runtime with local path support, wasm-backed decode, canvas render.
-- `blurkit/browser`: browser/client uploads (`File`/`Blob`) with CORS-compatible remote URL support.
-- `blurkit/edge`: generic worker runtimes; native decode first, wasm fallback second.
-- `blurkit/cloudflare`: Cloudflare Workers with `cf.image`; remote URLs only.
-- `blurkit/wasm`: runtimes without native decode APIs; PNG/JPEG/WebP decode.
+- [Installation and runtime matrix](https://blurkit.okazakee.dev/docs/installation/)
+- [Quick start](https://blurkit.okazakee.dev/docs/quick-start/)
+- [API reference](https://blurkit.okazakee.dev/docs/api/encode/)
+- [CLI](https://blurkit.okazakee.dev/docs/cli/)
+- [Guides](https://blurkit.okazakee.dev/docs/guides/nextjs/)
+- [Limits and caveats](https://blurkit.okazakee.dev/docs/limits/)
+- [Roadmap](https://blurkit.okazakee.dev/docs/roadmap/)
 
 ## CLI
 
-Encode a single local image:
-
 ```bash
+# one image to stdout
 npx blurkit encode ./public/hero.jpg --pretty
-```
 
-Encode with wasm backend:
-
-```bash
-npx blurkit encode ./public/hero.jpg --backend wasm --pretty
-```
-
-`--backend wasm` requires `blurkit-wasm-codecs`.
-
-Encode a remote image:
-
-```bash
-npx blurkit encode https://example.com/image.jpg --algorithm thumbhash --format jpeg
-```
-
-Generate a manifest for a folder:
-
-```bash
+# a folder manifest in build pipelines
 npx blurkit encode ./public \
   --glob "**/*.{jpg,jpeg,png,webp}" \
   --out blur-manifest.json \
   --pretty
 ```
 
-Single-image input prints a `BlurResult` or writes that JSON directly with `--out`. Directory input produces a `BlurManifest`.
+Add `--backend wasm` to skip `sharp`; it requires `blurkit-wasm-codecs`. Full flag reference: [CLI overview](https://blurkit.okazakee.dev/docs/cli/).
 
-## Manifest Example
+## Contributing
 
-```json
-{
-  "version": 1,
-  "algorithm": "blurhash",
-  "generatedAt": "2026-05-12T00:00:00.000Z",
-  "images": {
-    "/images/hero.jpg": {
-      "dataURL": "data:image/png;base64,...",
-      "hash": "L9TSUA~qfQ~q~qoffQoffQfQfQfQ",
-      "algorithm": "blurhash",
-      "width": 32,
-      "height": 18,
-      "meta": {
-        "originalWidth": 1920,
-        "originalHeight": 1080,
-        "format": "jpeg",
-        "hasAlpha": false
-      }
-    }
-  }
-}
-```
-
-## API Overview
-
-### `encode()`
-
-```ts
-import { encode } from 'blurkit/node'
-
-const result = await encode('./public/hero.jpg', {
-  algorithm: 'blurhash',
-  size: 32,
-  outputFormat: 'png',
-})
-```
-
-### `encodeMany()`
-
-```ts
-import { encodeMany } from 'blurkit/node'
-
-const results = await encodeMany([
-  './public/hero.jpg',
-  './public/poster.jpg',
-])
-```
-
-`encodeMany()` is intentionally fail-fast and mirrors `Promise.all()`.
-
-### `encodeManySettled()`
-
-```ts
-import { encodeManySettled } from 'blurkit/node'
-
-const settled = await encodeManySettled([
-  './public/hero.jpg',
-  './public/missing.jpg',
-])
-```
-
-`encodeManySettled()` returns ordered `fulfilled`/`rejected` results for partial success workflows.
-
-### `createMemoryCache()`
-
-```ts
-import { createMemoryCache, encode } from 'blurkit/node'
-
-const cache = createMemoryCache({ max: 500 })
-const result = await encode('./public/hero.jpg', { cache })
-```
-
-### Manifest Helpers
-
-```ts
-import { createManifest, writeManifest } from 'blurkit'
-
-const manifest = createManifest({
-  '/images/hero.jpg': result,
-})
-
-await writeManifest('./blur-manifest.json', manifest, { pretty: true })
-```
-
-## Runtime Notes
-
-- Node and Bun use the `blurkit/node` entrypoint and rely on `sharp` for image decoding and rendering. `Uint8Array` and Node `Buffer` are first-class inputs; `Buffer` views with a non-zero byte offset are handled exactly.
-- Deno uses the `blurkit/deno` entrypoint with wasm codecs for decode and native `OffscreenCanvas` for rendering. Requires `blurkit-wasm-codecs`.
-- The browser runtime supports `File`, `Blob`, `ArrayBuffer`, `Uint8Array`, and remote URLs that permit CORS.
-- The edge runtime uses native `ImageDecoder` + `OffscreenCanvas` when available, then falls back to the wasm runtime.
-- Edge fallback, `blurkit/wasm`, and `blurkit/deno` require `blurkit-wasm-codecs`.
-- The Cloudflare runtime is optimized for Worker image transforms.
-- The wasm runtime supports PNG/JPEG/WebP decode in runtimes without native decoding APIs.
-- The root import resolves through conditional exports (`node`, `browser`, `worker`, `deno`), but explicit runtime imports are safer for bundlers and framework apps.
-
-## Roadmap / Deferred
-
-These are intentionally not documented as current support:
-
-- Framework-specific adapters such as Next.js convenience helpers
-- Additional manifest output formats and tighter build-tool integrations
-
-## Publishing
-
-See [PUBLISHING.md](./PUBLISHING.md) for details on library releases, website deployments, and library size reports.
+- [CONTRIBUTING.md](./CONTRIBUTING.md) — local setup, tests, and expectations
+- [COMMIT_CONVENTIONS.md](./COMMIT_CONVENTIONS.md) — commit subject rules and deploy triggers
+- [PUBLISHING.md](./PUBLISHING.md) — release and website deployment workflows
+- [ROADMAP.md](./ROADMAP.md) — product boundary, committed work, and exploratory ideas

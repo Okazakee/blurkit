@@ -3,11 +3,11 @@ title: Deno Runtime
 description: Use wasm-backed encoding with local file support and OffscreenCanvas rendering for Deno.
 ---
 
-## When to use
+## Why this runtime
 
 Use `blurkit/deno` for Deno scripts, build steps, and server-side processing when you want local filesystem support without depending on `sharp`.
 
-## Example
+## Encode with a filesystem cache
 
 ```ts
 import { createFilesystemCache, encode } from 'blurkit/deno'
@@ -23,7 +23,7 @@ const result = await encode('./public/hero.jpg', {
 })
 ```
 
-## Inputs / Options / Behavior
+## Inputs and rendering
 
 - Supported inputs:
   - local path string
@@ -43,14 +43,14 @@ const result = await encode('./public/hero.jpg', {
   - `createManifest()`
   - `writeManifest()`
 
-## Limits / Caveats
+## Runtime notes
 
 - Requires `blurkit-wasm-codecs` at execution time.
 - Missing wasm codecs throws `BLURKIT_MISSING_WASM_CODECS` with install guidance.
 - Decode support is limited to PNG, JPEG, and WebP.
 - `encodeMany()` is fail-fast.
 
-## Next read
+## Related
 
 - [API: encode()](/docs/api/encode/)
 - [API: Cache](/docs/api/cache/)

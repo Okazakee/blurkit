@@ -3,11 +3,11 @@ title: WASM Runtime
 description: Encode placeholders with wasm decode/resize in runtimes without native image decode APIs.
 ---
 
-## When to use
+## Why this runtime
 
 Use `blurkit/wasm` when your target runtime does not provide `ImageDecoder` and `OffscreenCanvas`, but you still need consistent placeholder generation.
 
-## Example
+## Encode with wasm codecs
 
 ```ts
 import { encode } from 'blurkit/wasm'
@@ -17,7 +17,7 @@ const result = await encode('https://example.com/image.webp', {
 })
 ```
 
-## Inputs / Options / Behavior
+## Decode and output support
 
 - Supported inputs:
   - remote `http`/`https` URL string
@@ -30,14 +30,14 @@ const result = await encode('https://example.com/image.webp', {
 - Includes `encodeMany()` and `encodeManySettled()`.
 - Requires `blurkit-wasm-codecs` to be installed in your project.
 
-## Limits / Caveats
+## WASM limits
 
 - Local filesystem path strings are rejected.
 - Decode support is intentionally limited to PNG/JPEG/WebP.
 - Remote URL input still depends on network reachability and runtime fetch behavior.
 - If codecs package is missing, calls throw `BLURKIT_MISSING_WASM_CODECS`.
 
-## Next read
+## Related
 
 - [Edge Runtime](/docs/runtimes/edge/)
 - [Cloudflare Runtime](/docs/runtimes/cloudflare/)

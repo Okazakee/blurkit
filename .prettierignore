@@ -1,0 +1,8 @@
+# Generated outputs and vendored assets
+node_modules
+**/dist
+**/node_modules
+.turbo
+artifacts
+apps/web/public
+pnpm-lock.yaml

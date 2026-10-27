@@ -309,6 +309,8 @@ body[data-mobile-menu-expanded] {
 .docs-page-sidebar__panel starlight-toc nav {
   display: grid;
   gap: 0.9rem;
+  border-top: 1px dotted var(--bk-line-2);
+  padding-top: 1rem;
 }
 
 .docs-page-sidebar__panel starlight-toc h2 {
@@ -467,10 +469,6 @@ body[data-mobile-menu-expanded] {
   font-size: 13px;
 }
 
-.docs-page-sidebar__panel starlight-toc nav {
-  border-top: 1px dotted var(--bk-line-2);
-  padding-top: 1rem;
-}
 
 .docs-footer__pagination .pagination-links a {
   border-radius: 4px;
@@ -478,4 +476,11 @@ body[data-mobile-menu-expanded] {
 
 .docs-header__link {
   border-radius: 4px;
+}
+
+/* Wide compatibility tables scroll instead of overflowing the panel. */
+.sl-markdown-content table:not(:where(.not-content *)) {
+  display: block;
+  overflow-x: auto;
+  font-size: 0.92rem;
 }

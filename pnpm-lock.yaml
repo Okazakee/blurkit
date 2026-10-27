@@ -35,6 +35,9 @@ importers:
       oxlint:
         specifier: 1.78.0
         version: 1.78.0
+      prettier:
+        specifier: ^3.9.6
+        version: 3.9.6
       tsdown:
         specifier: ^0.22.14
         version: 0.22.14(@volar/typescript@2.4.28)(typescript@7.0.2)

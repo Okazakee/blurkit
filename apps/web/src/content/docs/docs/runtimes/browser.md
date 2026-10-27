@@ -3,11 +3,11 @@ title: Browser Runtime
 description: Encode placeholders from File, Blob, ArrayBuffer, or CORS-enabled remote URLs in client code.
 ---
 
-## When to use
+## Why this runtime
 
 Use `blurkit/browser` when the user provides an image in the client and you need a local preview placeholder.
 
-## Example
+## Encode a user upload
 
 ```ts
 import { encode } from 'blurkit/browser'
@@ -25,7 +25,7 @@ if (file) {
 }
 ```
 
-## Inputs / Options / Behavior
+## Accepted inputs
 
 - Supported inputs:
   - `File`
@@ -35,12 +35,12 @@ if (file) {
   - remote URL string or `URL` when CORS allows fetch and decode
 - Includes `encodeMany()` and `encodeManySettled()`.
 
-## Limits / Caveats
+## Browser constraints
 
 - Local filesystem paths are not supported.
 - Remote URL flow fails when CORS blocks image decode.
 
-## Next read
+## Related
 
 - [API: encode()](/docs/api/encode/)
 - [Guide: Browser Uploader Flow](/docs/guides/browser-uploader-flow/)
