@@ -13,27 +13,33 @@ Use this pattern when image URLs are known in build-time or server-side code.
 import Image from 'next/image'
 import { encode } from 'blurkit/node'
 
-const result = await encode('./public/hero.jpg')
+export default async function HeroImage() {
+  const result = await encode('./public/hero.jpg', { size: 32 })
 
-<Image
-  src="/hero.jpg"
-  placeholder="blur"
-  blurDataURL={result.dataURL}
-  alt="Product hero image"
-/>
+  return (
+    <Image
+      src="/hero.jpg"
+      alt="Product hero image"
+      width={1200}
+      height={800}
+      placeholder="blur"
+      blurDataURL={result.dataURL}
+    />
+  )
+}
 ```
 
 ## Inputs / Options / Behavior
 
-- Placeholder work runs before render.
+- The component is an async Server Component: the encode runs before the markup is rendered.
 - `blurDataURL` receives `result.dataURL` directly.
-- Runtime entrypoint should be `blurkit/node` for this flow.
-- Node `Buffer` and `Uint8Array` inputs are supported directly, so `readFile()` output can be passed to `encode()` without conversion.
+- Pass `width` and `height` (or use `fill`) because `next/image` still needs the rendered layout dimensions. `result.width`/`result.height` are the encoder's target dimensions, not necessarily the display size.
+- Use `blurkit/node` for this flow; it supports `Buffer` and `Uint8Array` inputs, so `readFile()` output can be passed to `encode()` without conversion.
 
 ## Limits / Caveats
 
-- Requires `sharp` in Node environment.
-- Do not use browser runtime for server-only placeholder generation.
+- Requires `sharp` in the Node environment running the build or server.
+- Do not use the browser runtime for server-only placeholder generation.
 
 ## Known integration caveat: Turbopack and native Sharp resolution
 

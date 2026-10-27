@@ -24,17 +24,16 @@ const result = await encode('https://example.com/image.jpg')
   - `ArrayBuffer`
   - `Uint8Array`
 - Includes `encodeMany()` and `encodeManySettled()`.
-- Runtime selection:
-  - native path: `ImageDecoder` + `OffscreenCanvas`
-  - fallback path: wasm runtime (PNG/JPEG/WebP decode)
-- Fallback path requires `blurkit-wasm-codecs` to be installed.
+- Backend selection happens before decoding:
+  - native backend when `ImageDecoder` and `OffscreenCanvas` are both available
+  - wasm backend when either API is missing
+- The wasm backend requires `blurkit-wasm-codecs` to be installed.
 
 ## Limits / Caveats
 
 - Non-remote string input is rejected.
-- If native APIs are missing, edge automatically tries wasm fallback.
-- If fallback codecs are missing, edge throws `BLURKIT_MISSING_WASM_CODECS`.
-- If fallback fails for other reasons, error message includes both native and fallback guidance.
+- The fallback is chosen by API availability, not by failure: once the native backend is selected, decode errors propagate and are not retried with wasm.
+- If the wasm codecs are missing, edge throws `BLURKIT_MISSING_WASM_CODECS`.
 - For Cloudflare Workers, prefer `blurkit/cloudflare`.
 
 ## Next read

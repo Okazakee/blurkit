@@ -10,8 +10,10 @@ Use manifest helpers when you precompute placeholders and need one stable JSON f
 ## Example
 
 ```ts
-import { createManifest, writeManifest } from 'blurkit'
+import { encode } from 'blurkit/node'
+import { createManifest, writeManifest } from 'blurkit/node'
 
+const result = await encode('./public/hero.jpg')
 const manifest = createManifest({
   '/images/hero.jpg': result,
 })
@@ -35,6 +37,8 @@ interface BlurManifest {
 
 - `createManifest()` infers `algorithm` as single value or `mixed`.
 - `writeManifest()` creates parent directories and writes UTF-8 JSON.
+- `createManifest()` is runtime-agnostic. `writeManifest()` only writes files in `blurkit/node` and `blurkit/deno`; the browser and edge root exports expose it as a function that throws.
+- In browser or worker code, call `createManifest()` and persist the JSON with your own storage layer (R2, KV, an API route, and so on).
 
 ## Limits / Caveats
 

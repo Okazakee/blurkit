@@ -53,7 +53,7 @@ Dimension behavior:
 ## Limits / Caveats
 
 - `componentX` and `componentY` only affect `blurhash`.
-- Built-in cache helper is provided via `blurkit/node` only.
+- Cache helpers are runtime-specific: see [API: Cache](/docs/api/cache/) for the full matrix.
 
 ## Next read
 

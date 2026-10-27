@@ -1,61 +1,39 @@
 # blurkit Next.js example
 
-Minimal Next.js example that generates a placeholder from a local image file using .
+Minimal Next.js app that generates a placeholder at request time with `blurkit/node` and renders it from `result.dataURL`.
 
 ## Run
 
-Scope: all 4 workspace projects
-Progress: resolved 1, reused 0, downloaded 0, added 0
-Progress: resolved 634, reused 539, downloaded 4, added 0
-Packages: +8
-++++++++
-Progress: resolved 671, reused 550, downloaded 7, added 8, done
+From the repository root:
 
-Done in 2.5s using pnpm v11.1.1
-▲ Next.js 16.2.6 (Turbopack)
-- Local:         http://localhost:3000
-- Network:       http://192.168.1.50:3000
-✓ Ready in 295ms
-Creating turbopack project {
-  dir: '/home/okazakee/Desktop/Projects/blurkit/apps/example-nextjs',
-  testMode: true
-}
+```bash
+pnpm install
+pnpm --filter @blurkit/example-nextjs dev
+```
 
-▲ Next.js 16.2.6 (Turbopack)
-- Local:         http://localhost:3000
-- Network:       http://192.168.1.50:3000
-✓ Ready in 134ms
-Creating turbopack project {
-  dir: '/home/okazakee/Desktop/Projects/blurkit/apps/example-nextjs',
-  testMode: true
-}
-
-[?25h
-/home/okazakee/Desktop/Projects/blurkit/apps/example-nextjs:
-[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @blurkit/example-nextjs@ dev: `next dev`
-Exit status 143
+The app starts on <http://localhost:3000>.
 
 ## Build
 
-▲ Next.js 16.2.6 (Turbopack)
+```bash
+pnpm --filter @blurkit/example-nextjs build
+pnpm --filter @blurkit/example-nextjs start
+```
 
-  Creating an optimized production build ...
-✓ Compiled successfully in 1135ms
-  Running TypeScript ...
-  Finished TypeScript in 35ms ...
-  Collecting page data using 4 workers ...
-  Generating static pages using 4 workers (0/3) ...
-✓ Generating static pages using 4 workers (3/3) in 265ms
-  Finalizing page optimization ...
+## How it works
 
-Route (app)
-┌ ○ /
-└ ○ /_not-found
+`app/page.jsx` is an async Server Component:
 
+1. Reads `public/hero.svg` with `node:fs/promises`, which returns a Node `Buffer`.
+2. Passes the buffer straight to `encode()` from `blurkit/node` (`algorithm: 'blurhash'`, `size: 32`, `outputFormat: 'png'`). No `ArrayBuffer` conversion is needed.
+3. Renders `placeholder.dataURL` as an `<img src>` next to the source image, and prints the hash and dimensions.
 
-○  (Static)  prerendered as static content
+The page uses no dynamic APIs, so Next.js prerenders it at build time. That means `sharp` has to resolve on the machine running `next build` as well as on the dev server.
 
 ## Notes
 
-- Uses a server component () so Node APIs and  are available.
-- Input image is  for deterministic local runs.
+- `blurkit/node` requires `sharp`; it is already a dependency of this example.
+- Blurkit lazy-loads `sharp` behind `await import('sharp')`, so importing `blurkit/node` does not execute sharp eagerly.
+- Do not add `sharp` to `serverExternalPackages` (or the equivalent Turbopack externalization) by default. Forcing it there has been observed to break libvips resolution on Vercel; letting Next.js handle sharp resolved that deployment.
+- If you copy this pattern into another app, install both packages: `pnpm add blurkit sharp`.
+- Full documentation: <https://blurkit.okazakee.dev/docs/>.

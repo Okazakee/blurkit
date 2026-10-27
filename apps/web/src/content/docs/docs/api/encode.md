@@ -29,7 +29,8 @@ type BlurKitInput = string | URL | File | Blob | ArrayBuffer | Uint8Array
 
 - Runtime entrypoint determines which input forms are valid at runtime.
 - `options` controls algorithm, target dimensions, output format, and optional cache.
-- Returns a `BlurResult` with `dataURL`, `hash`, dimensions, algorithm, and optional `meta`.
+- Returns a `BlurResult` with `dataURL`, `hash`, dimensions, algorithm, and `meta`.
+- `BlurKitInput` is the shared ceiling: each runtime rejects the forms it cannot resolve (local paths in the browser, `Blob` on Cloudflare, and so on).
 - `Uint8Array` input (including Node `Buffer`) is supported by every runtime that accepts raw bytes.
 - `blurkit/wasm` accepts remote URL/URL/Blob/ArrayBuffer/Uint8Array and decodes PNG/JPEG/WebP.
 - `blurkit/deno` accepts local paths, remote URL/URL/Blob/ArrayBuffer/Uint8Array with wasm-backed decode and canvas render.

@@ -28,9 +28,9 @@ Use this page before production rollout or when debugging behavior differences b
 
 - Cache is part of `BlurKitOptions` so callers can enable reuse without wrapping `encode()`.
 - The contract is intentionally low-level (`get` and `set`) to support sync and async adapters.
-- The package ships one helper: `createMemoryCache()` from `blurkit/node`.
+- `blurkit/node` and `blurkit/deno` ship `createMemoryCache()` and `createFilesystemCache()`; `blurkit/cloudflare` ships `createCloudflareCache()`. See [API: Cache](/docs/api/cache/) for the canonical list.
 - Persistent storage policy is not defined by blurkit — invalidating entries across path, bytes, and options is caller-owned.
-- Cache interface presence does not imply durable helper availability.
+- The Cloudflare helper keys on transformed bytes, so it does not avoid the upstream transform on a hit.
 
 ## Not shipped by design
 

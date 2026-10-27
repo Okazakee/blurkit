@@ -42,6 +42,8 @@ Repository setup:
 
 ## Website Deploy (`.github/workflows/website-deploy.yml`)
 
-- Automatic deploy trigger: push to `main` with website path changes (`apps/web/**`) and a commit subject matching `^(feat|fix|docs|refactor|perf)\(website\):`.
-- Non-matching commit subjects intentionally skip deployment, even when website files changed.
-- Manual `workflow_dispatch` is available and bypasses the commit-subject gate for testing or recovery deploys.
+Three paths deploy the website:
+
+1. **Website commit on `main`**: push that changes `apps/web/**` with a subject matching `^(feat|fix|docs|refactor|perf)\(website\):`. Non-matching subjects intentionally skip deployment, even when website files changed.
+2. **Release tag**: pushing a stable `vX.Y.Z` (or `X.Y.Z`) tag also deploys the website, which refreshes the package-version badge shown in the header. The tag deploy is independent of the commit-subject gate.
+3. **Manual dispatch**: `workflow_dispatch` bypasses the commit-subject gate for testing or recovery deploys.

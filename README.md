@@ -9,6 +9,8 @@ Universal image placeholder generation for Node, Bun, Deno, browser, edge, Cloud
 
 `blurkit` takes an image input and returns a ready-to-use placeholder `dataURL` plus the underlying hash, dimensions, and source metadata. The goal is to hide the decode, resize, hash, and render pipeline behind one practical API.
 
+Full documentation: <https://blurkit.okazakee.dev/docs/>.
+
 ## Features
 
 - Ready-to-use `dataURL` output
@@ -226,7 +228,7 @@ await writeManifest('./blur-manifest.json', manifest, { pretty: true })
 - Edge fallback, `blurkit/wasm`, and `blurkit/deno` require `blurkit-wasm-codecs`.
 - The Cloudflare runtime is optimized for Worker image transforms.
 - The wasm runtime supports PNG/JPEG/WebP decode in runtimes without native decoding APIs.
-- The root import auto-selects a runtime, but explicit runtime imports are safer for bundlers and framework apps.
+- The root import resolves through conditional exports (`node`, `browser`, `worker`, `deno`), but explicit runtime imports are safer for bundlers and framework apps.
 
 ## Roadmap / Deferred
 

@@ -31,16 +31,21 @@ interface BlurKitCache {
 
 Built-in helpers:
 
-- `createMemoryCache({ max? })` from `blurkit/node` and `blurkit/deno`
-- `createFilesystemCache({ dir, ttlMs? })` from `blurkit/node` and `blurkit/deno`
-- `createCloudflareCache({ name?, ttlSeconds? })` from `blurkit/cloudflare`
+| Helper | Available from | Backed by |
+| --- | --- | --- |
+| `createMemoryCache({ max? })` | `blurkit/node`, `blurkit/deno` | In-process map |
+| `createFilesystemCache({ dir, ttlMs? })` | `blurkit/node`, `blurkit/deno` | Local disk |
+| `createCloudflareCache({ name?, ttlSeconds? })` | `blurkit/cloudflare` | Worker Cache API |
+
+These three exports are the complete set. Other runtimes accept any `BlurKitCache` you supply, but ship no helper of their own.
 
 ## Limits / Caveats
 
 - Cache keys are content-aware: they include a digest of the resolved image bytes plus every output-affecting option, so a changed file, Blob, or remote URL produces a new entry instead of stale output.
 - Memory cache is process-local and reset on restart.
-- Filesystem cache is local-disk scoped.
+- Filesystem cache is local-disk scoped and does not share entries across machines.
 - Cloudflare cache depends on Worker Cache API availability and scope.
+- The Cloudflare key is computed from the transformed response bytes, so `encode()` fetches and transforms the image before it can consult the cache. A hit returns the stored result without another encode, but it does not skip the upstream fetch/transform. The Cloudflare cache is therefore not a pre-encoding cache in the way the Node and Deno helpers are.
 
 ## Next read
 

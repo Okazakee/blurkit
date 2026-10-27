@@ -23,7 +23,7 @@ export default defineConfig({
     sitemap(),
     starlight({
       title: 'blurkit',
-      description: 'Production-ready placeholder generation for Node, Deno, browser, edge, Cloudflare, and wasm runtimes.',
+      description: 'Placeholder generation for Node, Deno, browser, edge, Cloudflare, and wasm runtimes.',
       logo: {
         src: './src/assets/blurkit-mark.svg',
         alt: 'blurkit',

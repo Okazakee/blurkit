@@ -31,7 +31,7 @@ async function handleFile(file: File) {
 
 - Use `File` or `Blob` input for local user images.
 - `meta` fields can be stored with upload payloads.
-- `thumbhash` can reduce payload size for very small placeholders.
+- `thumbhash` produces a shorter hash string than `blurhash`. That does not automatically shrink `dataURL`: the rendered bytes depend on the image dimensions and `outputFormat`, so compare the stored `dataURL` size if payload budget is the concern.
 
 ## Limits / Caveats
 

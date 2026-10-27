@@ -9,6 +9,8 @@ Universal image placeholder generation for Node, Bun, Deno, browsers, edge runti
 
 `blurkit` takes an image input and returns a placeholder `dataURL` plus hash text, placeholder dimensions, and source metadata.
 
+Documentation: <https://blurkit.okazakee.dev/docs/>.
+
 ## Features
 
 - BlurHash and ThumbHash support
@@ -204,7 +206,9 @@ import { createManifest } from 'blurkit'
 
 ### `writeManifest(filePath, manifest, options?)`
 
-`writeManifest()` is Node-only. Use `blurkit/node` in browser/worker code.
+`writeManifest()` writes the JSON file on Node/Bun (`blurkit/node`) and Deno (`blurkit/deno`). It creates parent directories and returns a promise.
+
+In browser and worker code the root export exposes the same signature but throws when called, because those runtimes have no filesystem. Use `createManifest()` there and persist the JSON with your own storage layer. Importing `blurkit/node` is not a workaround for browser or worker code.
 
 ## Deno Runtime Notes
 
@@ -218,12 +222,13 @@ import { createManifest } from 'blurkit'
 - `blurkit/cloudflare` uses Cloudflare image transformations (`cf.image`).
 - It supports remote URL inputs only.
 - It returns normal `BlurResult` shape and supports cache integration.
-- The `hash` value is deterministic but Cloudflare-generated (not decoded via `ImageDecoder`).
+- `hash` is not a portable BlurHash/ThumbHash: it is a `cfbh:`/`cfth:`-prefixed SHA-256 digest of the transformed bytes, so standard decoders cannot read it. Use `dataURL` for rendering.
+- The cache helper keys on transformed bytes, so a cache hit does not skip the upstream fetch/transform.
 
 ## Edge Runtime Notes
 
 - `blurkit/edge` uses `ImageDecoder` + `OffscreenCanvas` when available.
-- If native APIs are unavailable, `blurkit/edge` automatically falls back to the wasm runtime path.
+- `blurkit/edge` selects wasm only when native APIs are unavailable; native decode errors are not retried with wasm.
 - Edge fallback requires `blurkit-wasm-codecs`.
 - For Cloudflare Workers, prefer `blurkit/cloudflare`.
 
