@@ -296,5 +296,5 @@ jobs:
 
       - name: Build docs and search index
         run: |
-          pnpm --filter @blurkit/web build
+          pnpm exec turbo run build --filter=@blurkit/web
           test -f apps/web/dist/pagefind/pagefind.js
