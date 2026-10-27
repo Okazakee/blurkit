@@ -12,6 +12,8 @@ export type DitherOptions = {
   hotInk?: string
   /** Tone at which `hotInk` takes over. */
   hotAbove?: number
+  /** Optional per-cell mask (>= 0.5) that forces `hotInk` on inked cells. */
+  hotMask?: Float32Array
   /** Paper colour as a hex string. */
   paper: string
 }
@@ -142,7 +144,8 @@ export function toneToImageData(tones: Float32Array, width: number, height: numb
       const tone = tones[index] ?? 0
       const mask = thresholdFor(options.matrix, x, y)
       const passes = invert ? tone < mask : tone > mask
-      const color = passes ? (tone >= hotAbove ? colors.hotInk : colors.ink) : colors.paper
+      const hot = options.hotMask ? (options.hotMask[index] ?? 0) >= 0.5 : tone >= hotAbove
+      const color = passes ? (hot ? colors.hotInk : colors.ink) : colors.paper
       const offset = index * 4
 
       bytes[offset] = color[0]

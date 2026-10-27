@@ -5,14 +5,15 @@ import { toneToImageData } from '../lib/dither'
 const CELL = 4
 const PAPER = '#0a0a0b'
 const INK = '#e9e5dd'
-const HOT_INK = '#e9e5dd'
+const HOT_INK = '#63dff6'
 
 /**
  * Decorative page artwork: a lit sphere printed in two tones.
  * No image input, no controls - it is a texture for the hero, not a feature.
  */
-function buildTones(columns: number, rows: number, seconds: number): Float32Array {
+function buildTones(columns: number, rows: number, seconds: number) {
   const tones = new Float32Array(columns * rows)
+  const highlight = new Float32Array(columns * rows)
   const aspect = columns / Math.max(1, rows)
   const centerX = 0.54
   const centerY = 0.47
@@ -40,12 +41,15 @@ function buildTones(columns: number, rows: number, seconds: number): Float32Arra
       const nz = Math.sqrt(1 - distanceSquared)
       const diffuse = Math.max(0, dx * lx + dy * ly + nz * lz)
       const rim = (1 - nz) ** 5
+      const tone = Math.min(0.87, 0.04 + 0.8 * diffuse ** 1.5 + 0.22 * rim)
 
-      tones[y * columns + x] = Math.min(0.87, 0.04 + 0.8 * diffuse ** 1.5 + 0.55 * rim)
+      tones[y * columns + x] = tone
+      // Sparse shadow dots carry the accent; lit dots stay bone.
+      highlight[y * columns + x] = tone > 0.03 && tone < 0.24 ? 1 : 0
     }
   }
 
-  return tones
+  return { tones, highlight }
 }
 
 export function HeroArt() {
@@ -74,12 +78,12 @@ export function HeroArt() {
     let started = performance.now()
 
     function paint(seconds: number) {
-      const tones = buildTones(columns, rows, seconds)
+      const { tones, highlight } = buildTones(columns, rows, seconds)
       const pixels = toneToImageData(tones, columns, rows, {
         matrix: 'bayer8',
         ink: INK,
         hotInk: HOT_INK,
-        hotAbove: 0.8,
+        hotMask: highlight,
         paper: PAPER,
       })
 
