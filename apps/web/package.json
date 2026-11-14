@@ -12,7 +12,7 @@
     "@astrojs/mdx": "^8.1.1",
     "@astrojs/react": "^6.0.5",
     "@astrojs/sitemap": "^3.7.4",
-    "astro": "~7.3.3",
+    "astro": "~7.4.7",
     "astro-expressive-code": "^0.44.3",
     "blurkit": "workspace:*",
     "react": "^19.2.6",
